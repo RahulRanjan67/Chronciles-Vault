@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <radialGradient id="cv-glow" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#818cf8" stop-opacity="0.35"/>
+      <stop offset="60%" stop-color="#4f46e5" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#09090b" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cv-door" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#27272a"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </linearGradient>
+    <linearGradient id="cv-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a5b4fc"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="224" fill="#09090b"/>
+  <circle cx="512" cy="512" r="420" fill="url(#cv-glow)"/>
+  <circle cx="512" cy="512" r="356" fill="url(#cv-door)" stroke="#3f3f46" stroke-width="20"/>
+  <circle cx="512" cy="512" r="296" stroke="#6366f1" stroke-opacity="0.45" stroke-width="6" stroke-dasharray="18 14"/>
+  <path d="M312 384C312 357.49 333.49 336 360 336H488C501.255 336 512 346.745 512 360V672C512 658.745 501.255 648 488 648H360C333.49 648 312 626.51 312 600V384Z" fill="#18181b" stroke="url(#cv-accent)" stroke-width="18" stroke-linejoin="round"/>
+  <path d="M712 384C712 357.49 690.51 336 664 336H536C522.745 336 512 346.745 512 360V672C512 658.745 522.745 648 536 648H664C690.51 648 712 626.51 712 600V384Z" fill="#18181b" stroke="url(#cv-accent)" stroke-width="18" stroke-linejoin="round"/>
+  <circle cx="512" cy="492" r="34" fill="#818cf8"/>
+  <path d="M498 516L490 580H534L526 516H498Z" fill="#818cf8"/>
+</svg>

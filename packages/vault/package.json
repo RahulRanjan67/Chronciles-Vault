@@ -1,0 +1,42 @@
+{
+  "name": "@chronicles-vault/vault",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cryptographic vault with zero-reload reactive lock/unlock for Chronicles Vault",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@noble/ciphers": "^1.0.0",
+    "@noble/hashes": "^1.4.0",
+    "better-sqlite3": "^9.4.3",
+    "uuid": "^9.0.0",
+    "zustand": "^4.5.2"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "@radix-ui/react-dialog": "^1.0.0"
+  },
+  "devDependencies": {
+    "@radix-ui/react-dialog": "^1.1.2",
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/react": "^18.0.0",
+    "@types/uuid": "^9.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  }
+}

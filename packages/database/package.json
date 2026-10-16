@@ -1,0 +1,41 @@
+{
+  "name": "@chronicles-vault/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "SQLite database layer for Chronicles Vault using better-sqlite3",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "seed": "tsx src/seed/run.ts",
+    "seed:small": "tsx src/seed/run.ts --config small",
+    "seed:medium": "tsx src/seed/run.ts --config medium",
+    "test": "vitest run",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@chronicles-vault/domain": "workspace:*",
+    "@chronicles-vault/shared": "workspace:*",
+    "better-sqlite3": "^12.11.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/node": "^22.0.0",
+    "rimraf": "^6.0.0",
+    "tsup": "^8.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.0.0"
+  }
+}

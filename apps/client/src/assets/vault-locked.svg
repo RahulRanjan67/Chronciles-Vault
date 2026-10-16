@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" fill="none">
+  <defs>
+    <radialGradient id="vault-key-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#818cf8" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#09090b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="600" rx="48" fill="#09090b"/>
+  <circle cx="300" cy="300" r="240" fill="url(#vault-key-glow)"/>
+  <circle cx="300" cy="300" r="190" fill="#18181b" stroke="#27272a" stroke-width="12"/>
+  <circle cx="300" cy="300" r="152" stroke="#6366f1" stroke-opacity="0.4" stroke-width="4" stroke-dasharray="12 10"/>
+  <line x1="300" y1="92" x2="300" y2="128" stroke="#52525b" stroke-width="8" stroke-linecap="round"/>
+  <line x1="300" y1="472" x2="300" y2="508" stroke="#52525b" stroke-width="8" stroke-linecap="round"/>
+  <line x1="92" y1="300" x2="128" y2="300" stroke="#52525b" stroke-width="8" stroke-linecap="round"/>
+  <line x1="472" y1="300" x2="508" y2="300" stroke="#52525b" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="300" cy="276" r="28" fill="#6366f1"/>
+  <path d="M286 296L278 356H322L314 296H286Z" fill="#818cf8"/>
+</svg>

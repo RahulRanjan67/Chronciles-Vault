@@ -1,0 +1,546 @@
+/**
+ * Chronicles Vault — Multi-Personality Design Token System (Architectural Awwwards Edition)
+ *
+ * Five distinct atmospheric themes:
+ *   1. "Prism Arcana"   (default) — Prism White & Royal Indigo + url('/background.jpg')
+ *   2. "Antique Parchment"           — Warm Sunlit Vellum & Amber + url('/bg-parchment.jpg')
+ *   3. "Blossom Ascendant"           — Sakura White & Crimson Rose + url('/bg-xianxia.jpg')
+ *   4. "Ink"                         — Pure White Background & Stark Black Text + url('/bg-ink.svg')
+ *   5. "Midnight Arcana"             — Dark Blues & Violets + url('/background.jpg')
+ */
+
+:root {
+  /* ─── Default Theme: Prism Arcana (Prism White & Indigo) ─── */
+  --cv-theme-id: "prism-arcana";
+  --cv-theme-name: "Prism Arcana";
+
+  /* ─── Surface Hierarchy (Crisp White + Airy Pearl) ─────── */
+  --cv-bg: #f4f7ff;
+  --cv-bg-elevated: #ffffff;
+  --cv-surface: #eef2ff;
+  --cv-surface-raised: #e0e7ff;
+  --cv-surface-hover: #c7d2fe;
+
+  /* ─── Borders ──────────────────────────────────────────── */
+  --cv-border: rgba(79, 70, 229, 0.22);
+  --cv-border-strong: rgba(79, 70, 229, 0.48);
+  --cv-border-focus: #4f46e5;
+
+  /* ─── Text (High-Contrast Deep Slate on Crisp White) ───── */
+  --cv-text: #0f172a;
+  --cv-text-muted: #334155;
+  --cv-text-subtle: #475569;
+  --cv-text-inverse: #ffffff;
+
+  /* ─── Accent — Vibrant Electric Indigo ─────────────────── */
+  --cv-accent: #4f46e5;
+  --cv-accent-muted: rgba(79, 70, 229, 0.14);
+  --cv-accent-strong: #4338ca;
+  --cv-accent-subtle: rgba(79, 70, 229, 0.07);
+  --cv-accent-fg: #ffffff;
+
+  /* ─── Status ───────────────────────────────────────────── */
+  --cv-success: #059669;
+  --cv-success-muted: rgba(5, 150, 105, 0.14);
+  --cv-warning: #d97706;
+  --cv-warning-muted: rgba(217, 119, 6, 0.15);
+  --cv-danger: #e11d48;
+  --cv-danger-muted: rgba(225, 29, 72, 0.14);
+  --cv-info: #0284c7;
+  --cv-info-muted: rgba(2, 132, 199, 0.14);
+
+  /* ─── Source Health ─────────────────────────────────────── */
+  --cv-health-healthy: #059669;
+  --cv-health-degraded: #d97706;
+  --cv-health-unavailable: #e11d48;
+  --cv-health-stale: #64748b;
+  --cv-health-unknown: #475569;
+  --cv-health-local: #4f46e5;
+
+  /* ─── Typography Scale ──────────────────────────────────── */
+  --cv-font-sans: "Inter", "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --cv-font-serif: "Newsreader", "Playfair Display", "Georgia", serif;
+  --cv-font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  --cv-text-xs: 0.78rem;
+  --cv-text-sm: 0.9rem;
+  --cv-text-base: 1rem;
+  --cv-text-lg: 1.15rem;
+  --cv-text-xl: 1.3rem;
+  --cv-text-2xl: 1.55rem;
+  --cv-text-3xl: 1.95rem;
+  --cv-text-4xl: 2.35rem;
+  --cv-text-5xl: 3.1rem;
+  --cv-text-display: 4rem;
+
+  /* ─── Line Heights ──────────────────────────────────────── */
+  --cv-leading-tight: 1.22;
+  --cv-leading-snug: 1.35;
+  --cv-leading-normal: 1.52;
+  --cv-leading-relaxed: 1.65;
+
+  /* ─── Font Weights (Upgraded for Bold Editorial Clarity) ── */
+  --cv-weight-normal: 500;
+  --cv-weight-medium: 600;
+  --cv-weight-semibold: 700;
+  --cv-weight-bold: 800;
+
+  /* ─── Spacing (4px base grid) ───────────────────────────── */
+  --cv-space-0: 0;
+  --cv-space-px: 1px;
+  --cv-space-0-5: 0.125rem;
+  --cv-space-1: 0.25rem;
+  --cv-space-1-5: 0.375rem;
+  --cv-space-2: 0.5rem;
+  --cv-space-2-5: 0.625rem;
+  --cv-space-3: 0.75rem;
+  --cv-space-3-5: 0.875rem;
+  --cv-space-4: 1rem;
+  --cv-space-5: 1.25rem;
+  --cv-space-6: 1.5rem;
+  --cv-space-8: 2rem;
+  --cv-space-10: 2.5rem;
+  --cv-space-12: 3rem;
+  --cv-space-16: 4rem;
+  --cv-space-20: 5rem;
+  --cv-space-24: 6rem;
+
+  /* ─── Architectural Sharp Border Radii (Zero Generic AI Pills) ─── */
+  --cv-radius-sm: 1px;
+  --cv-radius: 2px;
+  --cv-radius-md: 3px;
+  --cv-radius-lg: 4px;
+  --cv-radius-xl: 6px;
+  --cv-radius-2xl: 8px;
+  --cv-radius-full: 2px;
+
+  /* ─── Shadows ───────────────────────────────────────────── */
+  --cv-shadow-xs: 2px 2px 0px rgba(79, 70, 229, 0.14);
+  --cv-shadow-sm: 3px 3px 0px rgba(79, 70, 229, 0.18);
+  --cv-shadow: 4px 4px 0px rgba(79, 70, 229, 0.22);
+  --cv-shadow-lg: 6px 6px 0px rgba(79, 70, 229, 0.26);
+  --cv-shadow-xl: 8px 8px 0px rgba(79, 70, 229, 0.30);
+  --cv-shadow-glow: 0 0 28px rgba(79, 70, 229, 0.25);
+
+  /* ─── Z-Index Scale ─────────────────────────────────────── */
+  --cv-z-base: 1;
+  --cv-z-sticky: 20;
+  --cv-z-dropdown: 40;
+  --cv-z-overlay: 50;
+  --cv-z-drawer: 55;
+  --cv-z-modal: 60;
+  --cv-z-popover: 70;
+  --cv-z-toast: 80;
+  --cv-z-tooltip: 90;
+  --cv-z-command: 100;
+
+  /* ─── Glass & Backdrop ──────────────────────────────────── */
+  --cv-glass-bg: rgba(255, 255, 255, 0.88);
+  --cv-glass-border: rgba(79, 70, 229, 0.32);
+  --cv-glass-blur: blur(16px);
+  --cv-glass-blur-heavy: blur(28px);
+
+  /* ─── Theme Background Image & Overlay ──────────────────── */
+  --cv-bg-image: url("/background.jpg");
+  --cv-main-overlay: linear-gradient(135deg, rgba(244, 247, 255, 0.76) 0%, rgba(238, 242, 255, 0.70) 100%);
+
+  /* ─── Motion & Easing ───────────────────────────────────── */
+  --cv-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --cv-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --cv-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --cv-duration-micro: 90ms;
+  --cv-duration-fast: 150ms;
+  --cv-duration-base: 220ms;
+  --cv-duration-slow: 350ms;
+  --cv-duration-cinematic: 500ms;
+
+  /* ─── Layout Dimensions ─────────────────────────────────── */
+  --cv-sidebar-width: 248px;
+  --cv-sidebar-collapsed-width: 64px;
+  --cv-header-height: 60px;
+  --cv-bottom-nav-height: 64px;
+  --cv-max-width-narrow: 768px;
+  --cv-max-width-standard: 1200px;
+  --cv-max-width-wide: 1440px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --cv-duration-micro: 0ms;
+    --cv-duration-fast: 0ms;
+    --cv-duration-base: 0ms;
+    --cv-duration-slow: 50ms;
+    --cv-duration-cinematic: 100ms;
+  }
+}
+
+/* ============================================================
+   THEME 1: Prism Arcana (prism-arcana)
+   Crisp alabaster white cards over astral background.jpg artwork,
+   electric royal indigo & vibrant cyan/emerald highlights.
+   ============================================================ */
+[data-theme="prism-arcana"] {
+  --cv-theme-id: "prism-arcana";
+  --cv-theme-name: "Prism Arcana";
+
+  --cv-bg: #f4f7ff;
+  --cv-bg-elevated: #ffffff;
+  --cv-surface: #eef2ff;
+  --cv-surface-raised: #e0e7ff;
+  --cv-surface-hover: #c7d2fe;
+
+  --cv-border: rgba(79, 70, 229, 0.22);
+  --cv-border-strong: rgba(79, 70, 229, 0.48);
+  --cv-border-focus: #4f46e5;
+
+  --cv-text: #0f172a;
+  --cv-text-muted: #334155;
+  --cv-text-subtle: #475569;
+  --cv-text-inverse: #ffffff;
+
+  --cv-accent: #4f46e5;
+  --cv-accent-muted: rgba(79, 70, 229, 0.14);
+  --cv-accent-strong: #4338ca;
+  --cv-accent-subtle: rgba(79, 70, 229, 0.07);
+  --cv-accent-fg: #ffffff;
+
+  --cv-success: #059669;
+  --cv-success-muted: rgba(5, 150, 105, 0.14);
+  --cv-warning: #d97706;
+  --cv-warning-muted: rgba(217, 119, 6, 0.15);
+  --cv-danger: #e11d48;
+  --cv-danger-muted: rgba(225, 29, 72, 0.14);
+  --cv-info: #0284c7;
+  --cv-info-muted: rgba(2, 132, 199, 0.14);
+
+  --cv-health-healthy: #059669;
+  --cv-health-degraded: #d97706;
+  --cv-health-unavailable: #e11d48;
+  --cv-health-stale: #64748b;
+  --cv-health-unknown: #475569;
+  --cv-health-local: #4f46e5;
+
+  --cv-shadow-xs: 2px 2px 0px rgba(79, 70, 229, 0.14);
+  --cv-shadow-sm: 3px 3px 0px rgba(79, 70, 229, 0.18);
+  --cv-shadow: 4px 4px 0px rgba(79, 70, 229, 0.22);
+  --cv-shadow-lg: 6px 6px 0px rgba(79, 70, 229, 0.26);
+  --cv-shadow-xl: 8px 8px 0px rgba(79, 70, 229, 0.30);
+  --cv-shadow-glow: 0 0 28px rgba(79, 70, 229, 0.25);
+
+  --cv-glass-bg: rgba(255, 255, 255, 0.88);
+  --cv-glass-border: rgba(79, 70, 229, 0.32);
+
+  --cv-bg-image: url("/background.jpg");
+  --cv-main-overlay: linear-gradient(135deg, rgba(244, 247, 255, 0.76) 0%, rgba(238, 242, 255, 0.70) 100%);
+}
+
+/* ============================================================
+   THEME 2: Antique Parchment (parchment-ink)
+   300-year-old pages feel - warm beige to amber/orangey-yellow hues,
+   NO white - pure aged parchment tones throughout.
+   ============================================================ */
+[data-theme="parchment-ink"] {
+  --cv-theme-id: "parchment-ink";
+  --cv-theme-name: "Antique Parchment";
+
+  --cv-bg: #f5e6d3;
+  --cv-bg-elevated: #faf0e6;
+  --cv-surface: #f0d9c0;
+  --cv-surface-raised: #e8c89e;
+  --cv-surface-hover: #dfb983;
+
+  --cv-border: rgba(180, 83, 9, 0.35);
+  --cv-border-strong: rgba(180, 83, 9, 0.60);
+  --cv-border-focus: #ea580c;
+
+  --cv-text: #2d2218;
+  --cv-text-muted: #5c4535;
+  --cv-text-subtle: #7a5c48;
+  --cv-text-inverse: #faf0e6;
+
+  --cv-accent: #d97706;
+  --cv-accent-muted: rgba(217, 119, 6, 0.18);
+  --cv-accent-strong: #b45309;
+  --cv-accent-subtle: rgba(217, 119, 6, 0.10);
+  --cv-accent-fg: #faf0e6;
+
+  --cv-success: #059669;
+  --cv-success-muted: rgba(5, 150, 105, 0.16);
+  --cv-warning: #d97706;
+  --cv-warning-muted: rgba(217, 119, 6, 0.18);
+  --cv-danger: #dc2626;
+  --cv-danger-muted: rgba(220, 38, 38, 0.16);
+  --cv-info: #d97706;
+  --cv-info-muted: rgba(217, 119, 6, 0.16);
+
+  --cv-health-healthy: #059669;
+  --cv-health-degraded: #d97706;
+  --cv-health-unavailable: #dc2626;
+  --cv-health-stale: #8c745a;
+  --cv-health-unknown: #7a5c48;
+  --cv-health-local: #d97706;
+
+  --cv-shadow-xs: 2px 2px 0px rgba(180, 83, 9, 0.20);
+  --cv-shadow-sm: 3px 3px 0px rgba(180, 83, 9, 0.26);
+  --cv-shadow: 4px 4px 0px rgba(180, 83, 9, 0.30);
+  --cv-shadow-lg: 6px 6px 0px rgba(180, 83, 9, 0.34);
+  --cv-shadow-xl: 8px 8px 0px rgba(180, 83, 9, 0.38);
+  --cv-shadow-glow: 0 0 24px rgba(217, 119, 6, 0.28);
+
+  --cv-glass-bg: rgba(245, 230, 211, 0.90);
+  --cv-glass-border: rgba(180, 83, 9, 0.40);
+
+  --cv-bg-image: url("/bg-parchment.jpg");
+  --cv-main-overlay: linear-gradient(135deg, rgba(245, 230, 211, 0.85) 0%, rgba(240, 217, 192, 0.80) 100%);
+}
+
+/* ============================================================
+   THEME 3: Blossom Ascendant (xianxia-realm)
+   Xianxia-flavored pink-purple hues, separate from parchment yellowish,
+   NO white dominance - pink-violet-magenta spectrum throughout.
+   ============================================================ */
+[data-theme="xianxia-realm"] {
+  --cv-theme-id: "xianxia-realm";
+  --cv-theme-name: "Blossom Ascendant";
+
+  --cv-bg: #fdf2f8;
+  --cv-bg-elevated: #fce7f3;
+  --cv-surface: #fbcfe8;
+  --cv-surface-raised: #f9a8d4;
+  --cv-surface-hover: #f472b6;
+
+  --cv-border: rgba(219, 39, 119, 0.30);
+  --cv-border-strong: rgba(219, 39, 119, 0.55);
+  --cv-border-focus: #db2777;
+
+  --cv-text: #4a044e;
+  --cv-text-muted: #701a75;
+  --cv-text-subtle: #86198f;
+  --cv-text-inverse: #fdf2f8;
+
+  --cv-accent: #e11d48;
+  --cv-accent-muted: rgba(225, 29, 72, 0.16);
+  --cv-accent-strong: #be123c;
+  --cv-accent-subtle: rgba(225, 29, 72, 0.10);
+  --cv-accent-fg: #fdf2f8;
+
+  --cv-success: #059669;
+  --cv-success-muted: rgba(5, 150, 105, 0.16);
+  --cv-warning: #d97706;
+  --cv-warning-muted: rgba(217, 119, 6, 0.18);
+  --cv-danger: #dc2626;
+  --cv-danger-muted: rgba(220, 38, 38, 0.16);
+  --cv-info: #7c3aed;
+  --cv-info-muted: rgba(124, 58, 237, 0.16);
+
+  --cv-health-healthy: #059669;
+  --cv-health-degraded: #d97706;
+  --cv-health-unavailable: #dc2626;
+  --cv-health-stale: #a21caf;
+  --cv-health-unknown: #86198f;
+  --cv-health-local: #db2777;
+
+  --cv-shadow-xs: 2px 2px 0px rgba(219, 39, 119, 0.18);
+  --cv-shadow-sm: 3px 3px 0px rgba(219, 39, 119, 0.24);
+  --cv-shadow: 4px 4px 0px rgba(219, 39, 119, 0.28);
+  --cv-shadow-lg: 6px 6px 0px rgba(219, 39, 119, 0.32);
+  --cv-shadow-xl: 8px 8px 0px rgba(219, 39, 119, 0.36);
+  --cv-shadow-glow: 0 0 28px rgba(219, 39, 119, 0.30);
+
+  --cv-glass-bg: rgba(253, 242, 248, 0.90);
+  --cv-glass-border: rgba(219, 39, 119, 0.40);
+
+  --cv-bg-image: url("/bg-xianxia.jpg");
+  --cv-main-overlay: linear-gradient(135deg, rgba(253, 242, 248, 0.85) 0%, rgba(252, 231, 243, 0.80) 100%);
+}
+
+/* ============================================================
+   THEME 4: Ink (ink)
+   Simple black and white theme - stark gallery-white paper,
+   obsidian black typography, high contrast throughout.
+   ============================================================ */
+[data-theme="ink"] {
+  --cv-theme-id: "ink";
+  --cv-theme-name: "Ink";
+
+  --cv-bg: #ffffff;
+  --cv-bg-elevated: #fafafa;
+  --cv-surface: #f5f5f5;
+  --cv-surface-raised: #e5e5e5;
+  --cv-surface-hover: #d4d4d4;
+
+  --cv-border: rgba(0, 0, 0, 0.20);
+  --cv-border-strong: rgba(0, 0, 0, 0.40);
+  --cv-border-focus: #000000;
+
+  --cv-text: #000000;
+  --cv-text-muted: #1a1a1a;
+  --cv-text-subtle: #333333;
+  --cv-text-inverse: #ffffff;
+
+  --cv-accent: #000000;
+  --cv-accent-muted: rgba(0, 0, 0, 0.08);
+  --cv-accent-strong: #000000;
+  --cv-accent-subtle: rgba(0, 0, 0, 0.04);
+  --cv-accent-fg: #ffffff;
+
+  --cv-success: #15803d;
+  --cv-success-muted: rgba(21, 128, 61, 0.12);
+  --cv-warning: #b45309;
+  --cv-warning-muted: rgba(180, 83, 9, 0.14);
+  --cv-danger: #dc2626;
+  --cv-danger-muted: rgba(220, 38, 38, 0.14);
+  --cv-info: #1e293b;
+  --cv-info-muted: rgba(30, 41, 59, 0.12);
+
+  --cv-health-healthy: #15803d;
+  --cv-health-degraded: #b45309;
+  --cv-health-unavailable: #dc2626;
+  --cv-health-stale: #52525b;
+  --cv-health-unknown: #333333;
+  --cv-health-local: #000000;
+
+  --cv-shadow-xs: 2px 2px 0px rgba(0, 0, 0, 0.15);
+  --cv-shadow-sm: 3px 3px 0px rgba(0, 0, 0, 0.18);
+  --cv-shadow: 4px 4px 0px rgba(0, 0, 0, 0.20);
+  --cv-shadow-lg: 6px 6px 0px rgba(0, 0, 0, 0.22);
+  --cv-shadow-xl: 8px 8px 0px rgba(0, 0, 0, 0.25);
+  --cv-shadow-glow: 0 0 28px rgba(220, 38, 38, 0.30);
+
+  --cv-glass-bg: rgba(255, 255, 255, 0.92);
+  --cv-glass-border: rgba(0, 0, 0, 0.30);
+
+  --cv-bg-image: url("/bg-ink.svg");
+  --cv-main-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.70) 0%, rgba(245, 245, 245, 0.65) 100%);
+}
+
+/* ============================================================
+   THEME 5: Midnight Arcana (midnight-arcana)
+   Darker shades of blues and violets for dark theme lovers,
+   NO white - pure dark blue-violet spectrum throughout.
+   ============================================================ */
+[data-theme="midnight-arcana"] {
+  --cv-theme-id: "midnight-arcana";
+  --cv-theme-name: "Midnight Arcana";
+  --cv-theme-legacy-id: "night-theme";
+
+  --cv-bg: #0f172a;
+  --cv-bg-elevated: #1e293b;
+  --cv-surface: #1e3a8a;
+  --cv-surface-raised: #312e81;
+  --cv-surface-hover: #4338ca;
+
+  --cv-border: rgba(99, 102, 241, 0.35);
+  --cv-border-strong: rgba(99, 102, 241, 0.60);
+  --cv-border-focus: #6366f1;
+
+  --cv-text: #e2e8f0;
+  --cv-text-muted: #94a3b8;
+  --cv-text-subtle: #64748b;
+  --cv-text-inverse: #0f172a;
+
+  --cv-accent: #6366f1;
+  --cv-accent-muted: rgba(99, 102, 241, 0.18);
+  --cv-accent-strong: #818cf8;
+  --cv-accent-subtle: rgba(99, 102, 241, 0.10);
+  --cv-accent-fg: #e2e8f0;
+
+  --cv-success: #10b981;
+  --cv-success-muted: rgba(16, 185, 129, 0.16);
+  --cv-warning: #f59e0b;
+  --cv-warning-muted: rgba(245, 158, 11, 0.18);
+  --cv-danger: #ef4444;
+  --cv-danger-muted: rgba(239, 68, 68, 0.16);
+  --cv-info: #8b5cf6;
+  --cv-info-muted: rgba(139, 92, 246, 0.16);
+
+  --cv-health-healthy: #10b981;
+  --cv-health-degraded: #f59e0b;
+  --cv-health-unavailable: #ef4444;
+  --cv-health-stale: #6366f1;
+  --cv-health-unknown: #64748b;
+  --cv-health-local: #8b5cf6;
+
+  --cv-shadow-xs: 2px 2px 0px rgba(99, 102, 241, 0.18);
+  --cv-shadow-sm: 3px 3px 0px rgba(99, 102, 241, 0.24);
+  --cv-shadow: 4px 4px 0px rgba(99, 102, 241, 0.28);
+  --cv-shadow-lg: 6px 6px 0px rgba(99, 102, 241, 0.32);
+  --cv-shadow-xl: 8px 8px 0px rgba(99, 102, 241, 0.36);
+  --cv-shadow-glow: 0 0 28px rgba(99, 102, 241, 0.30);
+
+  --cv-glass-bg: rgba(15, 23, 42, 0.90);
+  --cv-glass-border: rgba(99, 102, 241, 0.40);
+
+  --cv-bg-image: url("/background.jpg");
+  --cv-main-overlay: linear-gradient(135deg, rgba(15, 23, 42, 0.90) 0%, rgba(30, 41, 59, 0.85) 100%);
+}
+
+/* ============================================================
+   AWWWARDS ARCHITECTURAL & EDITORIAL UTILITY CLASSES
+   ============================================================ */
+.cv-chamfer {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+
+.cv-editorial-btn {
+  border-radius: 0px !important;
+  border: 1.5px solid var(--cv-border-strong);
+  box-shadow: 3px 3px 0px var(--cv-border-strong);
+  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cv-editorial-btn:hover {
+  transform: translate(-1.5px, -1.5px);
+  box-shadow: 5px 5px 0px var(--cv-accent);
+}
+
+.cv-editorial-card {
+  border-radius: 0px !important;
+  border: 1.5px solid var(--cv-border-strong);
+  background: var(--cv-bg-elevated);
+  box-shadow: 4px 4px 0px var(--cv-border-strong);
+}
+
+@keyframes cvMarqueeScroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.cv-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: cvMarqueeScroll 32s linear infinite;
+}
+
+.cv-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* ============================================================
+   PERFORMANCE PROFILES
+   ============================================================ */
+[data-perf-profile="full"] {
+  --cv-glass-blur: blur(18px);
+  --cv-glass-blur-heavy: blur(30px);
+}
+
+[data-perf-profile="lite"] {
+  --cv-glass-blur: none;
+  --cv-glass-blur-heavy: none;
+  --cv-shadow-lg: var(--cv-shadow-sm);
+  --cv-shadow-xl: var(--cv-shadow-sm);
+  --cv-shadow-glow: none;
+  --cv-duration-micro: 0ms;
+  --cv-duration-fast: 0ms;
+  --cv-duration-base: 0ms;
+  --cv-duration-slow: 0ms;
+  --cv-duration-cinematic: 0ms;
+}
+
+[data-perf-profile="lite"] [class*="backdrop-blur"] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <pattern id="editorial-grid" width="120" height="120" patternUnits="userSpaceOnUse">
+      <path d="M 120 0 L 0 0 0 120" fill="none" stroke="#09090b" stroke-width="0.6" stroke-opacity="0.09" />
+      <path d="M 60 0 L 60 120 M 0 60 L 120 60" fill="none" stroke="#09090b" stroke-width="0.4" stroke-opacity="0.04" stroke-dasharray="3 3" />
+      <path d="M 116 0 L 120 0 L 120 4" fill="none" stroke="#09090b" stroke-width="1.2" stroke-opacity="0.22" />
+    </pattern>
+    <radialGradient id="ink-wash-1" cx="82%" cy="18%" r="48%">
+      <stop offset="0%" stop-color="#09090b" stop-opacity="0.10" />
+      <stop offset="55%" stop-color="#27272a" stop-opacity="0.04" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="ink-wash-2" cx="14%" cy="84%" r="45%">
+      <stop offset="0%" stop-color="#09090b" stop-opacity="0.09" />
+      <stop offset="60%" stop-color="#3f3f46" stop-opacity="0.03" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Pure Stark White Paper Canvas -->
+  <rect width="1920" height="1080" fill="#ffffff" />
+
+  <!-- Architectural Editorial Grid -->
+  <rect width="1920" height="1080" fill="url(#editorial-grid)" />
+
+  <!-- Sumi-e Wash Gradients -->
+  <rect width="1920" height="1080" fill="url(#ink-wash-1)" />
+  <rect width="1920" height="1080" fill="url(#ink-wash-2)" />
+
+  <!-- Sweeping Sumi-e Calligraphy Brush Arcs -->
+  <path d="M -80,920 C 340,740 720,1040 1280,680 C 1580,490 1760,220 2020,110" fill="none" stroke="#09090b" stroke-width="48" stroke-opacity="0.045" stroke-linecap="round" />
+  <path d="M -40,950 C 380,770 760,1060 1310,700 C 1610,510 1790,250 2040,140" fill="none" stroke="#09090b" stroke-width="14" stroke-opacity="0.07" stroke-linecap="round" />
+  <path d="M 1180,-60 C 1360,290 1620,480 1980,620" fill="none" stroke="#09090b" stroke-width="26" stroke-opacity="0.04" />
+
+  <!-- Architectural Compass Rings (Top Right) -->
+  <g transform="translate(1580, 240)" opacity="0.14">
+    <circle cx="0" cy="0" r="190" fill="none" stroke="#09090b" stroke-width="1.5" />
+    <circle cx="0" cy="0" r="145" fill="none" stroke="#09090b" stroke-width="1" stroke-dasharray="6 6" />
+    <circle cx="0" cy="0" r="85" fill="none" stroke="#09090b" stroke-width="2" />
+    <line x1="-220" y1="0" x2="220" y2="0" stroke="#09090b" stroke-width="1" />
+    <line x1="0" y1="-220" x2="0" y2="220" stroke="#09090b" stroke-width="1" />
+  </g>
+
+  <!-- Vermilion Hanko Artist Stamp (Bottom Right Editorial Mark) -->
+  <g transform="translate(1760, 920)" opacity="0.22">
+    <rect x="0" y="0" width="76" height="76" fill="none" stroke="#dc2626" stroke-width="3" />
+    <rect x="6" y="6" width="64" height="64" fill="none" stroke="#dc2626" stroke-width="1.2" />
+    <path d="M 20 24 H 56 M 38 24 V 56 M 22 40 H 54 M 20 56 H 56" stroke="#dc2626" stroke-width="3.2" fill="none" />
+  </g>
+</svg>

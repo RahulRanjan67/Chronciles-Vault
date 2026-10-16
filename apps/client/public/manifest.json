@@ -1,0 +1,42 @@
+{
+  "name": "Chronicles Vault",
+  "short_name": "Chronicles Vault",
+  "description": "A permanent private home for your entire fiction life. Your fiction life, kept forever.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "education", "books"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Add Work",
+      "short_name": "Add",
+      "description": "Add a new work to your library",
+      "url": "/?action=add",
+      "icons": [{ "src": "/logo-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Library",
+      "short_name": "Library",
+      "description": "View your library",
+      "url": "/library",
+      "icons": [{ "src": "/logo-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

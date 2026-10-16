@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chronicles Vault Radar</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Radar</h1>
+      <p class="intro">Stage reading links for review. Tabs are never closed automatically.</p>
+      <button id="capture-tab" type="button">Capture current tab</button>
+      <button id="capture-window" class="secondary" type="button">Capture this window</button>
+      <label for="bookmark-folder">Bookmark folder</label>
+      <select id="bookmark-folder">
+        <option value="">Choose a folder</option>
+      </select>
+      <button id="capture-bookmarks" class="secondary" type="button">Capture folder</button>
+      <section aria-labelledby="queue-heading">
+        <div class="queue-heading">
+          <h2 id="queue-heading">Offline queue</h2>
+          <span id="queue-count">0</span>
+        </div>
+        <p id="queue-status" role="status" aria-live="polite">
+          Captures stay in this browser until you clear them.
+        </p>
+        <button id="export-batch" type="button" disabled>Export next batch for Radar</button>
+        <button id="clear-batch" class="text-button" type="button" disabled>
+          Clear exported batch
+        </button>
+      </section>
+    </main>
+    <script src="capture-utils.js"></script>
+    <script src="browser-adapter.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "appId": "com.chroniclesvault.app",
+  "appName": "Chronicles Vault",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor",
+    "hostname": "app.chroniclesvault.local"
+  },
+  "plugins": {
+    "CapacitorSQLite": {
+      "iosDatabaseLocation": "Library/CapacitorDatabase",
+      "iosIsEncryption": false,
+      "iosKeychainPrefix": "chronicles-vault",
+      "androidIsEncryption": false
+    },
+    "Filesystem": {
+      "iosIsDocumentPickerEnabled": true
+    },
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "backgroundColor": "#09090b",
+      "showSpinner": false
+    }
+  },
+  "extra": {
+    "pinnedVersions": {
+      "@capacitor/core": "6.2.0",
+      "@capacitor/cli": "6.2.0",
+      "@capacitor/ios": "6.2.0",
+      "@capacitor/android": "6.2.0",
+      "@capacitor/filesystem": "6.0.2",
+      "@capacitor-community/sqlite": "6.0.2"
+    },
+    "architectureDecisionRecords": ["ADR-001", "ADR-009", "ADR-010"]
+  }
+}

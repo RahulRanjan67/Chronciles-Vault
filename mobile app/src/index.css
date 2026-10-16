@@ -1,0 +1,216 @@
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@chronicles-vault/ui/tokens";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.cv-pdf-text-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 1;
+  line-height: 1;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  user-select: text;
+}
+
+.cv-pdf-text-layer :is(span, br) {
+  position: absolute;
+  color: transparent;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0 0;
+}
+
+.cv-pdf-text-layer ::selection {
+  background: var(--cv-accent-muted);
+}
+
+/* ============================================================
+   Awwwards-Inspired Sanctum Room & Preloader Motion System
+   Compositor-only (transform, opacity, clip-path)
+   ============================================================ */
+
+@keyframes cvFloatMote {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(0.9);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate3d(8px, -22px, 0) scale(1.2);
+    opacity: 0.85;
+  }
+}
+
+@keyframes cvLampBreathe {
+  0%, 100% {
+    opacity: 0.68;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.96;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes cvPageTurn {
+  0% {
+    transform: perspective(600px) rotateY(0deg);
+    opacity: 0.95;
+  }
+  45% {
+    transform: perspective(600px) rotateY(-65deg);
+    opacity: 0.7;
+  }
+  55% {
+    transform: perspective(600px) rotateY(-120deg);
+    opacity: 0.35;
+  }
+  100% {
+    transform: perspective(600px) rotateY(-175deg);
+    opacity: 0;
+  }
+}
+
+@keyframes cvSpinePulse {
+  0%, 100% {
+    opacity: 0.45;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes cvKineticUp {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes cvShorthandSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes cvRoomDoorOpen {
+  0% {
+    clip-path: circle(120% at 50% 50%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 50% 42%);
+    opacity: 0;
+  }
+}
+
+.cv-mote {
+  animation: cvFloatMote 5.5s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.cv-lamp-glow {
+  animation: cvLampBreathe 4s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.cv-page-flip {
+  transform-origin: left center;
+  animation: cvPageTurn 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  will-change: transform, opacity;
+}
+
+.cv-spine-active {
+  animation: cvSpinePulse 2.8s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.cv-kinetic-enter {
+  animation: cvKineticUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.cv-orbit-ring {
+  animation: cvShorthandSpin 24s linear infinite;
+  will-change: transform;
+}
+
+.cv-room-exit-curtain {
+  animation: cvRoomDoorOpen 0.55s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+/* Reduced motion compliance per modern-web-guidance */
+@media (prefers-reduced-motion: reduce) {
+  .cv-mote,
+  .cv-lamp-glow,
+  .cv-page-flip,
+  .cv-spine-active,
+  .cv-orbit-ring {
+    animation: none !important;
+  }
+  .cv-kinetic-enter {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--cv-border);
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    background-color: var(--cv-bg);
+    color: var(--cv-text);
+    font-family: var(--cv-font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Custom scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--cv-surface-raised);
+    border-radius: var(--cv-radius-full);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--cv-surface-hover);
+  }
+
+  ::selection {
+    background-color: var(--cv-accent-muted);
+    color: var(--cv-accent-strong);
+  }
+}

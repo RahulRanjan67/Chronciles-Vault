@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "moduleDetection": "force",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@cv/domain":    ["packages/domain/src/index.ts"],
+      "@cv/domain/*": ["packages/domain/src/*"],
+      "@cv/database":    ["packages/database/src/index.ts"],
+      "@cv/database/*": ["packages/database/src/*"],
+      "@cv/ui":    ["packages/ui/src/index.ts"],
+      "@cv/ui/*": ["packages/ui/src/*"],
+      "@cv/state":    ["packages/state/src/index.ts"],
+      "@cv/state/*": ["packages/state/src/*"],
+      "@cv/search":    ["packages/search/src/index.ts"],
+      "@cv/search/*": ["packages/search/src/*"],
+      "@cv/memory":    ["packages/memory/src/index.ts"],
+      "@cv/memory/*": ["packages/memory/src/*"],
+      "@cv/reader":    ["packages/reader/src/index.ts"],
+      "@cv/reader/*": ["packages/reader/src/*"],
+      "@cv/source":    ["packages/source/src/index.ts"],
+      "@cv/source/*": ["packages/source/src/*"],
+      "@cv/vault":    ["packages/vault/src/index.ts"],
+      "@cv/vault/*": ["packages/vault/src/*"],
+      "@cv/shared":    ["packages/shared/src/index.ts"],
+      "@cv/shared/*": ["packages/shared/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "**/node_modules", "**/dist", "**/build"]
+}

@@ -1,0 +1,180 @@
+/**
+ * Fictional Seed Data Catalogue.
+ *
+ * Rich collection of fictional titles, genres, tags, synopses, and source providers
+ * for generating realistic reading collections.
+ */
+
+export const GENRES = [
+  'Action',
+  'Adventure',
+  'Comedy',
+  'Drama',
+  'Fantasy',
+  'Historical',
+  'Horror',
+  'Isekai',
+  'Martial Arts',
+  'Mystery',
+  'Psychological',
+  'Romance',
+  'Sci-Fi',
+  'Slice of Life',
+  'Supernatural',
+  'Thriller',
+] as const;
+
+export const TAGS = [
+  'Overpowered MC',
+  'Reincarnation',
+  'System / Status Window',
+  'Dungeon Crawler',
+  'Cultivation',
+  'Magic Academy',
+  'Time Travel',
+  'Revenge Arc',
+  'Tower Climbing',
+  'Kingdom Building',
+  'Guild Management',
+  'Found Family',
+  'Anti-Hero',
+  'Monsters & Taming',
+  'Sword & Sorcery',
+  'Post-Apocalyptic',
+  'Cyberpunk City',
+  'Slow Burn',
+  'Political Intrigue',
+  'Artifact Crafting',
+  'Virtual Reality',
+  'Dual Cultivation',
+  'Regression',
+  'Constellations / Streamers',
+  'Mythology Retelling',
+] as const;
+
+export const PROVIDERS = [
+  { name: 'MangaDex', domain: 'mangadex.org', kind: 'web' },
+  { name: 'Webtoons Official', domain: 'webtoons.com', kind: 'web' },
+  { name: 'Royal Road', domain: 'royalroad.com', kind: 'web' },
+  { name: 'NovelUpdates', domain: 'novelupdates.com', kind: 'web' },
+  { name: 'Crunchyroll', domain: 'crunchyroll.com', kind: 'web' },
+  { name: 'AniList', domain: 'anilist.co', kind: 'web' },
+  { name: 'BookWalker', domain: 'bookwalker.jp', kind: 'web' },
+  { name: 'Local Vault Storage', domain: 'local', kind: 'local_file' },
+] as const;
+
+export const TITLE_PREFIXES = [
+  'The Return of',
+  'Chronicles of',
+  'Solo Leveling in',
+  'Ascent of',
+  'Whispers of',
+  'The Legend of',
+  'Reincarnated as',
+  'Tears of',
+  'Awakened by',
+  'Memories of',
+  'The Last Sovereign of',
+  'Path of',
+  'Echoes of',
+  'Secrets of',
+  'The Grandmaster of',
+  'Dawn of',
+  'Rise of',
+  'Inheritor of',
+  'The Forgotten',
+  'The Boundless',
+  'Shadows over',
+  'The Alchemist of',
+  'Master of',
+  'The Indomitable',
+] as const;
+
+export const TITLE_CORES = [
+  'the Void Blade',
+  'the Azure Dragon',
+  'the Celestial Realm',
+  'the Iron Fortress',
+  'Infinite Cycles',
+  'the Starfall Empire',
+  'the Abyssal Throne',
+  'the Sunken City',
+  'the Crimson Peak',
+  'the Obsidian Gate',
+  'the Wandering Scholar',
+  'the Moonlight Lotus',
+  'the Clockwork Heart',
+  'the Forgotten Archive',
+  'the Silver Weaver',
+  'the Northern Tempest',
+  'the Ember Dynasty',
+  'the Eternal Frost',
+  'the Gilded Cage',
+  'the Spectral King',
+  'the Dragon Core',
+  'the World Tree',
+  'the Silent Monolith',
+  'the Astral Horizon',
+] as const;
+
+export const TITLE_SUFFIXES = [
+  'Chronicles',
+  ': Second Awakening',
+  ': Broken Oath',
+  'and the Nine Heavens',
+  ': Bloodline',
+  'Reign',
+  ': Fall of Gods',
+  'Memoirs',
+  ': Rebirth',
+  ': Origins',
+  ': Final Protocol',
+  'and the Hidden Path',
+  ': Unlimited',
+  ': Shattered Mirror',
+  ': The Zero Hour',
+  '',
+  '',
+  '',
+] as const;
+
+export const BASE_SYNOPSES = [
+  'Betrayed by his closest allies at the peak of the mountain conquest, our protagonist wakes up ten years in the past with the memories of the calamity yet to unfold.',
+  'In a world where gates suddenly opened to connect Earth to monster-filled dungeons, a low-ranked hunter discovers an ancient interface that only he can see.',
+  'Transported into the world of her favorite tragic fantasy novel, she must rewrite the doomed fate of the villainous duke before the execution countdown strikes zero.',
+  'An archmage sealed away inside a cryogenic capsule for three thousand years awakens into a world where true magic has faded into myth and technology reigns supreme.',
+  'Bound by a mysterious contract with the Spirit of the Void, a crippled disciple discovers an unorthodox cultivation method that bypasses the traditional meridians.',
+  'When an eccentric scientist accidentally unlocks the spatial coordinates to parallel timelines, she finds herself hunted by an interdimensional order of chronomancers.',
+  'A quiet librarian accidentally reads the forbidden grimoire that anchors the universe together, setting off an ancient geopolitical war between five ancient noble houses.',
+  'After dying in an industrial laboratory accident, he wakes up in the body of an exiled third prince on the borderlands of a dying empire infested with demonic beasts.',
+  'In a dystopian neo-Tokyo, a cyber-enhanced courier takes on a delivery job that contains the sentient consciousness of the city founder.',
+  'Two rival swordsmen who fought to a stalemate for seventy years decide to open a tea shop together in the capital, only to find the martial world following them.',
+] as const;
+
+export const MEMORY_TEMPLATES = [
+  {
+    type: 'quote',
+    title: 'Unforgettable dialogue from Chapter 45',
+    body: '"The stars do not weep for the fallen; they merely watch as we kindle our own fire in the dark."',
+  },
+  {
+    type: 'note',
+    title: 'Theory on the Grand Elder\'s true motives',
+    body: 'Re-reading volume 3 reveals that the poisoned tea ceremony was orchestrated by his disciple, not the rival sect. Watch out for the crest on the ring in episode 12.',
+  },
+  {
+    type: 'review',
+    title: 'Mid-series reflection: pacing and character growth',
+    body: 'The character arc between the protagonist and their childhood rival reaches a stunning climax in this arc. Exceptional art direction and panel flow.',
+  },
+  {
+    type: 'reaction',
+    title: 'Ending of Arc 2 was pure cinema',
+    body: 'Did NOT expect that sacrifice play. The emotional resonance of the music cue paired with the double-page spread was breathtaking.',
+  },
+  {
+    type: 'screenshot',
+    title: 'Double-page spread: Awakening of the Void Dragon',
+    body: 'Saved this iconic double spread for reference. The linework and contrast are top tier.',
+  },
+] as const;
