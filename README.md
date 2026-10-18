@@ -115,30 +115,6 @@ pnpm lint
 ```bash
 pnpm seed
 ```
-
----
-
-## 📁 Documentation
-
-All contract and architecture documents live in [`docs/`](./docs/):
-
-| Document | Purpose |
-|---|---|
-| [PRODUCT.md](./docs/PRODUCT.md) | Product thesis and user stories |
-| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | System overview and data flow |
-| [DOMAIN.md](./docs/DOMAIN.md) | All domain entities with full field specs |
-| [DATABASE.md](./docs/DATABASE.md) | Tables, indexes, FTS5, migrations |
-| [EVENTS.md](./docs/EVENTS.md) | Domain events and payload shapes |
-| [UI-CONTRACT.md](./docs/UI-CONTRACT.md) | Design system, tokens, components |
-| [SOURCE-CONTRACT.md](./docs/SOURCE-CONTRACT.md) | AccessPath providers and adapters |
-| [READER-CONTRACT.md](./docs/READER-CONTRACT.md) | Reader adapters and progress locators |
-| [VAULT-CONTRACT.md](./docs/VAULT-CONTRACT.md) | Encryption model and session lifecycle |
-| [INTEGRATION-RULES.md](./docs/INTEGRATION-RULES.md) | Provider legality and API rules |
-| [PERFORMANCE.md](./docs/PERFORMANCE.md) | Targets, benchmarks, device matrix |
-| [AGENT_RULES.md](./docs/AGENT_RULES.md) | Development agent rules |
-| [IMPLEMENTATION_STATE.md](./docs/IMPLEMENTATION_STATE.md) | Feature implementation tracking |
-| [DECISIONS.md](./docs/DECISIONS.md) | Architecture decision records |
-
 ---
 
 ## 🔧 Configuration
