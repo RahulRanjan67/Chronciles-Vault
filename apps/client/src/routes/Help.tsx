@@ -140,7 +140,7 @@ const KEYBOARD_SHORTCUTS = [
   },
   {
     keys: ["G", "then", "R"],
-    description: "Jump immediately to Return Desk",
+    description: "Jump immediately to Up Next",
   },
   {
     keys: ["G", "then", "D"],
@@ -432,10 +432,10 @@ export function Help(_props: HelpProps) {
                 {
                   id: "step2",
                   num: "2",
-                  title: "Check Return Desk",
+                  title: "Check Up Next",
                   desc: "See prioritized works awaiting attention based on releases and reading streaks.",
-                  link: "/return-desk",
-                  linkText: "Return Desk",
+                  link: "/up-next",
+                  linkText: "Up Next",
                 },
                 {
                   id: "step3",

@@ -104,17 +104,13 @@ export interface UserAccountProfile {
 }
 
 export const DEFAULT_USER_ACCOUNT: UserAccountProfile = {
-  id: "account-owner",
+  id: "archivist",
   username: "Archivist",
   displayName: "Archivist",
-  role: "Library Keeper",
+  role: "Archivist",
 };
 
-export const AVAILABLE_USER_PROFILES: UserAccountProfile[] = [
-  DEFAULT_USER_ACCOUNT,
-];
-
-export const DEMO_USER_ACCOUNT = DEFAULT_USER_ACCOUNT;
+export const AVAILABLE_USER_PROFILES: UserAccountProfile[] = [];
 
 export const DEFAULT_WORK_COVERS: Record<string, string> = {};
 

@@ -5,9 +5,11 @@
 import {
   Archive,
   BookOpen,
+  Clock,
   Compass,
   HardDrive,
   HelpCircle,
+  KeyRound,
   ListFilter,
   type LucideIcon,
   MessageSquare,
@@ -30,7 +32,7 @@ export interface NavItem {
 
 export const PRIMARY_NAV_ITEMS: NavItem[] = [
   { id: 'library', label: 'Library', href: '/', icon: BookOpen },
-  { id: 'return', label: 'Return Desk', href: '/return-desk', icon: RotateCcw },
+  { id: 'return', label: 'Up Next', href: '/up-next', icon: Clock },
   { id: 'radar', label: 'Radar', href: '/radar', icon: Radar },
   { id: 'shelf', label: 'Local Shelf', href: '/shelf', icon: HardDrive },
   { id: 'memory', label: 'Memory', href: '/memory', icon: MessageSquare },
@@ -41,6 +43,7 @@ export const SECONDARY_NAV_ITEMS: NavItem[] = [
   { id: 'friends', label: 'Friends & Shelves', href: '/friends', icon: Users },
   { id: 'categories', label: 'My Categories', href: '/categories', icon: Tag },
   { id: 'lists', label: 'Lists', href: '/lists', icon: ListFilter },
+  { id: 'keyring', label: 'Keyring & Portals', href: '/keyring', icon: KeyRound },
   { id: 'archive', label: 'Archive', href: '/archive', icon: Archive },
   { id: 'trash', label: 'Trash Bin', href: '/trash', icon: Trash2 },
   { id: 'discover', label: 'Discover', href: '/discover', icon: Compass },

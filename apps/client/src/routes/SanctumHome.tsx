@@ -441,8 +441,8 @@ export function SanctumHome({
 
   // User Account (Persists in localStorage so signed-up users never have to sign in again)
   const [currentUser, setCurrentUser] = React.useState<string>(() => {
-    if (typeof window === "undefined") return "Archivist";
-    return window.localStorage.getItem("cv:username") || "Archivist";
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem("cv:username") || "";
   });
   const [showSignUpModal, setShowSignUpModal] = React.useState(false);
   const [signUpInput, setSignUpInput] = React.useState("");
@@ -844,11 +844,19 @@ export function SanctumHome({
                   SANCTUM RESIDENCE · {activeRoom.name.toUpperCase()}
                 </div>
                 <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[var(--gm-text)] leading-tight">
-                  WELCOME, ARCHIVIST{" "}
-                  <span className="text-[var(--gm-accent-strong)]">{currentUser.toUpperCase()}</span>.
+                  {currentUser ? (
+                    <>
+                      WELCOME, ARCHIVIST{" "}
+                      <span className="text-[var(--gm-accent-strong)]">{currentUser.toUpperCase()}</span>.
+                    </>
+                  ) : (
+                    <>
+                      WELCOME TO <span className="text-[var(--gm-accent-strong)]">GRIMOIRE</span>.
+                    </>
+                  )}
                 </h1>
                 <p className="text-gm-xs sm:text-gm-sm text-[var(--gm-text-muted)] leading-relaxed max-w-xl">
-                  Your private reading sanctum and multimedia workstation are synchronized. Enter your room to browse your library shelves, chapter updates, and offline media.
+                  Your private offline fiction sanctum and multimedia workstation. All library shelves, chapter updates, and notes are stored strictly locally with zero server tracking.
                 </p>
               </div>
 
@@ -867,21 +875,39 @@ export function SanctumHome({
 
               {/* Account Switcher & Sign Up Bar */}
               <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-[var(--gm-text-muted)] pt-1 border-t border-[var(--gm-border)]">
-                <span>Active Profile: <strong className="text-[var(--gm-text)]">@{currentUser}</strong></span>
+                {currentUser ? (
+                  <span>Active Profile: <strong className="text-[var(--gm-text)]">@{currentUser}</strong></span>
+                ) : (
+                  <span>Status: <strong className="text-[var(--gm-accent-strong)]">No Profile Selected (Guest)</strong></span>
+                )}
                 <div className="flex items-center gap-2">
+                  {currentUser && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        window.localStorage.removeItem("cv:username");
+                        window.localStorage.removeItem("cv:auth_token");
+                        setCurrentUser("");
+                      }}
+                      className="border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-1 text-[10px] font-mono font-bold uppercase text-[var(--gm-danger)] hover:bg-[var(--gm-surface-hover)] shadow-[1px_1px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
+                      title="Log Out and Clear Current User Profile"
+                    >
+                      Log Out
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => setShowSignUpModal(true)}
                     className="border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-1 text-[10px] font-mono font-bold uppercase text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[1px_1px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
                   >
-                    Switch Account
+                    {currentUser ? "Switch Account" : "Set Username"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowSignUpModal(true)}
                     className="border border-[var(--gm-accent)] bg-[var(--gm-accent-muted)] px-2.5 py-1 text-[10px] font-mono font-bold uppercase text-[var(--gm-accent-strong)] hover:bg-[var(--gm-accent)] hover:text-[var(--gm-accent-fg)] shadow-[1px_1px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
                   >
-                    + Sign Up
+                    + New Profile
                   </button>
                 </div>
               </div>
@@ -1130,12 +1156,12 @@ export function SanctumHome({
                   {
                     icon: RotateCcw,
                     badge: "02 · HIATUS RECOVERY",
-                    title: "The Return Desk & 30-Second Memory Refresher",
+                    title: "Up Next & 30-Second Memory Refresher",
                     oldWay:
                       "After a 4-month break from a 300-chapter novel or series, you forget the cast—and Googling the wiki spoils major plot twists.",
                     betterWay:
-                      "The Return Desk surfaces stalled works and opens a spoiler-safe Memory Refresher Drawer showing YOUR own past quotes, theories, and character notes.",
-                    tryRoute: "/return-desk",
+                      "Up Next surfaces stalled works and opens a spoiler-safe Memory Refresher Drawer showing YOUR own past quotes, theories, and character notes.",
+                    tryRoute: "/up-next",
                   },
                   {
                     icon: Film,

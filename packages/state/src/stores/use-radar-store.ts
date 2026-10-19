@@ -114,95 +114,15 @@ function isStoredItem(value: unknown): value is RadarCaptureItem {
   );
 }
 
-const DEFAULT_RADAR_SEEDS: RadarCaptureItem[] = [
-  {
-    id: "radar-seed-1",
-    url: "https://asuracomic.net/series/omniscient-readers-viewpoint-chapter-220",
-    normalizedUrl: "https://asuracomic.net/series/omniscient-readers-viewpoint-chapter-220",
-    title: "Omniscient Reader's Viewpoint - Chapter 220 - Asura Scans",
-    browserSource: "chromium",
-    capturedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    state: "pending",
-    readerMetadata: {
-      estimatedChapter: 220,
-      detectedFormat: "manga",
-      author: "Sing Shong",
-    },
-    batchLabel: "Active Reading Tabs",
-  },
-  {
-    id: "radar-seed-2",
-    url: "https://mangadex.org/chapter/frieren-chapter-131",
-    normalizedUrl: "https://mangadex.org/chapter/frieren-chapter-131",
-    title: "Frieren: Beyond Journey's End - Chapter 131 - MangaDex",
-    browserSource: "chromium",
-    capturedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-    state: "pending",
-    readerMetadata: {
-      estimatedChapter: 131,
-      detectedFormat: "manga",
-      author: "Kanehito Yamada",
-    },
-    batchLabel: "Active Reading Tabs",
-  },
-  {
-    id: "radar-seed-3",
-    url: "https://mangadex.org/chapter/delicious-in-dungeon-chapter-97",
-    normalizedUrl: "https://mangadex.org/chapter/delicious-in-dungeon-chapter-97",
-    title: "Dungeon Meshi - Chapter 97 [END] - MangaDex",
-    browserSource: "firefox",
-    capturedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-    state: "matched",
-    matchedWorkId: "work-dungeon-meshi",
-    matchedWorkTitle: "Delicious in Dungeon",
-    matchConfidence: 0.98,
-    readerMetadata: {
-      estimatedChapter: 97,
-      detectedFormat: "manga",
-      author: "Ryoko Kui",
-    },
-    batchLabel: "Completed Manga Batch",
-  },
-  {
-    id: "radar-seed-4",
-    url: "https://tapas.io/episode/the-beginning-after-the-end-185",
-    normalizedUrl: "https://tapas.io/episode/the-beginning-after-the-end-185",
-    title: "The Beginning After The End - Episode 185 - Tapas",
-    browserSource: "chromium",
-    capturedAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-    state: "pending",
-    readerMetadata: {
-      estimatedChapter: 185,
-      detectedFormat: "webtoon",
-      author: "TurtleMe",
-    },
-    batchLabel: "Weekend Reading",
-  },
-  {
-    id: "radar-seed-5",
-    url: "https://webnovel.com/book/lord-of-mysteries-volume-2-chapter-214",
-    normalizedUrl: "https://webnovel.com/book/lord-of-mysteries-volume-2-chapter-214",
-    title: "Lord of the Mysteries - Vol 2 Chapter 214 - Webnovel",
-    browserSource: "edge",
-    capturedAt: new Date(Date.now() - 3600000 * 48).toISOString(),
-    state: "pending",
-    readerMetadata: {
-      estimatedVolume: 2,
-      estimatedChapter: 214,
-      detectedFormat: "novel",
-      author: "Cuttlefish That Loves Diving",
-    },
-    batchLabel: "Novels Staging",
-  },
-];
+const DEFAULT_RADAR_SEEDS: RadarCaptureItem[] = [];
 
 function loadItems(): { items: RadarCaptureItem[]; error: string | null } {
   if (typeof localStorage === "undefined") return { items: [], error: null };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw === null) {
-      persistItems(DEFAULT_RADAR_SEEDS);
-      return { items: DEFAULT_RADAR_SEEDS, error: null };
+      persistItems([]);
+      return { items: [], error: null };
     }
     const decoded: unknown = JSON.parse(raw);
     if (!Array.isArray(decoded) || !decoded.every(isStoredItem)) {

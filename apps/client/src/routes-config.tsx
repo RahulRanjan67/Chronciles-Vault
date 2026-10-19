@@ -64,14 +64,18 @@ const Friends = React.lazy(() =>
 const TrashBin = React.lazy(() =>
   import("./routes/TrashBin").then((module) => ({ default: module.TrashBin })),
 );
+const KeyringPortals = React.lazy(() =>
+  import("./routes/KeyringPortals").then((module) => ({ default: module.KeyringPortals })),
+);
 
 export { CommandPalette };
 
 export const APP_ROUTES: RouteDefinition[] = [
   { path: "/", name: "Library", tier: 0, component: Library },
   { path: "/library", name: "Library", tier: 0, component: Library },
-  { path: "/return-desk", name: "Return Desk", tier: 0, component: ReturnDesk },
-  { path: "/return", name: "Return Desk", tier: 0, component: ReturnDesk },
+  { path: "/up-next", name: "Up Next", tier: 0, component: ReturnDesk },
+  { path: "/return-desk", name: "Up Next", tier: 0, component: ReturnDesk },
+  { path: "/return", name: "Up Next", tier: 0, component: ReturnDesk },
   { path: "/work/:id", name: "Work Detail", tier: 1, component: WorkDetail },
   { path: "/library/:id", name: "Work Detail", tier: 1, component: WorkDetail },
   { path: "/radar", name: "Radar", tier: 1, component: Radar },
@@ -82,6 +86,8 @@ export const APP_ROUTES: RouteDefinition[] = [
   { path: "/lists", name: "Lists", tier: 2, component: Lists },
   { path: "/friends", name: "Friends & Shelves", tier: 2, component: Friends },
   { path: "/categories", name: "My Categories", tier: 2, component: Categories },
+  { path: "/keyring", name: "Keyring & Portals", tier: 2, component: KeyringPortals },
+  { path: "/portals", name: "Keyring & Portals", tier: 2, component: KeyringPortals },
   { path: "/discover", name: "Discover", tier: 2, component: Discover },
   { path: "/vault", name: "Private Vault", tier: 3, component: Vault },
   { path: "/archive", name: "Archive", tier: 3, component: Archive },

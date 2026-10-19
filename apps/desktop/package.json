@@ -1,0 +1,21 @@
+{
+  "name": "@grimoire/desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Grimoire Sovereign Reading Sanctum — Native Desktop Application (Tauri v2 + WebView2)",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "gui:start": "python ../../tools/windows/run_grimoire_gui.py"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-dialog": "^2.0.0",
+    "@tauri-apps/plugin-fs": "^2.0.0",
+    "@tauri-apps/plugin-shell": "^2.0.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}

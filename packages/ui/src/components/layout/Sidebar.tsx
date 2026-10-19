@@ -35,7 +35,8 @@ export function Sidebar({
 }: SidebarProps) {
   const isItemActive = (href: string) => {
     if (href === '/') return currentPath === '/' || currentPath === '/library';
-    if (href === '/return-desk') return currentPath === '/return-desk' || currentPath === '/return';
+    if (href === '/up-next' || href === '/return-desk') return currentPath === '/up-next' || currentPath === '/return-desk' || currentPath === '/return';
+    if (href === '/keyring') return currentPath === '/keyring' || currentPath === '/portals';
     return currentPath.startsWith(href);
   };
 
@@ -91,7 +92,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        'hidden md:flex flex-col w-[var(--gm-sidebar-width)] shrink-0 border-r border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] h-screen select-none sticky top-0 z-[var(--gm-z-sticky)]',
+        'hidden md:flex flex-col w-[var(--gm-sidebar-width)] shrink-0 border-r border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] h-full overflow-hidden select-none z-[var(--gm-z-sticky)]',
         className,
       )}
       {...props}
@@ -136,7 +137,8 @@ export function Sidebar({
       </div>
 
       {/* Bottom utilities: Help, Vault & Settings */}
-      <div className="p-3 border-t border-[var(--gm-border)] space-y-1">
+      {/* On large windows: maintain separate full destinations */}
+      <div className="hidden xl:block p-3 border-t border-[var(--gm-border)] space-y-1 shrink-0">
         <button
           type="button"
           onClick={() => onNavigate('/help')}
@@ -146,6 +148,7 @@ export function Sidebar({
               ? 'bg-[var(--gm-surface)] text-[var(--gm-text)] font-semibold shadow-xs'
               : 'text-[var(--gm-text-muted)] hover:bg-[var(--gm-surface)]/60 hover:text-[var(--gm-text)]',
           )}
+          title="Help & Guide"
         >
           <HelpCircle
             className={cn(
@@ -160,15 +163,14 @@ export function Sidebar({
 
         <button
           type="button"
-          onClick={() => {
-            onNavigate('/vault');
-          }}
+          onClick={() => onNavigate('/vault')}
           className={cn(
             'group flex w-full items-center justify-between rounded-cv px-2.5 py-2 text-gm-sm font-medium transition-colors select-none text-left cursor-pointer',
             isItemActive('/vault')
               ? 'bg-[var(--gm-surface)] text-[var(--gm-text)]'
               : 'text-[var(--gm-text-muted)] hover:bg-[var(--gm-surface)]/60 hover:text-[var(--gm-text)]',
           )}
+          title="Private Vault"
         >
           <div className="flex items-center gap-2.5 min-w-0">
             {isVaultUnlocked ? (
@@ -192,9 +194,56 @@ export function Sidebar({
               ? 'bg-[var(--gm-surface)] text-[var(--gm-text)]'
               : 'text-[var(--gm-text-muted)] hover:bg-[var(--gm-surface)]/60 hover:text-[var(--gm-text)]',
           )}
+          title="Settings"
         >
           <Settings className="h-4 w-4 text-[var(--gm-text-subtle)] group-hover:text-[var(--gm-text)] shrink-0" />
           <span className="truncate">Settings</span>
+        </button>
+      </div>
+
+      {/* On narrow screens / compact sidebar: configure utilities into icon buttons with hover tooltips */}
+      <div className="xl:hidden p-2 border-t border-[var(--gm-border)] flex items-center justify-around gap-1 shrink-0 bg-[var(--gm-bg-elevated)]">
+        <button
+          type="button"
+          onClick={() => onNavigate('/help')}
+          className={cn(
+            'p-2 rounded-gm-sm border border-[var(--gm-border)] transition-all cursor-pointer hover:bg-[var(--gm-surface)] hover:text-[var(--gm-text)]',
+            isItemActive('/help') ? 'bg-[var(--gm-surface)] text-[var(--gm-accent-strong)] border-[var(--gm-accent-strong)] shadow-xs' : 'text-[var(--gm-text-subtle)]'
+          )}
+          title="Help & Guide"
+          aria-label="Help & Guide"
+        >
+          <HelpCircle className="h-4 w-4" />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate('/vault')}
+          className={cn(
+            'p-2 rounded-gm-sm border border-[var(--gm-border)] transition-all cursor-pointer hover:bg-[var(--gm-surface)] hover:text-[var(--gm-text)]',
+            isItemActive('/vault') ? 'bg-[var(--gm-surface)] text-[var(--gm-accent-strong)] border-[var(--gm-accent-strong)] shadow-xs' : 'text-[var(--gm-text-subtle)]'
+          )}
+          title={isVaultUnlocked ? 'Private Vault (Unlocked)' : 'Private Vault (Locked)'}
+          aria-label="Private Vault"
+        >
+          {isVaultUnlocked ? (
+            <Unlock className="h-4 w-4 text-[var(--gm-warning)]" />
+          ) : (
+            <Lock className="h-4 w-4" />
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate('/settings')}
+          className={cn(
+            'p-2 rounded-gm-sm border border-[var(--gm-border)] transition-all cursor-pointer hover:bg-[var(--gm-surface)] hover:text-[var(--gm-text)]',
+            isItemActive('/settings') ? 'bg-[var(--gm-surface)] text-[var(--gm-accent-strong)] border-[var(--gm-accent-strong)] shadow-xs' : 'text-[var(--gm-text-subtle)]'
+          )}
+          title="Settings"
+          aria-label="Settings"
+        >
+          <Settings className="h-4 w-4" />
         </button>
       </div>
     </aside>

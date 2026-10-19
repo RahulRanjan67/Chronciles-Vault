@@ -5,6 +5,7 @@ import {
   FilePlus,
   HardDrive,
   HelpCircle,
+  KeyRound,
   LayoutGrid,
   Lock,
   MessageSquare,
@@ -50,8 +51,9 @@ const goTo = (href: string) => (ctx: CommandContext) => ctx.navigate(href);
 
 export const COMMAND_REGISTRY: CommandItem[] = [
   // Navigation
-  { id: "nav-return", title: "Go to Return Desk", category: "Navigation", icon: RotateCcw, keywords: ["return", "home", "continue", "desk"], action: goTo("/return-desk") },
+  { id: "nav-return", title: "Go to Up Next", category: "Navigation", icon: RotateCcw, keywords: ["up next", "return", "home", "continue", "desk", "queue"], action: goTo("/up-next") },
   { id: "nav-library", title: "Go to Library", category: "Navigation", icon: BookOpen, keywords: ["library", "books", "manga", "novels", "shelf"], action: goTo("/") },
+  { id: "nav-keyring", title: "Go to Keyring & Portals", category: "Navigation", icon: KeyRound, keywords: ["keyring", "passwords", "websites", "portals", "credentials", "logins"], action: goTo("/keyring") },
   { id: "nav-discover", title: "Go to Discover", category: "Navigation", icon: Compass, keywords: ["discover", "find", "search", "providers"], action: goTo("/discover") },
   { id: "nav-radar", title: "Go to Radar", category: "Navigation", icon: Radar, keywords: ["radar", "tracking", "detection", "releases"], action: goTo("/radar") },
   { id: "nav-updates", title: "Go to Updates Feed", category: "Navigation", icon: Sparkles, keywords: ["updates", "new", "chapters", "feed"], action: goTo("/updates") },

@@ -542,7 +542,7 @@ export function Library({ onNavigateWork }: LibraryProps) {
                 disabled={selectedIds.length === 0}
                 onClick={handleBulkDelete}
                 className="h-8 gap-1 text-gm-xs text-[var(--gm-danger)] hover:bg-[var(--gm-danger-muted)]"
-                title="Move selected to Return Desk"
+                title="Move selected to Trash"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>Delete</span>

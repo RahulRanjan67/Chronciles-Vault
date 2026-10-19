@@ -37,10 +37,13 @@ export function WorkspaceShell({
     try {
       localStorage.removeItem("cv:username");
       localStorage.removeItem("cv:auth_token");
+      localStorage.removeItem("grimoire:active_profile");
+      localStorage.removeItem("cv:current_room");
+      useVaultStore.getState().lock();
     } catch {}
     toast({
       title: "Logged Out",
-      description: "Archivist room exited and identity sealed.",
+      description: "Room exited, vault sealed, and identity unlinked.",
     });
     onOpenSanctumHome();
   }, [onOpenSanctumHome]);

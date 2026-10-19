@@ -64,35 +64,9 @@ interface PersistedNotebookData {
 }
 
 function createInitialNotebookSeed(): PersistedNotebookData {
-  const now = new Date().toISOString();
   return {
-    activatedWorkIds: ["work-orv", "work-lotm"],
-    entries: [
-      {
-        id: "nb-orv-1",
-        workId: "work-orv" as WorkId,
-        category: "theory",
-        title: "Secretive Plotter identity clues",
-        body: "Notice how Secretive Plotter reacts to every regression turn of Yoo Joonghyuk and knows details even Ways of Survival only hinted at.",
-        chapterHint: "Ch. 188",
-        pinned: true,
-        promotedMemoryId: null,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        id: "nb-lotm-1",
-        workId: "work-lotm" as WorkId,
-        category: "clue",
-        title: "Tarot Club Sequence Pathways tracker",
-        body: "Fool (Seer), Justice (Spectator), Hanged Man (Sailor), Sun (Bard) — keep track of potion acting principles.",
-        chapterHint: "Vol. 1",
-        pinned: true,
-        promotedMemoryId: null,
-        createdAt: now,
-        updatedAt: now,
-      },
-    ],
+    activatedWorkIds: [],
+    entries: [],
   };
 }
 
@@ -276,51 +250,7 @@ interface FandomLinksState {
 const FANDOM_STORAGE_KEY = "cv_fandom_links_v1";
 
 function createInitialFandomSeed(): FandomLink[] {
-  const now = new Date().toISOString();
-  return [
-    {
-      id: "fandom-orv-wiki",
-      workId: "work-orv" as WorkId,
-      communityName: "Omniscient Reader's Viewpoint Wiki",
-      provider: "fandom",
-      canonicalTitle: "Omniscient Reader's Viewpoint",
-      url: "https://omniscient-readers-viewpoint.fandom.com/wiki/Omniscient_Reader%27s_Viewpoint_Wiki",
-      language: "en",
-      isPreferred: true,
-      provenance: "manual",
-      lastCheckedAt: now,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      id: "fandom-lotm-wiki",
-      workId: "work-lotm" as WorkId,
-      communityName: "Lord of the Mysteries Wiki",
-      provider: "fandom",
-      canonicalTitle: "Lord of the Mysteries",
-      url: "https://lordofthemysteries.fandom.com/wiki/Lord_of_the_Mysteries_Wiki",
-      language: "en",
-      isPreferred: true,
-      provenance: "manual",
-      lastCheckedAt: now,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      id: "fandom-tog-wiki",
-      workId: "work-tog" as WorkId,
-      communityName: "Tower of God Wiki",
-      provider: "fandom",
-      canonicalTitle: "Tower of God",
-      url: "https://towerofgod.fandom.com/wiki/Tower_of_God_Wiki",
-      language: "en",
-      isPreferred: true,
-      provenance: "manual",
-      lastCheckedAt: now,
-      createdAt: now,
-      updatedAt: now,
-    },
-  ];
+  return [];
 }
 
 function loadFandomStorage(): FandomLink[] {
