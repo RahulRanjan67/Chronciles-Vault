@@ -1,6 +1,35 @@
 import os
 import json
 import zipfile
+import io
+from PIL import Image, ImageDraw
+
+def generate_cover_image(title: str, subtitle: str, bg_color: tuple, text_color: tuple = (255, 255, 255)) -> bytes:
+    img = Image.new("RGB", (600, 850), color=bg_color)
+    draw = ImageDraw.Draw(img)
+    draw.rectangle([20, 20, 580, 830], outline=text_color, width=3)
+    draw.rectangle([28, 28, 572, 822], outline=(100, 100, 120), width=1)
+    draw.text((300, 380), title, fill=text_color, anchor="mm")
+    draw.text((300, 440), subtitle, fill=(180, 180, 190), anchor="mm")
+    draw.text((300, 780), "GRIMOIRE ARCHIVES · SOVEREIGN SANCTUM", fill=(130, 130, 150), anchor="mm")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
+
+def generate_screenshot_image(feature_name: str, caption: str, accent_color: tuple) -> bytes:
+    img = Image.new("RGB", (1280, 720), color=(15, 17, 23))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle([0, 0, 1280, 50], fill=(25, 28, 38))
+    draw.ellipse([20, 18, 34, 32], fill=(239, 68, 68))
+    draw.ellipse([42, 18, 56, 32], fill=(245, 158, 11))
+    draw.ellipse([64, 18, 78, 32], fill=(16, 185, 129))
+    draw.text((640, 25), f"Grimoire — {feature_name}", fill=(200, 200, 200), anchor="mm")
+    draw.rectangle([60, 80, 1220, 680], fill=(24, 27, 36), outline=accent_color, width=2)
+    draw.text((100, 120), feature_name, fill=accent_color)
+    draw.text((100, 160), caption, fill=(210, 210, 220))
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
 
 root_dir = r"c:\Users\67rah\Desktop\Chronciles Vault"
 os.makedirs(root_dir, exist_ok=True)
@@ -197,13 +226,22 @@ z1_path = os.path.join(root_dir, "grimoire_sample_pack_1_xianxia_progression.zip
 with zipfile.ZipFile(z1_path, "w", zipfile.ZIP_DEFLATED) as z:
     z.writestr("archive.gca", json.dumps(pack1_data, indent=2))
     z.writestr("archive.json", json.dumps(pack1_data, indent=2))
+    z.writestr("covers/lotm_cover.png", generate_cover_image("Lord of the Mysteries", "Occult & Tarot Pathways", (26, 26, 46)))
+    z.writestr("covers/reverend_insanity.png", generate_cover_image("Reverend Insanity", "Perseverance & Gu Cultivation", (38, 20, 20)))
+    z.writestr("covers/cradle_unsouled.png", generate_cover_image("Cradle: Unsouled", "Sacred Arts & Progression", (15, 35, 45)))
+    z.writestr("screenshots/ss_01_lotm_tarot_notes.png", generate_screenshot_image("LotM — Tarot Club Notes", "Chapter 1380 · Character dossiers and potion formula notes", (236, 72, 153)))
+    z.writestr("screenshots/ss_02_reverend_insanity_quote.png", generate_screenshot_image("Reverend Insanity — Quote Memory", "Chapter 1285 · 'I had once screamed, gradually, I lost my voice...'", (239, 68, 68)))
     z.writestr(
         "README.txt",
         "Grimoire Sample Pack 1: Xianxia & Progression Fantasy Chronicles\n\n"
+        "Includes:\n"
+        "- archive.gca / archive.json (5 works, memories, reading access paths, curated lists)\n"
+        "- High-res cover images in covers/\n"
+        "- In-app reading & memory screenshots in screenshots/\n\n"
         "How to import:\n"
         "1. Open Grimoire -> Settings -> Data & Backup.\n"
         "2. In 'Restore & Import', select archive.gca or archive.json.\n"
-        "3. All 5 works, memories, reading access paths, and curated lists will load instantly into your local Sanctum!\n",
+        "3. All works, memories, and reading lists load instantly into your local Sanctum!\n",
     )
 print("Pack 1 created successfully:", z1_path)
 
@@ -381,9 +419,18 @@ z2_path = os.path.join(root_dir, "grimoire_sample_pack_2_manga_anime_chronicles.
 with zipfile.ZipFile(z2_path, "w", zipfile.ZIP_DEFLATED) as z:
     z.writestr("archive.gca", json.dumps(pack2_data, indent=2))
     z.writestr("archive.json", json.dumps(pack2_data, indent=2))
+    z.writestr("covers/frieren_cover.png", generate_cover_image("Frieren: Beyond Journey's End", "Epitaph of the Hero Party", (24, 43, 73)))
+    z.writestr("covers/dungeon_meshi.png", generate_cover_image("Delicious in Dungeon", "Ecology & Monster Gastronomy", (48, 32, 16)))
+    z.writestr("covers/berserk_deluxe.png", generate_cover_image("Berserk: Deluxe Edition", "The Black Swordsman Epic", (20, 20, 24)))
+    z.writestr("screenshots/ss_01_frieren_spells.png", generate_screenshot_image("Frieren — Spell Notebook", "Volume 4 · Grimoire collection scratchpad and notes", (99, 102, 241)))
+    z.writestr("screenshots/ss_02_berserk_quote.png", generate_screenshot_image("Berserk — Milestone Memory", "Eclipse Aftermath · Guts and the Brand of Sacrifice", (244, 63, 94)))
     z.writestr(
         "README.txt",
         "Grimoire Sample Pack 2: Manga & Anime Masterworks\n\n"
+        "Includes:\n"
+        "- archive.gca / archive.json (5 works, memories, reading access paths, curated lists)\n"
+        "- High-res cover images in covers/\n"
+        "- In-app reading & memory screenshots in screenshots/\n\n"
         "How to import:\n"
         "1. Open Grimoire -> Settings -> Data & Backup.\n"
         "2. In 'Restore & Import', select archive.gca.\n"
@@ -572,9 +619,18 @@ z3_path = os.path.join(root_dir, "grimoire_sample_pack_3_cyberpunk_scifi_omnisci
 with zipfile.ZipFile(z3_path, "w", zipfile.ZIP_DEFLATED) as z:
     z.writestr("archive.gca", json.dumps(pack3_data, indent=2))
     z.writestr("archive.json", json.dumps(pack3_data, indent=2))
+    z.writestr("covers/orv_cover.png", generate_cover_image("Omniscient Reader's Viewpoint", "Three Ways to Survive", (17, 24, 39)))
+    z.writestr("covers/tbate_cover.png", generate_cover_image("The Beginning After The End", "Aether Core & Dicathen Wars", (30, 27, 75)))
+    z.writestr("covers/neuromancer_cover.png", generate_cover_image("Neuromancer", "Chiba Sprawl & The Matrix", (12, 74, 96)))
+    z.writestr("screenshots/ss_01_orv_dokja_timeline.png", generate_screenshot_image("ORV — Scenario Timeline", "Scenario 46 · Character notes and regression timeline", (14, 165, 233)))
+    z.writestr("screenshots/ss_02_neuromancer_quote.png", generate_screenshot_image("Neuromancer — Cyberspace Memory", "Chiba Sprawl · 'The sky above the port was the color of television...'", (16, 185, 129)))
     z.writestr(
         "README.txt",
         "Grimoire Sample Pack 3: Cyberpunk, Sci-Fi & Meta-Fiction Chronicles\n\n"
+        "Includes:\n"
+        "- archive.gca / archive.json (5 works, memories, reading access paths, curated lists)\n"
+        "- High-res cover images in covers/\n"
+        "- In-app reading & memory screenshots in screenshots/\n\n"
         "How to import:\n"
         "1. Open Grimoire -> Settings -> Data & Backup.\n"
         "2. In 'Restore & Import', select archive.gca.\n"
