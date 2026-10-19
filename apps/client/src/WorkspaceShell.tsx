@@ -209,7 +209,7 @@ export function WorkspaceShell({
               type="button"
               onClick={onOpenFeaturesGuide}
               className="inline-flex h-8 sm:h-9 items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
-              title="Open 32-Feature Step-by-Step Encyclopedia"
+              title="Open Step-by-Step Feature Encyclopedia"
             >
               <Layers className="h-4 w-4 text-[var(--gm-accent-strong)]" />
               <span className="hidden lg:inline">Guide</span>

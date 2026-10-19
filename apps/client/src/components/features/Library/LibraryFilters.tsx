@@ -126,7 +126,12 @@ export function LibraryFilters({
               <SelectItem value="audiobook">Audiobook</SelectItem>
               <SelectItem value="fanfiction">Fanfiction</SelectItem>
               <SelectItem value="anime">Anime</SelectItem>
-              <SelectItem value="donghua">Donghua / Series</SelectItem>
+              <SelectItem value="donghua">Donghua / Animation</SelectItem>
+              <SelectItem value="movie">Movie</SelectItem>
+              <SelectItem value="cdrama">C-Drama</SelectItem>
+              <SelectItem value="kdrama">K-Drama</SelectItem>
+              <SelectItem value="jdrama">J-Drama</SelectItem>
+              <SelectItem value="series">TV Series</SelectItem>
               <SelectItem value="epub">EPUB / PDF</SelectItem>
             </SelectContent>
           </Select>
@@ -208,7 +213,12 @@ export function LibraryFilters({
                   <SelectItem value="audiobook">Audiobook</SelectItem>
                   <SelectItem value="fanfiction">Fanfiction</SelectItem>
                   <SelectItem value="anime">Anime</SelectItem>
-                  <SelectItem value="donghua">Donghua / Series</SelectItem>
+                  <SelectItem value="donghua">Donghua / Animation</SelectItem>
+                  <SelectItem value="movie">Movie</SelectItem>
+                  <SelectItem value="cdrama">C-Drama</SelectItem>
+                  <SelectItem value="kdrama">K-Drama</SelectItem>
+                  <SelectItem value="jdrama">J-Drama</SelectItem>
+                  <SelectItem value="series">TV Series</SelectItem>
                   <SelectItem value="epub">EPUB / PDF</SelectItem>
                 </SelectContent>
               </Select>

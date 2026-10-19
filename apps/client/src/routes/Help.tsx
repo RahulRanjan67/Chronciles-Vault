@@ -199,7 +199,7 @@ export function Help(_props: HelpProps) {
               Grimoire Manual
             </h1>
             <p className="text-gm-xs text-[var(--gm-text-muted)] max-w-xl">
-              Complete reference for 32 architectural features, keyboard hotkeys, and local-first privacy security.
+              Complete reference for architectural features, keyboard hotkeys, and local-first privacy security.
             </p>
           </div>
 
@@ -252,7 +252,7 @@ export function Help(_props: HelpProps) {
       </div>
 
       {/* ══════════════════════════════════════════════════════════
-          TAB 1 — 32 Features & Step-by-Step Guide
+          TAB 1 — Features & Step-by-Step Guide
       ═══════════════════════════════════════════════════════════ */}
       {activeTab === "features" && (
         <div className="rounded-gm-xl border border-[var(--gm-border)] overflow-hidden">

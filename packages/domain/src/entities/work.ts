@@ -26,6 +26,11 @@ export enum ContentType {
   CBZ = 'cbz',
   Audiobook = 'audiobook',
   Fanfiction = 'fanfiction',
+  Movie = 'movie',
+  CDrama = 'cdrama',
+  KDrama = 'kdrama',
+  JDrama = 'jdrama',
+  Series = 'series',
 }
 
 /**
