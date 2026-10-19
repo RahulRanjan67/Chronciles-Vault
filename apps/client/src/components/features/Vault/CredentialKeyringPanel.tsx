@@ -8,17 +8,19 @@ import {
   Globe,
   KeyRound,
   Plus,
+  Search,
   ShieldCheck,
   Star,
   Trash2,
 } from "lucide-react";
 import { Badge, Button, Input, toast } from "@grimoire/ui";
-import { useLibraryStore } from "@grimoire/state";
+import { clientRepository, useLibraryStore } from "@grimoire/state";
 
 export interface VaultCredential {
   readonly id: string;
   readonly siteName: string;
   readonly siteUrl: string;
+  readonly searchUrl?: string;
   readonly username: string;
   readonly password: string; // Stored securely while vault is active
   readonly notes?: string;
@@ -63,6 +65,7 @@ export function CredentialKeyringPanel() {
   const [showAddCred, setShowAddCred] = React.useState(false);
   const [siteName, setSiteName] = React.useState("");
   const [siteUrl, setSiteUrl] = React.useState("");
+  const [searchUrl, setSearchUrl] = React.useState("");
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [notes, setNotes] = React.useState("");
@@ -75,29 +78,42 @@ export function CredentialKeyringPanel() {
 
   // Auto-detect domains where user has >= 5 works in their library!
   const autoDetectedPortals = React.useMemo(() => {
-    const domainCounts: Record<string, { count: number; sampleTitle: string; sampleUrl: string }> = {};
+    const domainCounts: Record<string, { count: number; sampleTitle: string; sampleUrl: string; providerName: string }> = {};
 
-    for (const item of library.items) {
+    const items = clientRepository.getItems();
+    for (const item of items) {
       if (item.work.deletedAt) continue;
       for (const p of item.accessPaths) {
+        let domain = "";
+        let sampleUrl = "";
         const u = p.url ?? ("accessUrl" in p ? (p.accessUrl as string) : "");
         if (u && /^https?:\/\//i.test(u)) {
           try {
             const parsed = new URL(u);
             const host = parsed.hostname.replace(/^www\./, "");
             if (host) {
-              if (!domainCounts[host]) {
-                domainCounts[host] = {
-                  count: 0,
-                  sampleTitle: item.work.title,
-                  sampleUrl: `${parsed.protocol}//${parsed.hostname}`,
-                };
-              }
-              domainCounts[host].count += 1;
+              domain = host;
+              sampleUrl = `${parsed.protocol}//${parsed.hostname}`;
             }
           } catch {
             // ignore malformed URLs
           }
+        }
+        if (!domain && p.provider && p.provider !== "local_file" && p.provider !== "import") {
+          domain = p.provider.toLowerCase();
+          sampleUrl = `https://${domain}`;
+        }
+
+        if (domain) {
+          if (!domainCounts[domain]) {
+            domainCounts[domain] = {
+              count: 0,
+              sampleTitle: item.work.title,
+              sampleUrl: sampleUrl || `https://${domain}`,
+              providerName: p.provider || domain,
+            };
+          }
+          domainCounts[domain]!.count += 1;
         }
       }
     }
@@ -108,7 +124,7 @@ export function CredentialKeyringPanel() {
       if (meta.count >= 5) {
         frequent.push({
           id: `auto-${domain}`,
-          name: domain.split(".")[0]?.toUpperCase() ?? domain,
+          name: meta.providerName ? meta.providerName.toUpperCase() : domain,
           url: meta.sampleUrl,
           domain,
           isAutoDetected: true,
@@ -153,6 +169,7 @@ export function CredentialKeyringPanel() {
       id: `cred-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       siteName: siteName.trim(),
       siteUrl: siteUrl.trim() || (siteName.includes(".") ? `https://${siteName.trim()}` : ""),
+      searchUrl: searchUrl.trim() || undefined,
       username: username.trim(),
       password: password.trim(),
       notes: notes.trim() || undefined,
@@ -162,6 +179,7 @@ export function CredentialKeyringPanel() {
     saveCredentials([newCred, ...credentials]);
     setSiteName("");
     setSiteUrl("");
+    setSearchUrl("");
     setUsername("");
     setPassword("");
     setNotes("");
@@ -467,15 +485,27 @@ export function CredentialKeyringPanel() {
                 />
               </div>
             </div>
-            <div>
-              <label className="block text-[11px] font-bold text-[var(--gm-text-subtle)] mb-1">
-                Security Notes / Recovery Code (Optional)
-              </label>
-              <Input
-                placeholder="2FA backup codes, PIN, or reading notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="block text-[11px] font-bold text-[var(--gm-text-subtle)] mb-1">
+                  Search URL Template (Optional)
+                </label>
+                <Input
+                  placeholder="e.g. https://mangadex.org/search?q={query}"
+                  value={searchUrl}
+                  onChange={(e) => setSearchUrl(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-[var(--gm-text-subtle)] mb-1">
+                  Security Notes / Recovery Code (Optional)
+                </label>
+                <Input
+                  placeholder="2FA backup codes, PIN, or reading notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+              </div>
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t border-[var(--gm-border)]">
               <Button type="button" variant="ghost" size="sm" onClick={() => setShowAddCred(false)}>
@@ -573,6 +603,32 @@ export function CredentialKeyringPanel() {
                           <Copy className="h-3 w-3" />
                         </button>
                       </div>
+
+                      {cred.searchUrl && (
+                        <div className="flex items-center gap-1.5 font-mono bg-[var(--gm-bg-elevated)] px-2 py-0.5 border border-[var(--gm-border)]">
+                          <span className="text-[var(--gm-text-muted)]">Search:</span>
+                          <span className="text-[var(--gm-accent-strong)] truncate max-w-[180px]" title={cred.searchUrl}>
+                            {cred.searchUrl}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(cred.searchUrl!, "Search URL")}
+                            className="text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] transition-colors cursor-pointer ml-1"
+                            title="Copy Search URL"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
+                          <a
+                            href={cred.searchUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[var(--gm-accent-strong)] hover:underline ml-0.5"
+                            title="Open Search Page"
+                          >
+                            <Search className="h-3 w-3" />
+                          </a>
+                        </div>
+                      )}
 
                       {cred.notes && (
                         <span className="text-[11px] text-[var(--gm-text-muted)] italic">

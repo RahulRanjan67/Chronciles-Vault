@@ -222,7 +222,7 @@ export function DataTransferPanel() {
         contentType: work.contentType,
         genres: work.genres,
         tags: work.tags,
-        privacyState: work.privacyState === "private" ? "private" : "public",
+        privacyState: work.privacyState === "vault" ? "vault" : work.privacyState === "private" ? "private" : "public",
         description: work.description,
         accessUrl: (work.accessPaths.find((path) => path.isPreferred) ?? work.accessPaths[0])?.url ?? null,
         sourceLine: 0,
@@ -291,6 +291,29 @@ export function DataTransferPanel() {
     try {
       if (preview.kind === "backup") {
         const result = applyBackupImport(preview.snapshot, preview.plannedIds);
+        const anySnapshot = preview.snapshot as unknown as { categories?: unknown[]; credentials?: unknown[] };
+        if (typeof window !== "undefined" && Array.isArray(anySnapshot.categories) && anySnapshot.categories.length > 0) {
+          try {
+            const rawStored = window.localStorage.getItem("cv:custom_categories:v1");
+            const existingCategories: any[] = rawStored ? JSON.parse(rawStored) : [];
+            const existingIds = new Set(existingCategories.map((c) => c.id));
+            const newCats = (anySnapshot.categories as any[]).filter((c) => !existingIds.has(c.id));
+            if (newCats.length > 0) {
+              window.localStorage.setItem("cv:custom_categories:v1", JSON.stringify([...existingCategories, ...newCats]));
+            }
+          } catch {}
+        }
+        if (typeof window !== "undefined" && Array.isArray(anySnapshot.credentials) && anySnapshot.credentials.length > 0) {
+          try {
+            const rawCreds = window.localStorage.getItem("grimoire:vault:credentials");
+            const existingCreds: any[] = rawCreds ? JSON.parse(rawCreds) : [];
+            const existingIds = new Set(existingCreds.map((c) => c.id));
+            const newCreds = (anySnapshot.credentials as any[]).filter((c) => !existingIds.has(c.id));
+            if (newCreds.length > 0) {
+              window.localStorage.setItem("grimoire:vault:credentials", JSON.stringify([...existingCreds, ...newCreds]));
+            }
+          } catch {}
+        }
         toast({
           title: "Backup imported",
           description: `${result.worksCreated} works, ${result.memoriesCreated} notes, ${result.relationsCreated} relations, ${result.listsRestored} lists. Duplicates were skipped.`,

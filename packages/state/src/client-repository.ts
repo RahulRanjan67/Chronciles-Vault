@@ -351,6 +351,150 @@ export class ClientRepository {
     this.saveToStorage();
   }
 
+  public clear(): void {
+    this.resetToDefaultSeed();
+  }
+
+  public importData(rawInput: unknown): { worksCount: number; memoriesCount: number; user?: string } {
+    let payload: any = rawInput;
+    if (typeof payload === "string") {
+      try {
+        payload = JSON.parse(payload);
+      } catch {
+        throw new Error("Invalid JSON file content");
+      }
+    }
+
+    if (!payload || typeof payload !== "object") {
+      throw new Error("Import archive is empty or invalid");
+    }
+
+    let detectedUser: string | undefined = undefined;
+    if (payload.account?.username) detectedUser = String(payload.account.username);
+    else if (payload.user?.username) detectedUser = String(payload.user.username);
+    else if (typeof payload.account === "string") detectedUser = payload.account;
+    else if (typeof payload.username === "string") detectedUser = payload.username;
+    else if (payload.profile?.username) detectedUser = String(payload.profile.username);
+
+    let worksCount = 0;
+    let memoriesCount = 0;
+
+    // Format A: Direct array of HydratedWorkItem
+    if (Array.isArray(payload)) {
+      for (const item of payload) {
+        if (item && item.work && item.work.id) {
+          this.items.set(item.work.id, item);
+          worksCount++;
+          if (Array.isArray(item.memories)) {
+            memoriesCount += item.memories.length;
+          }
+        }
+      }
+    } else {
+      // Format B: Snapshot / Object with works, memories, relations
+      const worksList = Array.isArray(payload.works)
+        ? payload.works
+        : Array.isArray(payload.items)
+        ? payload.items
+        : [];
+
+      for (const w of worksList) {
+        if (!w) continue;
+        if (w.work && w.work.id) {
+          this.items.set(w.work.id, w);
+          worksCount++;
+          if (Array.isArray(w.memories)) {
+            memoriesCount += w.memories.length;
+          }
+        } else if (w.id && w.title) {
+          const workId = w.id as WorkId;
+          const workObj: Work = {
+            id: workId,
+            title: String(w.title),
+            alternativeTitles: Array.isArray(w.alternativeTitles) ? w.alternativeTitles : [],
+            aliases: Array.isArray(w.aliases) ? w.aliases : [],
+            description: w.description ?? null,
+            contentType: (w.contentType as ContentType) || ContentType.WebNovel,
+            origin: (w.origin as ContentOrigin) || ContentOrigin.Unknown,
+            publicationState: (w.publicationState as PublicationState) || PublicationState.Unknown,
+            privacyState: (w.privacyState as PrivacyState) || PrivacyState.Public,
+            coverRef: w.coverRef ?? null,
+            genres: Array.isArray(w.genres) ? w.genres : [],
+            tags: Array.isArray(w.tags) ? w.tags : [],
+            externalIds: Array.isArray(w.externalIds) ? w.externalIds : [],
+            createdAt: w.createdAt ?? new Date().toISOString(),
+            updatedAt: w.updatedAt ?? new Date().toISOString(),
+            deletedAt: null,
+          };
+
+          const paths: AccessPath[] = Array.isArray(w.accessPaths)
+            ? w.accessPaths.map((p: any) => ({
+                id: (p.id ?? newId()) as AccessPathId,
+                workId,
+                kind: (p.kind as AccessPathKind) ?? AccessPathKind.Web,
+                label: p.label ?? "Source",
+                url: p.url ?? "",
+                provider: p.provider ?? "import",
+                isPreferred: Boolean(p.isPreferred),
+                health: (p.health as SourceHealth) ?? SourceHealth.Unknown,
+                capabilities: p.capabilities ?? [AccessCapability.Read],
+                provenance: p.provenance ?? null,
+                lastOpenedAt: p.lastOpenedAt ?? null,
+              }))
+            : [];
+
+          this.items.set(workId, {
+            work: workObj,
+            relationship: w.relationship,
+            accessPaths: paths,
+            latestProgress: w.latestProgress,
+            memories: [],
+            updates: [],
+          });
+          worksCount++;
+        }
+      }
+
+      // Memories
+      if (Array.isArray(payload.memories)) {
+        for (const m of payload.memories) {
+          if (m && m.workId && this.items.has(m.workId)) {
+            const target = this.items.get(m.workId)!;
+            if (!target.memories.some((existing) => existing.id === m.id)) {
+              target.memories.push(m);
+              memoriesCount++;
+            }
+          }
+        }
+      }
+
+      // Relations
+      if (Array.isArray(payload.relations)) {
+        for (const r of payload.relations) {
+          if (r && r.id) {
+            this.workRelations.set(r.id, r);
+          }
+        }
+      }
+
+      // Archive Records
+      if (Array.isArray(payload.archiveRecords)) {
+        for (const ar of payload.archiveRecords) {
+          if (ar && ar.id) {
+            this.archiveRecords.set(ar.id, ar);
+          }
+        }
+      }
+    }
+
+    this.saveToStorage();
+    return {
+      worksCount,
+      memoriesCount,
+      user: detectedUser,
+    };
+  }
+
 
   // Reading relationship operations
   public updatePersonalState(

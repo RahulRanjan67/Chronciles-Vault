@@ -13,8 +13,18 @@ import subprocess
 from pathlib import Path
 from http.server import ThreadingHTTPServer
 
-TOOLS_DIR = Path(__file__).resolve().parent
-REPO_ROOT = TOOLS_DIR.parent.parent
+if getattr(sys, "frozen", False):
+    EXE_DIR = Path(sys.executable).resolve().parent
+    if (EXE_DIR / "ChroniclesVault-Windows-Installer").exists():
+        REPO_ROOT = EXE_DIR
+    elif (EXE_DIR.parent / "ChroniclesVault-Windows-Installer").exists():
+        REPO_ROOT = EXE_DIR.parent
+    else:
+        REPO_ROOT = Path(r"c:\Users\67rah\Desktop\Chronciles Vault")
+else:
+    TOOLS_DIR = Path(__file__).resolve().parent
+    REPO_ROOT = TOOLS_DIR.parent.parent
+
 INSTALLER_DIR = REPO_ROOT / "ChroniclesVault-Windows-Installer"
 PORT = 47920
 

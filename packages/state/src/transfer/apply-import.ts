@@ -79,7 +79,7 @@ function workParamsFor(input: {
   contentType: string | null;
   genres: readonly string[];
   tags: readonly string[];
-  privacyState: "public" | "private";
+  privacyState: "public" | "private" | "vault";
   aliases?: readonly string[];
   origin?: string;
   publicationState?: string;
@@ -98,9 +98,11 @@ function workParamsFor(input: {
       PublicationState.Unknown,
     ),
     privacyState:
-      input.privacyState === "private"
-        ? PrivacyState.Private
-        : PrivacyState.Public,
+      input.privacyState === "vault"
+        ? PrivacyState.Vault
+        : input.privacyState === "private"
+          ? PrivacyState.Private
+          : PrivacyState.Public,
     coverRef: input.coverRef ?? null,
     externalIds: [],
     genres: [...input.genres],
@@ -208,9 +210,11 @@ export function applyBackupImport(
       title: memory.title,
       body: memory.body,
       privacyState:
-        memory.privacyState === "private"
-          ? PrivacyState.Private
-          : PrivacyState.Public,
+        memory.privacyState === "vault"
+          ? PrivacyState.Vault
+          : memory.privacyState === "private"
+            ? PrivacyState.Private
+            : PrivacyState.Public,
       spoilerLevel: oneOf(
         SpoilerLevel,
         memory.spoilerLevel,
@@ -300,7 +304,12 @@ function restoreWork(repo: ClientRepository, work: BackupWork): Work {
       contentType: work.contentType,
       genres: work.genres,
       tags: work.tags,
-      privacyState: work.privacyState === "private" ? "private" : "public",
+      privacyState:
+        work.privacyState === "vault"
+          ? "vault"
+          : work.privacyState === "private"
+            ? "private"
+            : "public",
       aliases: work.aliases,
       origin: work.origin,
       publicationState: work.publicationState,

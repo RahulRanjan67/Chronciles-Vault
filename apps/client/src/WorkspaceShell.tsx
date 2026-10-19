@@ -1,5 +1,5 @@
 import * as React from "react";
-import { DoorOpen, Layers, Lock, LogOut, RefreshCw, Unlock } from "lucide-react";
+import { DoorOpen, KeyRound, Layers, Lock, LogOut, RefreshCw, Unlock, X } from "lucide-react";
 import { AppShell, toast, ThemeSwitcher } from "@grimoire/ui";
 import { matchRoute } from "./router";
 import { TermsAndConditions } from "./components/features/TermsAndConditions/TermsAndConditions";
@@ -13,6 +13,7 @@ import {
 import { useVaultAutoLock, useVaultStore } from "@grimoire/vault";
 import { APP_ROUTES, CommandPalette } from "./routes-config";
 import { syncWithCrossPlatformHub } from "./utils/cross-platform-sync";
+import { CredentialKeyringPanel } from "./components/features/Vault/CredentialKeyringPanel";
 
 export interface WorkspaceShellProps {
   currentPath: string;
@@ -28,6 +29,7 @@ export function WorkspaceShell({
   onOpenFeaturesGuide,
 }: WorkspaceShellProps) {
   const [commandPaletteOpen, setCommandPaletteOpen] = React.useState(false);
+  const [showPortalsModal, setShowPortalsModal] = React.useState(false);
   const [termsAccepted, setTermsAccepted] = React.useState(false);
   const [isSyncing, setIsSyncing] = React.useState(false);
   const isVaultUnlocked = useVaultStore((state) => state.status === "unlocked");
@@ -39,7 +41,12 @@ export function WorkspaceShell({
       localStorage.removeItem("cv:auth_token");
       localStorage.removeItem("grimoire:active_profile");
       localStorage.removeItem("cv:current_room");
+      localStorage.removeItem("cv:local_vault:v1");
+      localStorage.removeItem("cv:archive_records:v1");
+      localStorage.removeItem("cv:work_relations:v1");
       useVaultStore.getState().lock();
+      clientRepository.clear();
+      useLibraryStore.getState().refresh();
     } catch {}
     toast({
       title: "Logged Out",
@@ -207,6 +214,15 @@ export function WorkspaceShell({
               <Layers className="h-4 w-4 text-[var(--gm-accent-strong)]" />
               <span className="hidden lg:inline">Guide</span>
             </button>
+            <button
+              type="button"
+              onClick={() => setShowPortalsModal(true)}
+              className="inline-flex h-8 sm:h-9 items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
+              title="Reading Portals & Website Credential Manager"
+            >
+              <KeyRound className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+              <span className="hidden md:inline">Portals</span>
+            </button>
             <ThemeSwitcher />
             <button
               type="button"
@@ -246,6 +262,32 @@ export function WorkspaceShell({
               }}
             />
           </React.Suspense>
+        )}
+
+        {showPortalsModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
+            <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-gm-xl border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg)] p-6 shadow-2xl">
+              <div className="flex items-center justify-between pb-4 border-b border-[var(--gm-border)] mb-6">
+                <div>
+                  <h2 className="text-gm-lg font-extrabold text-[var(--gm-text)]">
+                    Reading Portals &amp; Website Credential Manager
+                  </h2>
+                  <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5">
+                    Store logins, passwords, search URLs, and view auto-curated reading sites.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPortalsModal(false)}
+                  className="rounded-cv p-1.5 text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:bg-[var(--gm-surface)] transition-colors cursor-pointer"
+                  title="Close Portals Modal"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <CredentialKeyringPanel />
+            </div>
+          </div>
         )}
       </AppShell>
     </>

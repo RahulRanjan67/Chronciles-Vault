@@ -147,8 +147,8 @@ export function serializeBackup(snapshot: BackupSnapshot): string {
 
 export type ParseResult<T> = { readonly ok: true; readonly value: T } | { readonly ok: false; readonly errors: readonly string[] };
 
-const WORK_PRIVACY = new Set(["public", "private"]);
-const MEMORY_PRIVACY = new Set(["public", "private"]);
+const WORK_PRIVACY = new Set(["public", "private", "vault"]);
+const MEMORY_PRIVACY = new Set(["public", "private", "vault"]);
 
 export function parseBackup(text: string): ParseResult<BackupSnapshot> {
   const errors: string[] = [];
@@ -322,7 +322,7 @@ export interface CandidateWork {
   readonly contentType: string | null;
   readonly genres: readonly string[];
   readonly tags: readonly string[];
-  readonly privacyState: "public" | "private";
+  readonly privacyState: "public" | "private" | "vault";
   readonly description: string | null;
   readonly accessUrl: string | null;
   readonly sourceLine: number;

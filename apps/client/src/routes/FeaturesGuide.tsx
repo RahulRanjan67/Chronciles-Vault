@@ -2,7 +2,6 @@ import * as React from "react";
 import {
   ArrowLeft,
   BookOpen,
-  Camera,
   Check,
   CheckCircle2,
   ChevronDown,
@@ -14,29 +13,30 @@ import {
   Filter,
   FolderKanban,
   GitMerge,
+  Globe,
   HardDrive,
+  HelpCircle,
   Image as ImageIcon,
+  KeyRound,
   Layers,
-  ListChecks,
   Lock,
   Maximize2,
   MessageSquare,
+  Monitor,
   Palette,
   Play,
   Radar,
   RotateCcw,
   Search,
   Shield,
+  Smartphone,
   Sparkles,
-  Trash2,
-  Upload,
   X,
   Zap,
 } from "lucide-react";
 
 export interface FeatureStepItem {
   readonly id: string;
-  readonly number: string;
   readonly category:
     | "room-themes"
     | "library-views"
@@ -58,32 +58,65 @@ export interface FeatureStepItem {
   readonly wireframeHighlights: readonly string[];
 }
 
+export interface FaqItem {
+  readonly id: string;
+  readonly category:
+    | "Account & Profiles"
+    | "Security & Privacy"
+    | "Readers & Media"
+    | "Adaptations & Graph"
+    | "Notes vs Memories"
+    | "Portals & Passwords"
+    | "Data & Portability"
+    | "Platforms & Storage";
+  readonly question: string;
+  readonly answer: string;
+  readonly highlights: readonly string[];
+}
+
 const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
-  // 1. SANCTUM ROOMS & THEMES
+  // 1. SANCTUM ROOM & ATMOSPHERIC THEMES
   {
     id: "room-preloader-profiles",
-    number: "01",
     category: "room-themes",
     categoryLabel: "Sanctum Room & Themes",
-    title: "Interactive Sanctum Room Preloader & User Room Profiles",
-    subtitle: "Instant-load architectural reading room with background session hydration & profile switching.",
+    title: "Interactive Sanctum Room Preloader & Atmospheric Desk Lamp",
+    subtitle: "Instant-load architectural reading room with background session hydration and kinetic desk lighting.",
     whyItMatters:
-      "Your 'Room' is your personal reading profile and sanctuary. Instead of staring at a blank white spinner while thousands of chapters hydrate, the Room opens in <30ms with interactive 3D lighting while your session loads in the background.",
+      "Your Room is your personal reading sanctuary. Instead of staring at a blank white spinner while thousands of chapters hydrate, the Room opens in under 30ms with interactive 3D lighting while your session loads smoothly in the background.",
     routePath: "/home",
     shortcutOrBadge: "Homepage / Lobby",
     steps: [
       "Open Grimoire to land immediately inside the animated Sanctum Room lobby.",
       "Move your cursor across the room to tilt the 3D bookshelves and aim the volumetric desk lamp.",
       "Click the Desk Lamp shade to cycle warm ambient light intensity while background hydration completes.",
-      "Use the 'Active Room Profile' switcher to switch between profiles (e.g., Main Sanctum, Night Xianxia Study, Manga Lounge) or create a custom Room profile.",
-      "Click 'Enter My Room ✦' (or press Enter) once the counter hits 100% to trigger the iris clip-path reveal into your workspace.",
+      "Use the Active Room Profile switcher to switch between profiles or create a custom room profile.",
+      "Click 'Enter My Room' (or press Enter) once hydration completes to trigger the iris reveal into your workspace.",
     ],
-    screenshotCaption: "Screenshot #01: Sanctum Room Homepage with 3D Bookshelf Stage, Room Profile Switcher & 'Enter My Room' CTA.",
-    wireframeHighlights: ["3D Parallax Bookshelves", "00% → 100% Kinetic Telemetry", "Room Profile Selector", "Enter My Room CTA"],
+    screenshotCaption: "Sanctum Room Homepage with 3D Bookshelf Stage, Room Profile Switcher and Enter My Room CTA.",
+    wireframeHighlights: ["3D Parallax Bookshelves", "00% to 100% Kinetic Telemetry", "Room Profile Selector", "Enter My Room CTA"],
+  },
+  {
+    id: "multi-profile-reading-rooms",
+    category: "room-themes",
+    categoryLabel: "Sanctum Room & Themes",
+    title: "Multi-Profile Reading Room Switcher & Custom Sanctum Creator",
+    subtitle: "Maintain independent isolated reading environments for light fiction, scholarly research, or midnight binges.",
+    whyItMatters:
+      "Avoid mixing work-related technical PDF documentation with escapist Korean cultivation novels. Each room preserves its own theme, active shelf state, and focal accent.",
+    routePath: "/home",
+    shortcutOrBadge: "Lobby Switcher",
+    steps: [
+      "From the Sanctum Title Screen, click the Room dropdown in the top control bar.",
+      "Select an existing room profile or click '+ Create Room Profile'.",
+      "Assign a custom room title, personal motto, and aesthetic theme preference.",
+      "Enter the room—all workspace filters and layout preferences isolate to this room profile.",
+    ],
+    screenshotCaption: "Room Profile Selector modal with custom title, aesthetic motto, and theme assignment.",
+    wireframeHighlights: ["Independent Room Profiles", "Custom Motto & Title", "Per-Profile Layout Cache"],
   },
   {
     id: "three-distinct-themes",
-    number: "02",
     category: "room-themes",
     categoryLabel: "Sanctum Room & Themes",
     title: "Three Hand-Crafted Atmospheric Themes (Zero Color Bleed)",
@@ -98,513 +131,786 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Select 'Parchment & Ink' for warm sunlit vellum paper, burnt sienna accents, and espresso ink typography.",
       "Select 'Blossom Ascendant' for velvet wine-rose nights, sakura coral-pink highlights, and imperial gold accents (strictly warm, zero cold blue).",
     ],
-    screenshotCaption: "Screenshot #02: Theme Switcher dropdown & side-by-side comparison of Midnight Arcana, Parchment & Ink, and Blossom Ascendant.",
+    screenshotCaption: "Theme Switcher dropdown and side-by-side comparison of Midnight Arcana, Parchment & Ink, and Blossom Ascendant.",
     wireframeHighlights: ["Midnight Arcana (#060913)", "Parchment & Ink (#f7f1e3)", "Blossom Ascendant (#1c070e)", "Per-Theme Cover Palettes"],
   },
   {
-    id: "performance-profiles",
-    number: "03",
+    id: "iris-clip-path-reveal",
     category: "room-themes",
     categoryLabel: "Sanctum Room & Themes",
-    title: "Adaptive Performance Profiles (Full / Balanced / Lite)",
-    subtitle: "Control GPU glass blur, shadow depth, motion duration, and row virtualization buffers.",
+    title: "Iris Clip-Path Workspace Reveal & Fullscreen Zen Mode",
+    subtitle: "Cinematic circular portal transition from the Sanctum title screen into your library, with F11 Zen mode.",
     whyItMatters:
-      "Keeps scrolling at a locked 60–120 FPS even on battery-saving laptops or mobile devices with 5,000+ works.",
-    routePath: "/settings",
-    shortcutOrBadge: "Settings → Performance",
+      "Creates an immersive boundary between the distraction-heavy desktop OS and your tranquil reading haven.",
+    routePath: "/home",
+    shortcutOrBadge: "Enter Room / F11",
     steps: [
-      "Navigate to Settings from the left Sidebar or mobile 'More' menu.",
-      "Locate the Performance Profile selector.",
-      "Choose 'Full' for maximum backdrop-blur glassmorphism and 80-item virtualization buffers.",
-      "Choose 'Lite' to disable backdrop filters, collapse multi-layer shadows, and zero out transition latency.",
+      "Click 'Enter My Room' on the Title Screen to witness the concentric iris expander transition.",
+      "Press F11 at any time while reading to enter borderless distraction-free Zen mode.",
+      "Header and navigation bars smoothly slide away, maximizing content visibility and typographic elegance.",
     ],
-    screenshotCaption: "Screenshot #03: Settings Performance Profile selector showing Full, Balanced, and Lite modes.",
-    wireframeHighlights: ["GPU Blur Toggle", "Virtual Buffer Sizing", "Zero-Latency Lite Mode"],
+    screenshotCaption: "Iris clip-path circular reveal expanding outward from the desk lamp focal center.",
+    wireframeHighlights: ["GPU Radial Mask", "Zero Screen Jitter", "Borderless F11 Zen Mode"],
   },
   {
-    id: "global-command-palette",
-    number: "04",
+    id: "three-way-first-time-landing",
     category: "room-themes",
     categoryLabel: "Sanctum Room & Themes",
-    title: "Global Command Palette & Keyboard Navigation",
-    subtitle: "Jump to any Work, route, theme, or quick action without touching the mouse.",
+    title: "Three-Way First-Time Landing Portal: Sign Up, Sign In, or Import .gca",
+    subtitle: "Clean entry architecture with zero default seed clutter for fresh visitors and returning readers.",
     whyItMatters:
-      "Power readers can search their entire library, create a new Work, or lock their Private Vault in under 1 second.",
-    routePath: "/",
-    shortcutOrBadge: "Ctrl+K / Cmd+K",
+      "New visitors are never surprised by demo accounts or mock libraries. You choose immediately whether to start a brand new profile, sign in, or restore a full .gca archive.",
+    routePath: "/home",
+    shortcutOrBadge: "First-Time Landing UI",
     steps: [
-      "Press Ctrl+K (or Cmd+K on macOS) from anywhere in the app, or click the search command button in the top header.",
-      "Type any Work title, creator name, route name (e.g. 'Return Desk', 'Vault'), or action ('New Work').",
-      "Use Up/Down arrow keys and press Enter to execute or navigate immediately.",
-      "Press Ctrl+Shift+L at any time to emergency-lock the Private Vault.",
+      "Arrive at the Sanctum Lobby as a first-time or logged-out reader.",
+      "Choose from the three prominent styled entry cards: Sign Up, Sign In, or Import .gca File.",
+      "Card 1 (Sign Up): Choose your username, optional email ID, theme, or click 'Continue with Google'.",
+      "Card 2 (Sign In): Pick any saved local profile or enter your existing credentials.",
+      "Card 3 (Import .gca): Drop your backup archive to restore your complete library and jump straight into your room.",
     ],
-    screenshotCaption: "Screenshot #04: Global Command Palette modal filtering Works, Routes, and Quick Actions.",
-    wireframeHighlights: ["Instant Fuzzy Search", "Keyboard Arrow Navigation", "Quick Create Work Trigger"],
+    screenshotCaption: "Three-Way Landing Screen with Sign Up, Sign In, and Import .gca File cards.",
+    wireframeHighlights: ["3 Distinct Styled Cards", "Zero Demo User Fallbacks", "1-Click .gca Drag & Drop"],
+  },
+  {
+    id: "multi-provider-authentication",
+    category: "room-themes",
+    categoryLabel: "Sanctum Room & Themes",
+    title: "Multi-Provider Authentication: Local Identity, Email ID & Google Sign-In",
+    subtitle: "Flexible account creation supporting offline zero-telemetry profiles as well as cloud-synced accounts.",
+    whyItMatters:
+      "Choose the exact balance of convenience and privacy you desire: 100% offline anonymous room profiles or synchronized Google/Email login.",
+    routePath: "/home",
+    shortcutOrBadge: "Sign In / Sign Up Modal",
+    steps: [
+      "Click 'Sign Up' or 'Sign In' from the Sanctum landing portal.",
+      "Select 'Continue with Google' for one-click seamless identity integration.",
+      "Alternatively, enter your Email ID and secure password for traditional credential management.",
+      "Or simply pick a local nickname for a purely offline, zero-network sovereign vault identity.",
+    ],
+    screenshotCaption: "Authentication modal displaying Google Sign-In button, Email ID fields, and Local Offline Mode toggle.",
+    wireframeHighlights: ["Continue with Google Button", "Email ID Validation", "Local Offline Identity"],
   },
 
-  // 2. LIBRARY & CATALOG VIEWS
+  // 2. CORE LIBRARY & DUAL PERSPECTIVES
   {
-    id: "library-four-view-modes",
-    number: "05",
+    id: "library-grid-shelf",
     category: "library-views",
-    categoryLabel: "Library & Catalog Views",
-    title: "Four Library View Modes (Grid, Compact, Table & Kanban Board)",
-    subtitle: "Switch seamlessly between cover-art galleries, high-density spreadsheets, and status columns.",
+    categoryLabel: "Library & Shelves",
+    title: "Dual Perspective: Adaptive Cover Grid & Wooden Bookshelf View",
+    subtitle: "Toggle between a fluid responsive cover grid and an architectural wooden bookshelf with realistic spine heights.",
     whyItMatters:
-      "Browse visually by cover art in Grid mode, audit 50 titles at once in Table mode, or drag-manage your reading pipeline in Kanban Board mode.",
+      "Grid view is optimized for rapid multi-column scanning across hundreds of titles, while Shelf view recreates the visceral sensation of standing before your real physical bookcase.",
     routePath: "/library",
-    shortcutOrBadge: "Library Top-Right Toggle",
+    shortcutOrBadge: "Ctrl+1 (Grid) / Ctrl+2 (Shelf)",
     steps: [
-      "Open the Library route (/library).",
-      "Click the View Mode toggle group in the top-right filter bar.",
-      "Select 'Grid' for rich cover cards with progress bars, status chips, and hover 'Continue' buttons.",
-      "Select 'Compact' for high-density 8-column cover thumbnails.",
-      "Select 'Table' for a structured row layout showing exact chapter anchors, health dots, and relative timestamps.",
-      "Select 'Board' to group all Works into vertical columns by Personal State (Reading, Waiting, Stalled, Planned, Completed).",
+      "Open your Library (/library).",
+      "Use the View Toggle in the top toolbar to switch between Grid View and Shelf View.",
+      "In Shelf View, notice dynamic spine thicknesses reflecting work chapter counts and realistic oak shelf lighting.",
+      "Hover over any cover or spine to reveal the floating Quick-Action HUD.",
     ],
-    screenshotCaption: "Screenshot #05: Library View Toggle switching between Grid, Compact, Table, and Kanban Board layouts.",
-    wireframeHighlights: ["Virtualized Cover Grid", "8-Col Compact Shelf", "Tabular Audit Rows", "Kanban Status Columns"],
+    screenshotCaption: "Library Shelf View showing oak wood grain shelves, varied book spine heights, and status badges.",
+    wireframeHighlights: ["Adaptive Cover Grid", "Oak Bookshelf Spines", "Dynamic Height Ratios", "Keyboard View Toggles"],
   },
   {
-    id: "library-search-filter-sort",
-    number: "06",
+    id: "dense-table-view",
     category: "library-views",
-    categoryLabel: "Library & Catalog Views",
-    title: "Multi-Facet Library Search, Filtering & Sorting",
-    subtitle: "Filter by Medium, Reading Status, Genre, Tag, or Source Health and sort in real time.",
+    categoryLabel: "Library & Shelves",
+    title: "Dense Metadata Table View with Column Sizing & Multi-Sort",
+    subtitle: "Spreadsheet-grade data density with resizable columns, inline chapter progress editing, and quick status pills.",
     whyItMatters:
-      "Instantly answer questions like 'Which Manhwa am I currently Waiting for Updates on, sorted by highest progress?'",
+      "When managing collections of 1,000+ web novels or manga, seeing chapter progress, rating, last-read dates, and tags in a compact table accelerates triage.",
     routePath: "/library",
-    shortcutOrBadge: "Shortcut: /",
+    shortcutOrBadge: "Ctrl+3 (Dense Table)",
     steps: [
-      "Press '/' or click the Library search box to search across Titles, Original Titles, Alternative Titles, Aliases, Creators, Genres, and Tags.",
-      "Use the Medium dropdown to filter by Novel, Web Novel, Light Novel, Manga, Manhwa, Manhua, Anime, Donghua, or Comic.",
-      "Use the Status dropdown to isolate Reading, Watching, Waiting, Stalled, Paused, Planned, Completed, or Dropped works.",
-      "Use the Sort dropdown to order by Last Read/Active, Recently Updated, Title (A–Z / Z–A), or Highest Chapter Progress.",
-      "Click 'Reset' whenever active filters are applied to clear all constraints in one click.",
+      "In the Library toolbar, click the Dense Table icon.",
+      "Click any column header (Title, Medium, Progress, Rating, Updated) to sort ascending or descending.",
+      "Click directly on a Progress cell to edit your current chapter number inline without opening the full dossier.",
+      "Click any tag pill in the table to filter your library by that tag immediately.",
     ],
-    screenshotCaption: "Screenshot #06: Library Filter & Sort bar with active filter badge counter and mobile bottom-sheet drawer.",
-    wireframeHighlights: ["Alias & Creator Search", "Medium & Status Filters", "4 Sort Modes", "1-Click Filter Reset"],
+    screenshotCaption: "Dense Table View showing tabular work rows, inline progress editor, and compact status pills.",
+    wireframeHighlights: ["Compact Row Density", "Inline Chapter Edits", "Multi-Column Sorting", "1-Click Tag Filters"],
   },
   {
-    id: "library-bulk-operations",
-    number: "07",
+    id: "reading-status-lifecycle",
     category: "library-views",
-    categoryLabel: "Library & Catalog Views",
-    title: "Bulk Multi-Select & Batch Operations Bar",
-    subtitle: "Batch-update reading status, shelf priority tiers, tags, lists, vault privacy, or archive state.",
+    categoryLabel: "Library & Shelves",
+    title: "Five-Stage Reading Status Lifecycle Engine",
+    subtitle: "Track works accurately across Plan to Read, Currently Reading, On Hold, Completed, and Dropped.",
     whyItMatters:
-      "Reorganizing 25 imported works takes 5 seconds instead of opening 25 individual detail pages.",
+      "Prevents your backlog from rotting in ambiguity. Every work has a clear intentional lifecycle stage with dedicated quick-filters and progress velocity.",
     routePath: "/library",
-    shortcutOrBadge: "Library → Select Mode",
+    shortcutOrBadge: "Status Tabs",
     steps: [
-      "In the Library header, click the 'Select' button to enter Bulk Selection Mode.",
-      "Click any Work cards (or click 'Select All Filtered') to check multiple items.",
-      "Use the floating Bulk Action Bar to batch-set Personal State (e.g. mark 10 works as 'Completed').",
-      "Batch-assign Shelf Tier (★ Favorite / ✦ Highlight), append a custom Tag to all selected works, add them to a Custom List, move them to the Private Vault, or Archive them.",
+      "Use the status tab bar at the top of the Library to filter by Reading, Plan to Read, On Hold, Completed, or Dropped.",
+      "Change any work's status with one click from its card HUD or the Work Detail header.",
+      "Works marked 'Completed' unlock celebration confetti and celebratory completion cards.",
+      "Works marked 'On Hold' automatically record hiatus duration to prompt you when you return.",
     ],
-    screenshotCaption: "Screenshot #07: Library Bulk Selection mode with multi-selected Work cards and batch action toolbar.",
-    wireframeHighlights: ["Select All Filtered", "Batch Status & Tier", "Bulk Tag Injector", "Batch Move to Vault"],
+    screenshotCaption: "Library status tab bar with item counts per status and active Reading tab highlighted.",
+    wireframeHighlights: ["5 Discrete States", "Unread Count Badges", "Hiatus Time Calculation", "Completion Milestones"],
   },
   {
-    id: "create-work-modal",
-    number: "08",
+    id: "realtime-fuzzy-search",
     category: "library-views",
-    categoryLabel: "Library & Catalog Views",
-    title: "Quick Create Work Modal with Initial Anchor & Source",
-    subtitle: "Register any new Chronicle with its medium, starting chapter/episode, tags, and primary URL.",
+    categoryLabel: "Library & Shelves",
+    title: "Multi-Field Real-Time Fuzzy Search & Instant Query Parsing",
+    subtitle: "Sub-millisecond fuzzy search matching across English titles, romanized aliases, authors, and user notes.",
     whyItMatters:
-      "Captures a new work, its reading relationship, its initial progress event, and its preferred access path in a single atomic transaction.",
+      "Never lose a work because you only remember its Korean romanization or an abbreviation like 'SL' or 'LOTM'.",
     routePath: "/library",
-    shortcutOrBadge: "+ Add Work Button",
+    shortcutOrBadge: "/ or Ctrl+K",
     steps: [
-      "Click '+ Add Work' in the Library header (or trigger 'Create New Work' from Ctrl+K).",
-      "Enter the Title, Medium (Manga, Manhwa, Web Novel, Anime, etc.), and initial Personal State.",
-      "Optionally enter your current Chapter/Episode number, Cover Image URL, Genres/Tags, and starting Source URL.",
-      "Click 'Save Work' to immediately mint the Work and see it appear at the top of your Library.",
+      "Press '/' or 'Ctrl+K' from anywhere in Grimoire to focus the omni-search input.",
+      "Type any partial title, author, or keyword (e.g. 'shadow', 'regression', 'ch. 100').",
+      "Results filter instantly in memory with highlighted fuzzy substring matches.",
+      "Press Enter to open the top matched work or Esc to clear.",
     ],
-    screenshotCaption: "Screenshot #08: Create Work Modal with medium selector, initial chapter anchor, and source URL fields.",
-    wireframeHighlights: ["Atomic Work Creation", "Initial Chapter Input", "Instant Source Binding"],
+    screenshotCaption: "Omni-search bar with real-time fuzzy match dropdown and highlighted title fragments.",
+    wireframeHighlights: ["Sub-millisecond Scoring", "Romanized Alias Matching", "Instant Keyword Clearing"],
+  },
+  {
+    id: "multi-tag-category-filter",
+    category: "library-views",
+    categoryLabel: "Library & Shelves",
+    title: "Multi-Tag, Custom Category & Medium Filter Engine",
+    subtitle: "Intersect multiple tags with AND/OR logic, filter by medium (Novel, Manhwa, Anime), and select custom shelves.",
+    whyItMatters:
+      "Find exactly what you want to read right now (e.g., 'Web Novel' + 'Time Loop' + 'Dao Heart' + 'Rating >= 9.0') in seconds.",
+    routePath: "/library",
+    shortcutOrBadge: "Filter Drawer",
+    steps: [
+      "Click the 'Filters' button in the Library toolbar to expand the multi-faceted filter drawer.",
+      "Toggle Medium badges (Web Novel, Light Novel, Manga, Manhwa, Manhua, Anime, Western).",
+      "Click one or more tag chips to narrow down works containing all selected tags.",
+      "Combine with rating sliders or category pills to pinpoint specific subsections of your collection.",
+    ],
+    screenshotCaption: "Library Filter Drawer showing Medium chips, Tag cloud, and Category selection pills.",
+    wireframeHighlights: ["Multi-Tag Intersection", "Medium Toggle Chips", "Rating Slider Filter", "1-Click Reset"],
+  },
+  {
+    id: "smart-sorting-matrix",
+    category: "library-views",
+    categoryLabel: "Library & Shelves",
+    title: "Smart Sorting Matrix (Pace, Recency, Title, Rating, Progress)",
+    subtitle: "Sort your collection by Reading Recency, Chapter Progress %, User Rating, Title A-Z, or Release Date.",
+    whyItMatters:
+      "Quickly surface what you read yesterday, find titles closest to completion, or review your highest-rated masterpieces.",
+    routePath: "/library",
+    shortcutOrBadge: "Sort Dropdown",
+    steps: [
+      "Click the 'Sort by' dropdown in the Library header.",
+      "Choose 'Recently Read' to keep your active binge front and center.",
+      "Choose 'Progress %' to find works that are 90%+ completed and ready for a finale push.",
+      "Choose 'Rating' to showcase your personal hall-of-fame favorites.",
+    ],
+    screenshotCaption: "Sort dropdown menu open with options for Recently Read, Progress %, Rating, and Title A-Z.",
+    wireframeHighlights: ["5 Dynamic Sort Criteria", "Ascending / Descending Toggle", "Persistent Sort Preference"],
+  },
+  {
+    id: "bulk-batch-actions",
+    category: "library-views",
+    categoryLabel: "Library & Shelves",
+    title: "Bulk Multi-Select & Batch Operation Bar",
+    subtitle: "Select multiple works to batch-assign tags, move into the Private Vault, update reading status, or export.",
+    whyItMatters:
+      "Editing 50 works one-by-one is tedious. The floating Bulk Action bar lets you reorganize large collections with a single click.",
+    routePath: "/library",
+    shortcutOrBadge: "Select Checkbox",
+    steps: [
+      "Hover over any work card and check the selection checkbox in the top-left corner.",
+      "Select additional works or click 'Select All' in the floating bottom action bar.",
+      "Choose a bulk action: 'Add Tag', 'Change Status', 'Move to Vault', 'Export Selected', or 'Delete'.",
+      "Confirm the operation—all selected works update in a single atomic storage transaction.",
+    ],
+    screenshotCaption: "Floating bottom Bulk Action bar with count badge and buttons for Tag, Status, Vault, and Export.",
+    wireframeHighlights: ["Floating Atomic HUD", "Multi-Select Checkboxes", "Atomic Batch Commit", "Select All Toggle"],
+  },
+  {
+    id: "discover-recommendations",
+    category: "library-views",
+    categoryLabel: "Library & Shelves",
+    title: "Discover Engine: Trope Spotlights & Reading Taste Affinity Clusters",
+    subtitle: "Explore curated recommendations matched against your favorite genres, tags, and completed masterpieces.",
+    whyItMatters:
+      "Surfaces high-affinity titles based on the exact tropes, pacing, and mediums you actually enjoy and finish.",
+    routePath: "/discover",
+    shortcutOrBadge: "Sidebar → Discover",
+    steps: [
+      "Open 'Discover' (/discover) from the main navigation sidebar.",
+      "Browse taste-matched clusters such as 'Regression & Second Chances' or 'Cultivation Heavens'.",
+      "Inspect why a work is recommended based on your reading history.",
+      "Click '+ Add to Library' or '+ Send to Radar' on any recommendation card to capture it immediately.",
+    ],
+    screenshotCaption: "Discover route showing taste-matched fiction recommendations and trope clusters.",
+    wireframeHighlights: ["Affinity Scoring", "Trope Spotlights", "1-Click Add to Library / Radar"],
   },
 
-  // 3. WORK DETAIL & RICH METADATA
+  // 3. WORK DOSSIER & TAXONOMY
   {
-    id: "work-detail-progress-stepper",
-    number: "09",
+    id: "work-dossier-header-hud",
     category: "work-detail",
-    categoryLabel: "Work Detail & Metadata",
-    title: "One-Click Progress Stepper (+1 / -1) & Custom Anchor Recording",
-    subtitle: "Increment or decrement chapters/episodes with instant toast feedback and automatic timestamping.",
+    categoryLabel: "Work Dossier & Taxonomy",
+    title: "Comprehensive Work Dossier & Header Quick-Action HUD",
+    subtitle: "Cinematic cover backdrop, chapter counter, quick status toggles, star ratings, and action controls.",
     whyItMatters:
-      "Every progress tick updates your Reading Relationship's lastActiveAt timestamp, recalculates unread update counts, and logs a Progress history entry.",
+      "Centralizes everything about a work into one cohesive dossier—reading progress, alternative titles, sources, memories, and relations.",
     routePath: "/work/01JPK3M9V0WORK000000000001",
-    shortcutOrBadge: "Work Detail Hero",
+    shortcutOrBadge: "Work Detail View",
     steps: [
-      "Click any Work card in your Library to open its Work Detail page.",
-      "In the hero control bar, click '+' to advance 1 chapter/episode or '−' to step back.",
-      "Watch the progress bar, percentage, and 'New Material' badge update instantaneously.",
-      "Click 'Resume Reading' to automatically launch the best linked local ebook, local video player, or web source.",
+      "Click any work in your Library to open its comprehensive dossier page.",
+      "Adjust your chapter progress using the quick increment (+ / -) buttons or type directly in the chapter input.",
+      "Rate the work from 1 to 10 stars with fractional half-star support.",
+      "Toggle reading status directly from the header status dropdown.",
     ],
-    screenshotCaption: "Screenshot #09: Work Detail Hero section with +1/-1 chapter stepper, progress bar, and Resume button.",
-    wireframeHighlights: ["+1 / -1 Chapter Stepper", "Progress Percentage Bar", "Smart Resume Launcher"],
+    screenshotCaption: "Work Dossier header with blurred cover ambient glow, chapter stepper, and rating stars.",
+    wireframeHighlights: ["Ambient Cover Glow", "Quick Chapter Stepper", "1-10 Star Rating", "Status Quick-Select"],
   },
   {
-    id: "cover-art-anilist-upload",
-    number: "10",
+    id: "multilingual-aliases",
     category: "work-detail",
-    categoryLabel: "Work Detail & Metadata",
-    title: "AniList Official Cover Auto-Fetch, Custom Image Upload & Deterministic Fallback",
-    subtitle: "Fetch high-res official covers via GraphQL, upload local PNG/WebP art, or use theme-aware procedural covers.",
+    categoryLabel: "Work Dossier & Taxonomy",
+    title: "Multilingual Titles & Romanized Alias Directory",
+    subtitle: "Store English, Korean Hangul, Japanese Kanji, Pinyin, and community abbreviations per work.",
     whyItMatters:
-      "Even obscure web novels or offline files get beautiful cover art—either fetched automatically from AniList, uploaded from disk, or rendered with deterministic typography.",
+      "Web novels and manga are discussed under dozens of names across platforms. Storing aliases ensures you can search under any name.",
     routePath: "/work/01JPK3M9V0WORK000000000001",
-    shortcutOrBadge: "Hover Cover Art",
+    shortcutOrBadge: "Work Detail → Aliases",
     steps: [
-      "On any Work Detail page, hover over the left Hero Cover image to reveal the Cover Actions overlay.",
-      "Click 'Auto-Fetch Cover' to query the AniList GraphQL API for the official extra-large cover art.",
-      "Click 'Upload Image' to pick a local PNG, JPG, or WebP file from your device (stored offline as a data URL).",
-      "Click 'Paste Image URL' to bind any external image link.",
+      "On the Work Detail page, view the alternative titles and aliases listed below the primary title.",
+      "Click '+ Add Alias' to add romanizations, native script, or abbreviations.",
+      "Set any alias as the primary display title if preferred.",
+      "All aliases become immediately searchable in the global omni-search.",
     ],
-    screenshotCaption: "Screenshot #10: Work Detail Cover Art hover overlay showing Auto-Fetch from AniList, Upload File, and URL input.",
-    wireframeHighlights: ["AniList GraphQL Fetch", "Offline Image Upload", "Theme-Reactive Fallback"],
+    screenshotCaption: "Aliases panel on Work Detail displaying Korean Hangul, romanized title, and acronym tags.",
+    wireframeHighlights: ["Multi-Language Script Support", "Community Acronym Storage", "Omni-Search Indexing"],
   },
   {
-    id: "rich-metadata-editor",
-    number: "11",
+    id: "content-warnings-ratings",
     category: "work-detail",
-    categoryLabel: "Work Detail & Metadata",
-    title: "Rich Bibliographic Metadata, Creators, Ratings & Content Warnings Editor",
-    subtitle: "Edit personal 0–10 rating, shelf tier, total chapters/volumes, original title/language, creators, and warnings.",
+    categoryLabel: "Work Dossier & Taxonomy",
+    title: "Content Warnings, Age Ratings & Spoilers Disclosure",
+    subtitle: "Tag sensitive themes (Gore, Psychological Trauma, Sexual Content) with discreet blur toggles.",
     whyItMatters:
-      "Preserves complete archival bibliography including Author/Artist credits, publication dates, and content advisories.",
+      "Allows you to track mature or psychologically intense works without accidentally exposing shocking cover art or summaries in public.",
     routePath: "/work/01JPK3M9V0WORK000000000001",
-    shortcutOrBadge: "Overview Tab → Edit Metadata",
+    shortcutOrBadge: "Work Detail → Metadata",
     steps: [
-      "Open a Work Detail page and stay on the 'Overview' tab.",
-      "Use the Personal State dropdown and Shelf Priority Tier selector (Standard, ★ Favorite, ✦ Highlight) for quick status updates.",
-      "Click the 'Edit Metadata' button to open the full bibliographic editor.",
-      "Set your Personal Rating (0–10), Primary Creator & Role (Author, Artist, Studio), Total Chapters/Volumes/Pages, Original Title, Language, Start/End Dates, Content Rating, and comma-separated Content Warnings.",
-      "Click 'Save Metadata' to persist changes immediately.",
+      "On the Work Detail page, scroll to the Content Warnings section.",
+      "Tag applicable warnings (e.g. Graphic Violence, Body Horror, Dark Fantasy).",
+      "Enable 'Blur Cover in Public' if the work contains NSFW or provocative illustration.",
+      "The card will display a discreet warning badge requiring a click to reveal.",
     ],
-    screenshotCaption: "Screenshot #11: Work Detail Overview tab with expanded Bibliographic Metadata Editor.",
-    wireframeHighlights: ["0–10 Personal Rating", "Creator & Role Credits", "Total Chapters/Volumes", "Content Warnings"],
-  },
-
-  // 4. ACCESS PATHS, SOURCE HEALTH & LOCAL VIDEO PLAYER
-  {
-    id: "multi-access-paths-health",
-    number: "12",
-    category: "sources-video",
-    categoryLabel: "Sources & Local Video Player",
-    title: "Multi-Source Access Paths, Preferred Source Pinning & Live Health Check",
-    subtitle: "Attach unlimited reading/watching URLs, RSS feeds, and local files to a single Work and probe their health.",
-    whyItMatters:
-      "When a translation site goes offline, your Work isn't lost—simply switch the 'Preferred' star to your backup mirror or local file.",
-    routePath: "/work/01JPK3M9V0WORK000000000001",
-    shortcutOrBadge: "Work Detail → Access Paths Tab",
-    steps: [
-      "Open any Work Detail page and click the 'Access Paths' tab.",
-      "Click '+ Add Source' and enter a Label (e.g. 'Official MangaPlus'), URL, and optional Provider name.",
-      "Click 'Set Preferred' on any source to make it the default target for 'Resume Reading'.",
-      "Click the circular Refresh icon on any source to run a live HTTP/Local Health Probe and update its status badge (Healthy, Degraded, Unavailable, Local).",
-    ],
-    screenshotCaption: "Screenshot #12: Access Paths tab showing multiple sources, Preferred badge, and Live Health Probe indicator.",
-    wireframeHighlights: ["Decoupled Access Paths", "Preferred Source Pin", "Live HTTP Health Probe"],
+    screenshotCaption: "Content Warnings editor with warning chips, blur toggle, and age rating badge.",
+    wireframeHighlights: ["Discreet Content Warnings", "Public Cover Blur Toggle", "Age Rating Selector"],
   },
   {
-    id: "local-video-linking-player",
-    number: "13",
-    category: "sources-video",
-    categoryLabel: "Sources & Local Video Player",
-    title: "Local Video File Linking & Built-In Inline HTML5 Video Player",
-    subtitle: "Link local Anime/Donghua video files (MP4, MKV, WebM) and watch episodes directly inside Work Detail.",
+    id: "custom-taxonomy-categories",
+    category: "work-detail",
+    categoryLabel: "Work Dossier & Taxonomy",
+    title: "Custom Taxonomy & Dynamic Category Assignment",
+    subtitle: "Assign works to your personal shelves like 'Comfort Binge', 'Peak Fiction', or 'Cultivation Lore'.",
     whyItMatters:
-      "Tracks your local anime/donghua episode files alongside your manga and novels, with instant in-app video playback and session file re-attachment.",
-    routePath: "/work/01JPK3M9V0WORK000000000001",
-    shortcutOrBadge: "Access Paths → Link Local Video",
+      "Standard publisher genres don't capture how readers actually think. Custom categories let you structure your library your way.",
+    routePath: "/categories",
+    shortcutOrBadge: "Work Detail → Categories",
     steps: [
-      "Go to a Work Detail page → 'Access Paths' tab and click '+ Link Local Video'.",
-      "Click 'Pick Video File' to select an MP4, WebM, or MKV file from your computer/device (auto-fills filename, MIME type, and MB size) or type a local disk path.",
-      "Click 'Link Video Reference'—the source is saved with a 'LOCAL VIDEO' badge and the inline video player opens automatically.",
-      "Use the 'Watch / Hide Player' toggle button at any time to play, pause, scrub, or fullscreen the video.",
-      "After a browser reload (when browser sandbox clears temporary blob URLs), click 'Select File to Play' inside the player panel to re-attach the local video file in 1 click.",
+      "Open any Work Detail page and locate the Category selector.",
+      "Check one or more custom categories you've created.",
+      "To create a new category, visit '/categories' and define a name, accent color, and description.",
+      "Browse all works inside any category with a single click.",
     ],
-    screenshotCaption: "Screenshot #13: Access Paths tab with 'LOCAL VIDEO' badge and active Inline HTML5 Video Player.",
-    wireframeHighlights: ["Pick Video File Dialog", "Inline HTML5 Video Player", "Session Re-Attach Button", "Copy Disk Path"],
-  },
-
-  // 5. BUILT-IN READER & LOCAL SHELF
-  {
-    id: "local-shelf-opfs-import",
-    number: "14",
-    category: "reader-shelf",
-    categoryLabel: "Built-In Ebook & Comic Reader",
-    title: "Offline Local Shelf (OPFS Storage) & Drag-and-Drop File Import",
-    subtitle: "Import EPUB, PDF, and CBZ/CBR files into browser Origin Private File System for 100% offline reading.",
-    whyItMatters:
-      "Your imported books are stored persistently inside the browser/device vault—no internet connection or external server required.",
-    routePath: "/shelf",
-    shortcutOrBadge: "Sidebar → Local Shelf",
-    steps: [
-      "Navigate to 'Local Shelf' (/shelf) from the Sidebar or bottom navigation bar.",
-      "Drag and drop any .epub, .pdf, or .cbz file onto the upload dropzone (or click 'Import Local Files').",
-      "Optionally click 'Load Demo Books' to auto-generate sample EPUB, PDF, and CBZ files to test all three readers immediately.",
-      "Link any imported file to an existing Work in your Library using the 'Link to Work' dropdown on the file card.",
-    ],
-    screenshotCaption: "Screenshot #14: Local Shelf route showing imported EPUB, PDF, and CBZ files stored in OPFS.",
-    wireframeHighlights: ["OPFS Offline Storage", "EPUB / PDF / CBZ Support", "1-Click Demo Book Seeder", "Work Linking"],
+    screenshotCaption: "Category assignment panel showing custom category pills with color-coded dot badges.",
+    wireframeHighlights: ["Custom Shelf Taxonomy", "Color-Coded Badges", "Multi-Category Assignment"],
   },
   {
-    id: "epub-reflowable-reader",
-    number: "15",
-    category: "reader-shelf",
-    categoryLabel: "Built-In Ebook & Comic Reader",
-    title: "Built-In EPUB Reflowable Reader with Typography & Theme Controls",
-    subtitle: "Read novels with customizable font family, font size, line height, column width, reader theme, and TOC drawer.",
+    id: "customizable-tags-taxonomy",
+    category: "work-detail",
+    categoryLabel: "Work Dossier & Taxonomy",
+    title: "Rich Tropes & Hierarchical Tagging with Custom Color Badges",
+    subtitle: "Create and color-code micro-trope tags (System Apocalypse, Weak to Strong, Female Lead, Regression).",
     whyItMatters:
-      "Provides a distraction-free novel reading environment that automatically saves your chapter and scroll position back to your Work.",
-    routePath: "/shelf",
-    shortcutOrBadge: "Local Shelf → Open EPUB",
+      "Fiction readers navigate by tropes. Rich tags allow you to filter across deeply specific thematic archetypes.",
+    routePath: "/library",
+    shortcutOrBadge: "Work Detail → Tags",
     steps: [
-      "From Local Shelf (or Work Detail 'Resume Reading'), open any EPUB file.",
-      "Click the Table of Contents icon to jump between chapters.",
-      "Open the Reader Settings popover to customize Font Size, Line Spacing, Page Margin Width, and Reader Surface Theme (Dark, Sepia, Light).",
-      "Use Previous/Next Chapter buttons or keyboard arrows; your reading progress percentage and chapter anchor save automatically.",
+      "On any Work Detail page, type into the Tag input to add or create new tags.",
+      "Assign custom background colors to prominent tags (e.g. Gold for 'Masterpiece', Red for 'Hiatus Warning').",
+      "Click any tag chip anywhere in the app to immediately filter your entire library by that trope.",
     ],
-    screenshotCaption: "Screenshot #15: Built-in EPUB Reader with Table of Contents drawer and typography customization panel.",
-    wireframeHighlights: ["Chapter TOC Drawer", "Font & Line-Height Tuning", "Auto Progress Sync"],
-  },
-  {
-    id: "pdf-canvas-text-reader",
-    number: "16",
-    category: "reader-shelf",
-    categoryLabel: "Built-In Ebook & Comic Reader",
-    title: "Built-In PDF Reader with High-DPI Canvas & Selectable Text Layer",
-    subtitle: "Render scanned or typeset PDF volumes with zoom controls, page jumper, and theme-aware text selection.",
-    whyItMatters:
-      "Reads light novel PDFs and artbooks directly inside Grimoire with crisp text selection for copying quotes into Memories.",
-    routePath: "/shelf",
-    shortcutOrBadge: "Local Shelf → Open PDF",
-    steps: [
-      "Open any PDF file from the Local Shelf or Work Detail.",
-      "Use the Zoom In / Zoom Out controls or fit-to-page options in the reader toolbar.",
-      "Highlight any passage on the page using the transparent selectable text layer to copy quotes.",
-      "Step through pages with keyboard Left/Right arrows while page progress persists automatically.",
-    ],
-    screenshotCaption: "Screenshot #16: Built-in PDF Reader showing page rendering, zoom toolbar, and selectable text layer.",
-    wireframeHighlights: ["PDF.js Canvas Engine", "Selectable Text Layer", "Page & Zoom Persistence"],
-  },
-  {
-    id: "cbz-manga-comic-reader",
-    number: "17",
-    category: "reader-shelf",
-    categoryLabel: "Built-In Ebook & Comic Reader",
-    title: "Built-In CBZ Comic & Manga Reader (RTL, Double-Page Spread & Fit Modes)",
-    subtitle: "Read archived manga/comic chapters with Right-to-Left manga direction, 2-page spreads, and webtoon vertical scroll.",
-    whyItMatters:
-      "Tailored specifically for manga (RTL double-page spreads) and manhwa/webtoons (vertical fit-width continuous reading).",
-    routePath: "/shelf",
-    shortcutOrBadge: "Local Shelf → Open CBZ",
-    steps: [
-      "Open any .cbz archive from the Local Shelf.",
-      "Toggle Reading Direction between LTR (Western Comics) and RTL (Japanese Manga).",
-      "Switch Page Layout between Single Page, Double-Page Spread, or Continuous Vertical Scroll.",
-      "Toggle image scaling between Fit Height, Fit Width, and Original Size.",
-    ],
-    screenshotCaption: "Screenshot #17: Built-in CBZ Manga Reader in Double-Page RTL mode with page scrubber.",
-    wireframeHighlights: ["RTL Manga Mode", "Double-Page Spreads", "Fit Width / Fit Height"],
-  },
-
-  // 6. UP NEXT & HIATUS RECOVERY
-  {
-    id: "return-desk-intelligence",
-    number: "18",
-    category: "return-desk",
-    categoryLabel: "Up Next & Context Recovery",
-    title: "Up Next — Intelligent Hiatus & Queue Prioritization",
-    subtitle: "Automatically surfaces works with New Material, Long Hiatuses, Near Completion, or Quick Wins.",
-    whyItMatters:
-      "Eliminates 'what should I read next?' decision paralysis by scoring your library based on unread chapters, hiatus duration, and completion proximity.",
-    routePath: "/up-next",
-    shortcutOrBadge: "Sidebar → Up Next",
-    steps: [
-      "Click 'Up Next' (/up-next) in the Sidebar or bottom navigation bar.",
-      "Filter return candidates by signal type: All Signals, New Material Available, Long Hiatus Recovery, Near Completion, or Stalled.",
-      "Review each Return Card's signal reason badge, unread chapter count, and time since last active.",
-      "Click 'Snooze 7d' if you aren't ready yet, or click 'Resume' to jump back in.",
-    ],
-    screenshotCaption: "Screenshot #18: Up Next dashboard showing prioritized Return Cards with signal badges and unread counts.",
-    wireframeHighlights: ["Signal-Driven Ranking", "Unread Chapter Delta", "1-Click Snooze & Resume"],
-  },
-  {
-    id: "memory-refresher-drawer",
-    number: "19",
-    category: "return-desk",
-    categoryLabel: "Up Next & Context Recovery",
-    title: "Spoiler-Safe Memory Refresher Drawer (30-Second Context Recovery)",
-    subtitle: "Review your own past quotes, character notes, and last-read anchor in a side drawer before resuming a stalled work.",
-    whyItMatters:
-      "Googling a character name after a 6-month break gets you spoiled by wiki death statuses. The Memory Refresher shows only what YOU knew up to your exact chapter.",
-    routePath: "/up-next",
-    shortcutOrBadge: "Return Card → Refresh Memory",
-    steps: [
-      "On any Return Card in Up Next, click the 'Refresh Memory' button.",
-      "A slide-over drawer opens displaying your last recorded Chapter/Episode anchor, when you paused, and your pinned Memory Cards (Quotes, Notes, Theories, Reactions).",
-      "Read through your past notes to recall the plot and character alliances in 30 seconds.",
-      "Click 'Resume Reading Now' at the bottom of the drawer to launch straight into the work.",
-    ],
-    screenshotCaption: "Screenshot #19: Memory Refresher Drawer open over Up Next showing spoiler-safe notes and quotes.",
-    wireframeHighlights: ["Spoiler-Safe Recap", "Pinned Quotes & Theories", "Direct Resume Action"],
-  },
-
-  // 7. MEMORIES, LORE NOTEBOOK & ADAPTATION GRAPH
-  {
-    id: "memories-quotes-timeline",
-    number: "20",
-    category: "memory-lore",
-    categoryLabel: "Memories, Lore & Graph",
-    title: "Personal Memory (Quotes, Theories, Reactions & Bookmarks)",
-    subtitle: "Attach timestamped, chapter-anchored memories to any Work and browse them globally in the Memory feed.",
-    whyItMatters:
-      "Turns passive consumption into a permanent personal commonplace book of your favorite lines, plot theories, and emotional reactions.",
-    routePath: "/memory",
-    shortcutOrBadge: "Sidebar → Memory",
-    steps: [
-      "Inside any Work Detail page → 'Memories' tab, click '+ Add Memory' to record a Quote, Note, Theory, Reaction, or Bookmark tied to your current chapter.",
-      "Or navigate to the global 'Memory' route (/memory) to browse and search every memory across your entire fiction life.",
-      "Filter memories by type (Quote, Theory, Note, Reaction) or search by keyword.",
-      "Click any Memory Card's work link to jump directly back to that Work Detail page.",
-    ],
-    screenshotCaption: "Screenshot #20: Global Memory timeline and Work Detail Memories tab with Quote and Theory cards.",
-    wireframeHighlights: ["Chapter-Anchored Quotes", "Plot Theories & Reactions", "Global Memory Search"],
-  },
-  {
-    id: "structured-lore-notebook",
-    number: "21",
-    category: "memory-lore",
-    categoryLabel: "Memories, Lore & Graph",
-    title: "Per-Work Structured Lore & Worldbuilding Notebook",
-    subtitle: "Maintain a spoiler-free encyclopedia of Characters, Factions, Locations, Cultivation Realms, and Artifacts per Work.",
-    whyItMatters:
-      "Essential for sprawling web novels and fantasy epics with 100+ named characters, power tiers, and complex political factions.",
-    routePath: "/work/01JPK3M9V0WORK000000000001",
-    shortcutOrBadge: "Work Detail → Notebook Tab",
-    steps: [
-      "Open a Work Detail page and select the 'Notebook' tab.",
-      "Filter or create entries by Lore Category: Character, Location, Faction, World Rule / Power System, or General Note.",
-      "Add aliases, role descriptions, and markdown notes for each character or realm.",
-      "Pin important entries so they stay at the top of your Work Notebook while reading.",
-    ],
-    screenshotCaption: "Screenshot #21: Work Detail Lore Notebook tab showing Character, Faction, and Power System cards.",
-    wireframeHighlights: ["Character & Faction Cards", "Power System Tracking", "Pinned Lore Entries"],
-  },
-  {
-    id: "adaptation-relation-graph",
-    number: "22",
-    category: "memory-lore",
-    categoryLabel: "Memories, Lore & Graph",
-    title: "Cross-Medium Adaptation & Franchise Relation Graph",
-    subtitle: "Link Web Novels, Light Novels, Manga, Manhwa, Anime Seasons, Sequels, Prequels, and Spin-offs.",
-    whyItMatters:
-      "Shows your entire franchise universe in one visual tree—know immediately that Anime Episode 24 corresponds to Manhwa Chapter 110 and Novel Chapter 142.",
-    routePath: "/work/01JPK3M9V0WORK000000000001",
-    shortcutOrBadge: "Work Detail → Relations Tab",
-    steps: [
-      "Open any Work Detail page and click the 'Relations' tab.",
-      "View the visual Relation Tree grouping Adapts / Adapted By, Precede / Sequel, Spin-Off, and Shared Universe links.",
-      "Click '+ Link Related Work', choose another Work from your Library, select the relationship type (e.g. 'Adaptation', 'Sequel'), and add an optional transition note (e.g. 'Anime S1 ends at Novel Ch. 65').",
-      "Click any linked Work node to navigate across mediums instantaneously.",
-    ],
-    screenshotCaption: "Screenshot #22: Work Detail Relations tab displaying cross-medium Adaptation & Sequel tree.",
-    wireframeHighlights: ["Novel ↔ Manhwa ↔ Anime Links", "Transition Chapter Notes", "1-Click Cross-Navigation"],
+    screenshotCaption: "Tag editor with color-picker dropdown and live tag preview chips.",
+    wireframeHighlights: ["Arbitrary Trope Creation", "Custom Color Assignments", "Instant Library Cross-Filtering"],
   },
   {
     id: "fandom-wiki-links-panel",
-    number: "23",
-    category: "memory-lore",
-    categoryLabel: "Memories, Lore & Graph",
+    category: "work-detail",
+    categoryLabel: "Work Dossier & Taxonomy",
     title: "Curated Fandom, Wiki, Subreddit & Community Links Panel",
-    subtitle: "Save trusted character wikis, discussion threads, author socials, and art galleries per Work.",
+    subtitle: "Save trusted character wikis, chapter discussion threads, official socials, and art galleries per work.",
     whyItMatters:
-      "Keeps all community resources, tier lists, and official author links organized right inside the Work's dossier.",
+      "Keeps all community resources, tier lists, and official author links organized right inside the work's dossier for easy reference.",
     routePath: "/work/01JPK3M9V0WORK000000000001",
     shortcutOrBadge: "Work Detail → Fandom Tab",
     steps: [
       "Open a Work Detail page and switch to the 'Fandom & Links' tab.",
-      "Click '+ Add Fandom Link' and choose a category (Wiki, Community/Reddit, Official, Fan Art, Discussion).",
-      "Add a spoiler warning note if a wiki link contains end-of-series spoilers.",
+      "Click '+ Add Fandom Link' and choose a category (Wiki, Reddit, Discord, Official Author, Fan Art).",
+      "Add a title, URL, and optional spoiler warning note if a wiki contains end-of-series revelations.",
+      "Click any link to launch external resources in a secure sandboxed tab.",
     ],
-    screenshotCaption: "Screenshot #23: Work Detail Fandom & Links tab with categorized community resources.",
-    wireframeHighlights: ["Wiki & Community Links", "Category Badges", "Quick External Launch"],
+    screenshotCaption: "Work Detail Fandom & Links tab with categorized community resources and spoiler tags.",
+    wireframeHighlights: ["Categorized External Links", "Spoiler Warning Annotations", "Quick External Launch"],
+  },
+
+  // 4. ACCESS PATHS & READING PORTALS
+  {
+    id: "multi-source-access-paths",
+    category: "sources-video",
+    categoryLabel: "Sources & Portals",
+    title: "Multi-Source Access Paths with Priority Ordering",
+    subtitle: "Store official web URLs, backup mirror links, raw scanlation sites, and local file paths per work.",
+    whyItMatters:
+      "Web reading sites constantly change URLs, get DMCA'd, or move domains. Grimoire ensures you never lose access by supporting unlimited fallback mirrors.",
+    routePath: "/work/01JPK3M9V0WORK000000000001",
+    shortcutOrBadge: "Work Detail → Access Paths",
+    steps: [
+      "Navigate to the 'Access Paths' tab on any Work Detail page.",
+      "Click '+ Add Access Path' to add a source (e.g. Official Publisher, Scanlation Group, Backup Mirror, Local EPUB).",
+      "Set the Source Type (Web URL, File Path, App Deep Link).",
+      "The primary source launches with 1-click from the library card or 'Read Now' button.",
+    ],
+    screenshotCaption: "Access Paths panel showing multiple mirrors, status indicators, and primary source star.",
+    wireframeHighlights: ["Unlimited Fallback Mirrors", "Local File & Web URL Support", "Primary Source Star Toggle"],
+  },
+  {
+    id: "dynamic-source-priority",
+    category: "sources-video",
+    categoryLabel: "Sources & Portals",
+    title: "Dynamic Source Priority Ordering & Primary Target Toggling",
+    subtitle: "Drag and drop or toggle access paths so your preferred translation group or mirror is always prioritized.",
+    whyItMatters:
+      "When one translation group catches up or another mirror goes down, swap primary priority in two seconds without editing bookmarks.",
+    routePath: "/work/01JPK3M9V0WORK000000000001",
+    shortcutOrBadge: "Drag / Priority Toggle",
+    steps: [
+      "In the Access Paths list, click the star icon on any mirror to set it as the Primary access path.",
+      "Use the up/down priority controls to reorder fallback sources.",
+      "Whenever you click 'Continue Reading', Grimoire automatically opens the highest-priority functional source.",
+    ],
+    screenshotCaption: "Access Paths reordering controls with visual primary highlight badge.",
+    wireframeHighlights: ["1-Click Primary Star", "Ordered Fallback Chain", "Automatic Target Resolution"],
+  },
+  {
+    id: "source-health-monitoring",
+    category: "sources-video",
+    categoryLabel: "Sources & Portals",
+    title: "Source Health Monitoring & Broken Mirror Alerts",
+    subtitle: "Mark mirrors as Healthy, Slow, Broken, or Paywalled to keep your access pathways reliable.",
+    whyItMatters:
+      "Visual indicators alert you if a scanlation mirror has died, prompting you to switch to a secondary mirror before sitting down to read.",
+    routePath: "/work/01JPK3M9V0WORK000000000001",
+    shortcutOrBadge: "Health Pill Badges",
+    steps: [
+      "In the Access Paths list, inspect the color-coded health pill on each path (Green = Healthy, Amber = Slow, Red = Down).",
+      "Click the health badge to manually flag a source as broken or dead.",
+      "Grimoire will automatically promote your next backup mirror to active duty.",
+    ],
+    screenshotCaption: "Source Health indicators with status badges and fallback transition warnings.",
+    wireframeHighlights: ["Visual Health Indicators", "Dead Link Flagging", "Automated Fallback Promotion"],
+  },
+  {
+    id: "embedded-web-reader",
+    category: "sources-video",
+    categoryLabel: "Sources & Portals",
+    title: "Embedded Web Reader Frame & External Browser Launcher",
+    subtitle: "Read online chapters inside a distraction-free embedded frame or launch directly in your default browser.",
+    whyItMatters:
+      "Gives you total freedom: read right inside Grimoire for focused immersion, or pop out to your external browser for full extensions.",
+    routePath: "/work/01JPK3M9V0WORK000000000001",
+    shortcutOrBadge: "Reader Frame Toggle",
+    steps: [
+      "Click 'Read Online' on any work with a valid web access path.",
+      "Choose 'Embedded Frame' to open the website inside Grimoire with a persistent chapter progress tracker overlay.",
+      "Or choose 'Open in Browser' to launch the URL externally while Grimoire stays running in the background.",
+    ],
+    screenshotCaption: "Embedded reader modal showing web chapter view with floating Grimoire progress bar.",
+    wireframeHighlights: ["Embedded Webview Frame", "Floating Progress Tracker", "External Browser Pop-Out"],
+  },
+  {
+    id: "reading-website-credentials-keyring",
+    category: "sources-video",
+    categoryLabel: "Sources & Portals",
+    title: "Encrypted Reading Portals & Website Credential Keyring",
+    subtitle: "Secure zero-knowledge storage for reading website usernames, passwords, search URLs, and provider notes.",
+    whyItMatters:
+      "Web novel and manga sites require accounts for bookmarks, VIP chapters, and forum comments. Grimoire stores your logins encrypted on your device so you never forget them.",
+    routePath: "/vault",
+    shortcutOrBadge: "Vault → Keyring Panel",
+    steps: [
+      "Open the Private Vault or Settings and navigate to the 'Website Credential Keyring'.",
+      "Click '+ Add Website Login' and enter the Website Name, Domain URL, Username, Password, and Search URL.",
+      "Click the Eye icon to view password, or click Copy to place your username or password on the clipboard.",
+      "All credentials are encrypted with AES-256-GCM using your Vault Passphrase and never leave your machine.",
+    ],
+    screenshotCaption: "Reading Portals & Credentials Keyring showing stored website logins and quick-copy buttons.",
+    wireframeHighlights: ["Zero-Knowledge AES-256 Storage", "1-Click Copy Username / Password", "Search URL Integration"],
+  },
+  {
+    id: "frequent-websites-auto-detection",
+    category: "sources-video",
+    categoryLabel: "Sources & Portals",
+    title: "Automatic Frequent Reading Websites Analyzer",
+    subtitle: "Scans your library access paths and automatically highlights any reading portal with 5 or more linked works.",
+    whyItMatters:
+      "Automatically identifies your most-visited web novel and manga websites, giving you instant one-click homepage access and catalog search.",
+    routePath: "/vault",
+    shortcutOrBadge: "Keyring → Frequent Sites",
+    steps: [
+      "Open the Website Credential Keyring in the Private Vault.",
+      "Notice the 'Frequent Reading Portals' banner at the top of the panel.",
+      "Grimoire scans all work access paths; any domain with 5 or more works is automatically featured with its work count badge.",
+      "Click 'Visit Homepage' or 'Search Catalog' to launch directly to your favorite portals.",
+    ],
+    screenshotCaption: "Frequent Reading Websites section displaying website badges with work count indicators.",
+    wireframeHighlights: ["Automated 5+ Work Threshold", "Domain Aggregator", "1-Click Catalog Search"],
+  },
+
+  // 5. DEDICATED BUILT-IN READERS & MEDIA PLAYERS
+  {
+    id: "builtin-epub-reader",
+    category: "reader-shelf",
+    categoryLabel: "Readers & Media",
+    title: "Built-in Local EPUB Reader with Chapter TOC & Theme Sync",
+    subtitle: "Zero-dependency offline EPUB reader with font sizing, line height controls, theme sync, and page bookmarks.",
+    whyItMatters:
+      "No need to launch bloated external reader apps. Read light novels and web fiction EPUBs directly inside Grimoire with synchronized dark/light themes.",
+    routePath: "/reader/epub",
+    shortcutOrBadge: "EPUB Reader Route",
+    steps: [
+      "Attach an EPUB file to any work's Access Paths, or navigate to '/reader/epub'.",
+      "Click 'Open EPUB' to load the book into the native renderer.",
+      "Open the Table of Contents drawer to jump across chapters seamlessly.",
+      "Adjust typography (Serif, Sans, Monospace, Font Size, Line Spacing) to match your reading comfort.",
+      "Your exact CFI reading position is automatically saved to your work's progress.",
+    ],
+    screenshotCaption: "Native EPUB Reader showing two-column typography, chapter TOC sidebar, and theme controls.",
+    wireframeHighlights: ["Offline EPUB Rendering", "TOC Chapter Navigation", "Typography Controls", "Auto CFI Progress Save"],
+  },
+  {
+    id: "builtin-pdf-viewer",
+    category: "reader-shelf",
+    categoryLabel: "Readers & Media",
+    title: "Built-in Local PDF Viewer with Zoom, Dual-Page Spread & Bookmarks",
+    subtitle: "High-performance canvas PDF rendering with continuous vertical scroll, dual-page mode, and page jumping.",
+    whyItMatters:
+      "Ideal for translated light novels, art books, and technical manuscripts. Renders crisp vector text with instant page memory.",
+    routePath: "/reader/pdf",
+    shortcutOrBadge: "PDF Viewer Route",
+    steps: [
+      "Attach a local PDF file or open the PDF Reader route (/reader/pdf).",
+      "Select a PDF document to render high-resolution canvas pages.",
+      "Toggle between Single Page, Continuous Scroll, and Dual-Page Spread modes.",
+      "Use the zoom slider or preset buttons (Fit Width, Fit Page) for optimal readability.",
+      "Your last-viewed page is saved automatically to your work progress.",
+    ],
+    screenshotCaption: "PDF Viewer showing continuous scroll mode, zoom controls, and thumbnail sidebar.",
+    wireframeHighlights: ["Canvas Vector Rendering", "Dual-Page & Continuous Modes", "Fit Width / Fit Page Zoom", "Page Memory"],
+  },
+  {
+    id: "comic-webtoon-reader",
+    category: "reader-shelf",
+    categoryLabel: "Readers & Media",
+    title: "Comic & Webtoon Continuous Vertical Scroll Strip Reader",
+    subtitle: "Optimized infinite vertical scroll for Korean manhwa and webtoons with zero seam gaps and image preload.",
+    whyItMatters:
+      "Webtoons are designed to be scrolled continuously without page breaks. Grimoire stitches vertical strips seamlessly with background image caching.",
+    routePath: "/reader/comic",
+    shortcutOrBadge: "Webtoon Mode",
+    steps: [
+      "Open a manhwa or comic work and launch the Comic Reader.",
+      "Switch to 'Webtoon Vertical' mode for seamless continuous scroll with zero image margins.",
+      "Use keyboard arrows, mouse wheel, or touch drag to glide down chapters smoothly.",
+      "The reader automatically triggers progress saves as you cross chapter boundary markers.",
+    ],
+    screenshotCaption: "Webtoon reader interface displaying seamless vertical manhwa strip scrolling and bottom HUD.",
+    wireframeHighlights: ["Zero-Seam Image Stitching", "Smooth Kinetic Scroll", "Chapter Boundary Detection"],
+  },
+  {
+    id: "local-audiobook-player",
+    category: "reader-shelf",
+    categoryLabel: "Readers & Media",
+    title: "Local Audiobook & Audio Drama Player with Sleep Timer & Variable Speed",
+    subtitle: "Play local MP3, M4B, WAV, and audio drama tracks with playback speeds from 0.5x to 2.5x and auto-sleep timer.",
+    whyItMatters:
+      "Listen to professionally narrated light novels or audio drama adaptations without switching apps, while keeping your chapter progress in sync.",
+    routePath: "/reader/audio",
+    shortcutOrBadge: "Audio Player HUD",
+    steps: [
+      "Attach a local audio file or folder to a work and click 'Play Audiobook'.",
+      "Use the mini-player or expanded player to scrub through tracks and chapters.",
+      "Adjust playback speed (0.75x, 1.0x, 1.25x, 1.5x, 2.0x) to match narrator velocity.",
+      "Set the Sleep Timer (15m, 30m, 45m, End of Chapter) for bedtime listening.",
+      "Playback position is saved to the second so you can resume anytime.",
+    ],
+    screenshotCaption: "Audiobook mini-player bar showing audio waveform, playback speed selector, and sleep timer.",
+    wireframeHighlights: ["0.5x to 2.5x Variable Speed", "Configurable Sleep Timer", "Timestamp Precision Resume"],
+  },
+  {
+    id: "local-video-anime-player",
+    category: "reader-shelf",
+    categoryLabel: "Readers & Media",
+    title: "Local Video & Anime Player with Subtitle Support & Theater Mode",
+    subtitle: "Play local MP4, MKV, and WebM anime episodes with subtitle track selection, theater mode, and timestamp resume.",
+    whyItMatters:
+      "When a light novel gets adapted into an anime, watch episodes right in Grimoire and track both novel chapters and anime episodes in one dossier.",
+    routePath: "/reader/video",
+    shortcutOrBadge: "Video Player Route",
+    steps: [
+      "Attach a local video file (e.g. Anime Episode 1) to a work and click 'Play Video'.",
+      "Toggle Theater Mode or Fullscreen for an immersive cinematic experience.",
+      "Enable or switch subtitle tracks (SRT / VTT).",
+      "Grimoire saves your playback timestamp and increments your episode counter upon completion.",
+    ],
+    screenshotCaption: "Video player in theater mode with scrub bar, subtitle toggle, and episode progress pill.",
+    wireframeHighlights: ["Theater Mode & Fullscreen", "Subtitle Track Support", "Episode Auto-Increment"],
+  },
+
+  // 6. UP NEXT & HIATUS RECOVERY
+  {
+    id: "up-next-central-command",
+    category: "return-desk",
+    categoryLabel: "Up Next & Hiatus",
+    title: "Up Next Central Command: Quick-Resume Queue & Pacing Center",
+    subtitle: "Your active reading cockpit (rebranded from Return Desk) surfacing top active works, unread deltas, and pace stats.",
+    whyItMatters:
+      "When you sit down to read, you shouldn't have to search through your entire library. Up Next puts your top 3-5 active books one click away.",
+    routePath: "/desk",
+    shortcutOrBadge: "Sidebar → Up Next",
+    steps: [
+      "Click 'Up Next' (/desk) in the main navigation sidebar.",
+      "View your active reading cards sorted by reading velocity and recent activity.",
+      "Click 'Resume Reading' on any card to jump immediately into your primary access path.",
+      "Review your daily reading streak and weekly chapter completion counts.",
+    ],
+    screenshotCaption: "Up Next dashboard showing active reading queue cards, pace metrics, and quick-resume buttons.",
+    wireframeHighlights: ["1-Click Quick Resume", "Reading Velocity Metrics", "Streak Counter HUD"],
+  },
+  {
+    id: "reading-velocity-calculator",
+    category: "return-desk",
+    categoryLabel: "Up Next & Hiatus",
+    title: "Reading Velocity, Pace Analyzer & Estimated Completion Horizon",
+    subtitle: "Calculates chapters read per day and predicts your estimated completion date for massive web serials.",
+    whyItMatters:
+      "Reading a 2,000-chapter cultivation epic can feel endless. The pace analyzer shows you: 'At your current rate of 12 chapters/day, you will finish in 42 days.'",
+    routePath: "/desk",
+    shortcutOrBadge: "Up Next → Pace Analyzer",
+    steps: [
+      "Open the Up Next dashboard and scroll to the Velocity & Pace panel.",
+      "View your 7-day and 30-day rolling chapter reading averages.",
+      "Check the Estimated Completion Date calculated for each active work based on total chapters.",
+      "Adjust your daily reading goal to see the horizon recalculate in real-time.",
+    ],
+    screenshotCaption: "Velocity Calculator displaying chapters/day velocity curve and estimated completion horizon.",
+    wireframeHighlights: ["Rolling Chapter Velocity", "Estimated Finish Date", "Daily Target Adjuster"],
+  },
+  {
+    id: "hiatus-recovery-engine",
+    category: "return-desk",
+    categoryLabel: "Up Next & Hiatus",
+    title: "Hiatus Recovery Engine: Context Refreshers & Last Scene Recaps",
+    subtitle: "Bridges the gap when returning to a novel after 6 months with custom spoiler-safe recaps and memory refreshers.",
+    whyItMatters:
+      "The #1 reason readers drop web novels is returning after a hiatus and forgetting who the characters are. Hiatus Recovery gets you up to speed in 2 minutes.",
+    routePath: "/desk",
+    shortcutOrBadge: "Up Next → Hiatus Section",
+    steps: [
+      "In Up Next, notice works marked with the amber 'Hiatus Warning' badge (inactive for 30+ days).",
+      "Click 'Recover Context' to review your last scene note, major character revelations, and bookmarked memories.",
+      "Read your personalized recap before opening the next unread chapter.",
+      "Once reoriented, click 'Resume Catch-Up' to transition the work back to active reading status.",
+    ],
+    screenshotCaption: "Hiatus Recovery card displaying days elapsed, last scene reflection, and memory refresher list.",
+    wireframeHighlights: ["Inactivity Detection Badge", "Last Scene Memory Refresher", "Smooth Catch-Up Transition"],
+  },
+  {
+    id: "daily-reading-streak-milestones",
+    category: "return-desk",
+    categoryLabel: "Up Next & Hiatus",
+    title: "Daily Reading Habit Streaks, Volume Milestones & Completion Badges",
+    subtitle: "Gamify your reading consistency with daily streak flame counters and volume milestone trophies.",
+    whyItMatters:
+      "Builds a rewarding lifelong reading habit. Celebrate finishing full novel volumes or maintaining a 30-day reading streak.",
+    routePath: "/desk",
+    shortcutOrBadge: "Up Next → Streaks",
+    steps: [
+      "Log your reading progress daily to keep your flame streak counter alive.",
+      "Unlock milestone badges upon completing 10, 50, 100, and 500 chapters.",
+      "Earn golden volume ribbons when completing full published arcs or light novel volumes.",
+    ],
+    screenshotCaption: "Reading Streaks panel with active flame counter, monthly consistency calendar, and badges.",
+    wireframeHighlights: ["Daily Flame Counter", "Monthly Activity Heatmap", "Milestone Trophy Badges"],
+  },
+
+  // 7. MEMORIES, NOTES & FRANCHISE GRAPH
+  {
+    id: "scratchpad-notes-roughwork",
+    category: "memory-lore",
+    categoryLabel: "Memories & Notes",
+    title: "Reading Scratchpad & In-Line Margin Notes",
+    subtitle: "Dedicated rough-work scratchpad for jotting down character theories, chapter guesses, and rough notes while reading.",
+    whyItMatters:
+      "Keeps temporary rough notes cleanly separated from permanent, cherished memories. Scratchpad is for working thoughts; Memories are for reminiscence.",
+    routePath: "/work/01JPK3M9V0WORK000000000001",
+    shortcutOrBadge: "Work Detail → Notes Tab",
+    steps: [
+      "Open any Work Detail page and switch to the 'Notes' tab.",
+      "Use the instant markdown scratchpad to record rough chapter notes, realm progression charts, or power scaling theories.",
+      "Notes save automatically on every keystroke with offline local persistence.",
+      "Keep scratch notes nearby while reading without cluttering your permanent Memory Hall.",
+    ],
+    screenshotCaption: "Notes scratchpad editor with auto-save indicator, markdown formatting bar, and quick list tools.",
+    wireframeHighlights: ["Auto-Save Scratchpad", "Separated from Memories", "Markdown Formatting", "Instant Revisions"],
+  },
+  {
+    id: "memories-vault-reminisce",
+    category: "memory-lore",
+    categoryLabel: "Memories & Notes",
+    title: "Memory Vault & Cherished Quotes (Permanent Reminiscence)",
+    subtitle: "Curate unforgettable quotes, emotional climaxes, and plot revelations to reminisce over years later.",
+    whyItMatters:
+      "When you finish a 1,000-chapter masterpiece, you want to preserve the exact quotes and revelations that touched your soul, forever.",
+    routePath: "/work/01JPK3M9V0WORK000000000001",
+    shortcutOrBadge: "Work Detail → Memories Tab",
+    steps: [
+      "On any Work Detail page, open the 'Memories' tab.",
+      "Click '+ Create Memory' and select 'Text Quote' or 'Plot Milestone'.",
+      "Record the chapter number, exact dialogue or excerpt, and your personal reflection.",
+      "Mark pivotal moments with the Vault Shield icon to keep them locked inside your Private Vault.",
+    ],
+    screenshotCaption: "Memory Vault cards displaying elegant quotation styling, chapter tags, and emotional reflection text.",
+    wireframeHighlights: ["Quotation Card Typography", "Chapter Milestone Tagging", "Private Vault Encryption Option"],
+  },
+  {
+    id: "screenshot-memory-lightbox",
+    category: "memory-lore",
+    categoryLabel: "Memories & Notes",
+    title: "High-Resolution Screenshot Memories & Visual Moment Preserver",
+    subtitle: "Save double-page spreads, iconic manhwa panels, and anime stills attached directly to work milestones.",
+    whyItMatters:
+      "A picture is worth a thousand words. Preserving the exact illustrated panel where a protagonist awakens their power creates a timeless visual chronicle.",
+    routePath: "/work/01JPK3M9V0WORK000000000001",
+    shortcutOrBadge: "Work Detail → Memories",
+    steps: [
+      "In the Memories tab, click '+ Add Screenshot Memory'.",
+      "Attach an image file (PNG, JPG, WebP) or paste an image directly from your clipboard.",
+      "Add a descriptive caption and associated chapter number.",
+      "Click any screenshot thumbnail to open the full-screen pan-and-zoom lightbox.",
+    ],
+    screenshotCaption: "Screenshot Memory card with high-resolution image preview and expand lightbox button.",
+    wireframeHighlights: ["High-Res Image Attachments", "Clipboard Paste Support", "Full-Screen Zoom Lightbox"],
+  },
+  {
+    id: "cross-medium-adaptation-graph",
+    category: "memory-lore",
+    categoryLabel: "Memories & Notes",
+    title: "Cross-Medium Adaptation Graph (Novel ↔ Manhwa ↔ Anime)",
+    subtitle: "Link Web Novels, Light Novels, Manga, Manhwa, and Anime adaptations into a unified franchise relation tree.",
+    whyItMatters:
+      "Shows your entire franchise universe in one visual graph—know immediately that Anime Episode 24 corresponds to Manhwa Chapter 110 and Novel Chapter 142.",
+    routePath: "/work/01JPK3M9V0WORK000000000001",
+    shortcutOrBadge: "Work Detail → Relations Tab",
+    steps: [
+      "Open any Work Detail page and switch to the 'Relations' tab.",
+      "View the visual Adaptation Tree grouping Novel, Manhwa, and Anime nodes.",
+      "Click '+ Link Related Work', choose another work from your Library, and select 'Adaptation' or 'Source Novel'.",
+      "Add Transition Notes (e.g. 'Manhwa Season 1 ends at Web Novel Chapter 65').",
+      "Click any linked work node to navigate across mediums instantaneously.",
+    ],
+    screenshotCaption: "Relations tab displaying cross-medium Novel ↔ Manhwa ↔ Anime visual relationship tree.",
+    wireframeHighlights: ["Novel ↔ Manhwa ↔ Anime Links", "Transition Chapter Notes", "1-Click Cross-Navigation"],
+  },
+  {
+    id: "franchise-universe-tree",
+    category: "memory-lore",
+    categoryLabel: "Memories & Notes",
+    title: "Franchise Universe Tree (Prequels, Sequels & Spin-Offs)",
+    subtitle: "Map complex fictional universes including prequels, sequels, side stories, alternative timelines, and crossovers.",
+    whyItMatters:
+      "Keeps multi-generational epics and massive light novel spinoff universes organized so you always know the canonical reading order.",
+    routePath: "/work/01JPK3M9V0WORK000000000001",
+    shortcutOrBadge: "Relations → Universe Graph",
+    steps: [
+      "In the Relations tab, select 'Add Relationship' and choose 'Sequel', 'Prequel', 'Spin-off', or 'Shared Universe'.",
+      "The interactive graph arranges related works chronologically or by publication order.",
+      "Track your reading progress across the entire franchise in a single unified view.",
+    ],
+    screenshotCaption: "Franchise Universe Tree displaying chronological reading sequence and spinoff branches.",
+    wireframeHighlights: ["Chronological Tree Ordering", "Multi-Branch Spinoffs", "Total Franchise Progress Meter"],
   },
 
   // 8. RADAR TRIAGE, UPDATES & MERGE WIZARD
   {
     id: "radar-capture-triage",
-    number: "24",
     category: "radar-merge",
-    categoryLabel: "Radar, Updates & Merge",
+    categoryLabel: "Radar & Deduplication",
     title: "Radar Capture Inbox & Triage Workflow",
     subtitle: "Dump intriguing recommendations, URLs, and titles into Radar without polluting your curated Library until verified.",
     whyItMatters:
-      "Separates 'I saw someone mention this title on Reddit/TikTok' from your committed Library catalog.",
+      "Separates casual 'I saw someone recommend this title on Reddit/TikTok' from your committed, organized Library catalog.",
     routePath: "/radar",
     shortcutOrBadge: "Sidebar → Radar",
     steps: [
-      "Open the 'Radar' route (/radar) or click 'Quick-Capture to Radar' from the Homepage Portal Directory.",
-      "Click '+ Capture to Radar' to quickly log a title, URL, medium, priority level, and why it caught your eye.",
-      "Filter Radar captures by Priority, Medium, or Triage Status, and bookmark high-interest items.",
+      "Open 'Radar' (/radar) from the navigation sidebar.",
+      "Click '+ Capture to Radar' to quickly record a title, URL, medium, priority level, and why it caught your eye.",
+      "Filter Radar captures by Priority (High, Medium, Low), Medium, or Triage Status.",
       "When ready to start reading, click 'Promote to Library' on any Radar card to convert it into a full Library Work.",
     ],
-    screenshotCaption: "Screenshot #24: Radar Capture Queue with priority badges, filters, and 'Promote to Library' triage action.",
+    screenshotCaption: "Radar Capture Queue with priority badges, medium filters, and Promote to Library action.",
     wireframeHighlights: ["Zero-Friction Capture", "Priority & Medium Filters", "1-Click Promote to Library"],
   },
   {
     id: "updates-certainty-inbox",
-    number: "25",
     category: "radar-merge",
-    categoryLabel: "Radar, Updates & Merge",
+    categoryLabel: "Radar & Deduplication",
     title: "Updates Feed with Release Certainty Badges & Snooze",
     subtitle: "Track newly detected chapters/episodes with Confirmed, Inferred, or Scheduled certainty indicators.",
     whyItMatters:
-      "Distinguishes between verified RSS/API chapter releases ('Confirmed') and estimated release cadences ('Scheduled' / 'Inferred').",
+      "Distinguishes between verified chapter releases ('Confirmed') and estimated release cadences ('Scheduled' / 'Inferred').",
     routePath: "/updates",
     shortcutOrBadge: "Sidebar → Updates",
     steps: [
-      "Click 'Updates' (/updates) in the Sidebar (notice the live unread badge count).",
-      "Inspect new chapter/episode release cards showing the numeric delta (e.g. '+3 new chapters since Ch. 112') and Update Certainty Badge.",
-      "Click 'Mark Seen', 'Snooze', or 'Read Now' to open the preferred source and clear the notification.",
+      "Click 'Updates' (/updates) in the sidebar (notice the live unread count badge).",
+      "Inspect new chapter release cards showing the numeric delta (e.g. '+3 new chapters since Ch. 112') and Certainty Badge.",
+      "Click 'Mark Seen', 'Snooze', or 'Read Now' to open your preferred source and clear the notification.",
     ],
-    screenshotCaption: "Screenshot #25: Updates Inbox showing unread chapter releases, certainty badges, and batch mark-seen controls.",
-    wireframeHighlights: ["Confirmed / Inferred Badges", "Unread Chapter Delta", "Snooze & Dismiss"],
+    screenshotCaption: "Updates Inbox showing unread chapter releases, certainty badges, and batch mark-seen controls.",
+    wireframeHighlights: ["Confirmed / Inferred Badges", "Unread Chapter Delta", "Snooze & Dismiss Controls"],
   },
   {
     id: "non-destructive-merge-wizard",
-    number: "26",
     category: "radar-merge",
-    categoryLabel: "Radar, Updates & Merge",
+    categoryLabel: "Radar & Deduplication",
     title: "Non-Destructive Duplicate Work Merge Wizard",
-    subtitle: "Combine two duplicate Works while preserving 100% of both works' Access Paths, Memories, Tags, and Highest Progress.",
+    subtitle: "Combine two duplicate works while preserving 100% of both works' Access Paths, Memories, Tags, and Progress.",
     whyItMatters:
-      "Often you accidentally track a work under its Korean/Japanese romanized title AND its English title. Merging them never deletes a single note or source.",
+      "Often you accidentally track a work under its romanized Korean title AND its official English title. Merging them never deletes a single note or mirror.",
     routePath: "/work/01JPK3M9V0WORK000000000001",
     shortcutOrBadge: "Work Detail → Merge",
     steps: [
       "On any Work Detail page, click the 'Merge' button in the top action bar.",
-      "Search and select the duplicate candidate Work (the wizard automatically scores likely duplicates by title/alias similarity).",
+      "Search and select the duplicate candidate work (the wizard automatically scores likely duplicates by title similarity).",
       "Choose which Title, Cover, and Primary State to keep while previewing the unified Access Paths, Memories, and Aliases.",
-      "Confirm the merge—the secondary title becomes a searchable Alias on the surviving Work and zero data is lost.",
+      "Confirm the merge—the secondary title becomes a searchable Alias on the surviving work and zero data is lost.",
     ],
-    screenshotCaption: "Screenshot #26: 3-Step Non-Destructive Merge Wizard showing side-by-side field resolution.",
+    screenshotCaption: "3-Step Non-Destructive Merge Wizard showing side-by-side field resolution and combined paths.",
     wireframeHighlights: ["Fuzzy Duplicate Detection", "Zero-Data-Loss Union", "Automatic Alias Preservation"],
   },
 
-  // 9. LISTS, CATEGORIES, PRIVATE VAULT & DATA PORTABILITY
+  // 9. LISTS, CATEGORIES, PRIVATE VAULT & PORTABILITY
   {
     id: "curated-lists-publication",
-    number: "27",
     category: "vault-backup",
-    categoryLabel: "Lists, Vault & Portability",
+    categoryLabel: "Vault, Lists & Portability",
     title: "Curated Reading Lists & Shareable Publication Cards",
     subtitle: "Build themed collections with custom ordering, curator notes, and exportable share cards.",
     whyItMatters:
@@ -612,77 +918,75 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
     routePath: "/lists",
     shortcutOrBadge: "Sidebar → Lists",
     steps: [
-      "Open 'Lists' (/lists) from the Sidebar and click '+ Create List'.",
-      "Add Works to the list from the List editor or via the Library Bulk Action bar.",
+      "Open 'Lists' (/lists) from the sidebar and click '+ Create List'.",
+      "Add works to the list from the list editor or via the Library Bulk Action bar.",
+      "Add custom curator annotations explaining why each work deserves its spot on the list.",
       "Open the Publication Panel to generate a shareable read-only card or JSON export of your curated list.",
     ],
-    screenshotCaption: "Screenshot #27: Curated Lists view with custom work ordering and Publication Share panel.",
-    wireframeHighlights: ["Themed Collections", "Curator Annotations", "Shareable Publication Card"],
+    screenshotCaption: "Curated Lists view with custom work ordering and Publication Share card generator.",
+    wireframeHighlights: ["Themed Collections", "Curator Annotations", "Shareable Publication Cards"],
   },
   {
-    id: "custom-dynamic-categories",
-    number: "28",
+    id: "custom-dynamic-categories-view",
     category: "vault-backup",
-    categoryLabel: "Lists, Vault & Portability",
+    categoryLabel: "Vault, Lists & Portability",
     title: "My Categories & Custom Taxonomy Organizer",
     subtitle: "Organize works into personal shelves and custom genre/theme taxonomies.",
     whyItMatters:
-      "Lets you define your own classification system beyond standard publisher genres.",
+      "Lets you define your own classification system beyond standard publisher genres with custom accent colors.",
     routePath: "/categories",
     shortcutOrBadge: "Sidebar → My Categories",
     steps: [
       "Navigate to 'My Categories' (/categories).",
-      "Create custom categories with custom icons/colors and assign Works to them.",
-      "Click any category card to filter and inspect all Works inside that shelf.",
+      "Create custom categories with custom icons/colors and assign works to them.",
+      "Click any category card to filter and inspect all works inside that shelf.",
     ],
-    screenshotCaption: "Screenshot #28: My Categories dashboard with custom shelf cards and work counts.",
+    screenshotCaption: "My Categories dashboard with custom shelf cards and work count indicators.",
     wireframeHighlights: ["Custom Shelf Taxonomy", "Color & Icon Badges", "Instant Category Filtering"],
   },
   {
-    id: "discover-recommendations",
-    number: "29",
-    category: "vault-backup",
-    categoryLabel: "Lists, Vault & Portability",
-    title: "Discover Engine & Taste-Matched Recommendations",
-    subtitle: "Explore curated recommendations matched against your favorite genres, tags, and completed works.",
-    whyItMatters:
-      "Surfaces high-affinity titles based on the exact tropes and mediums you actually finish.",
-    routePath: "/discover",
-    shortcutOrBadge: "Sidebar → Discover",
-    steps: [
-      "Open 'Discover' (/discover) from the Sidebar.",
-      "Browse taste-matched clusters and trope spotlights.",
-      "Click '+ Add to Library' or '+ Send to Radar' on any recommendation card.",
-    ],
-    screenshotCaption: "Screenshot #29: Discover route showing taste-matched fiction recommendations and trope clusters.",
-    wireframeHighlights: ["Affinity Scoring", "Trope Spotlights", "1-Click Add to Library/Radar"],
-  },
-  {
     id: "zero-knowledge-private-vault",
-    number: "30",
     category: "vault-backup",
-    categoryLabel: "Lists, Vault & Portability",
+    categoryLabel: "Vault, Lists & Portability",
     title: "Hardware-Accelerated Zero-Knowledge Private Vault with Auto-Lock",
-    subtitle: "Protect sensitive or private Works behind hardware-accelerated zero-knowledge encryption and instant panic-lock.",
+    subtitle: "Protect sensitive or private works behind hardware-accelerated zero-knowledge encryption and instant panic-lock.",
     whyItMatters:
-      "Private works are completely invisible in the standard Library, Search, and Return Desk until you unlock the Private Vault with your passphrase.",
+      "Private works are completely invisible in the standard Library, Search, and Up Next until you unlock the Private Vault with your passphrase.",
     routePath: "/vault",
     shortcutOrBadge: "Ctrl+Shift+L (Panic Lock)",
     steps: [
-      "Navigate to 'Private Vault' (/vault) in the Sidebar footer.",
-      "Set up your Vault Passphrase (derives an on-device cryptographic key).",
-      "Move any Work into the Vault from Work Detail (Shield icon) or Library Bulk Actions.",
-      "Lock the Vault manually or press Ctrl+Shift+L (also auto-locks after 15 minutes of inactivity or tab hide).",
+      "Navigate to 'Private Vault' (/vault) in the sidebar footer.",
+      "Set up your Vault Passphrase (derives an on-device AES-GCM 256-bit cryptographic key via PBKDF2).",
+      "Move any work into the Vault from Work Detail (Shield icon) or Library Bulk Actions.",
+      "Lock the Vault manually or press Ctrl+Shift+L (also auto-locks after 15 minutes of inactivity or window blur).",
     ],
-    screenshotCaption: "Screenshot #30: Private Vault unlock screen and encrypted sanctum view.",
-    wireframeHighlights: ["Zero-Knowledge Encryption", "On-Device Key Derivation", "Ctrl+Shift+L Panic Lock"],
+    screenshotCaption: "Private Vault unlock screen and encrypted sanctum view with panic lock trigger.",
+    wireframeHighlights: ["Zero-Knowledge AES-256", "PBKDF2 Key Derivation", "Ctrl+Shift+L Panic Lock"],
+  },
+  {
+    id: "hardware-panic-lock-stealth",
+    category: "vault-backup",
+    categoryLabel: "Vault, Lists & Portability",
+    title: "Instant Panic Lock (Ctrl+Shift+L) & Complete Stealth Mode",
+    subtitle: "Instantly evicts cryptographic keys from RAM, clears vault cards from screen, and redirects to innocent library.",
+    whyItMatters:
+      "If someone walks into your room while you are reading a private work, one keystroke purges memory and displays harmless public fiction.",
+    routePath: "/vault",
+    shortcutOrBadge: "Ctrl+Shift+L / Inactivity Timer",
+    steps: [
+      "While inside the Private Vault, press 'Ctrl+Shift+L' at any moment.",
+      "The screen instantly wipes all encrypted DOM nodes and redirects to the public Sanctum Library.",
+      "Cryptographic encryption keys in memory are scrubbed immediately.",
+      "To re-enter, you must re-enter your master passphrase.",
+    ],
+    screenshotCaption: "Stealth Panic Lock confirmation toast and instant memory scrubbing notification.",
+    wireframeHighlights: ["Sub-Millisecond Key Purge", "Zero DOM Remnants", "Automatic Window Blur Trigger"],
   },
   {
     id: "cold-storage-archive",
-    number: "31",
     category: "vault-backup",
-    categoryLabel: "Lists, Vault & Portability",
-    title: "Cold Storage Archive with Structured Reason & Snapshot Preservation",
+    categoryLabel: "Vault, Lists & Portability",
+    title: "Cold Storage Archive with Structured Reason & Reflection Notes",
     subtitle: "Retire dropped, hiatus-abandoned, or finished works out of your active workspace without deleting their history.",
     whyItMatters:
       "Keeps your active Library clean and focused while preserving a permanent historical record of why and when you archived a work.",
@@ -693,14 +997,32 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Select an Archive Reason (Completed & Retired, Dropped, Source Dead, Indefinite Hiatus, Seasonal Rotation) and add a final reflection note.",
       "Visit '/archive' anytime to search archived works or click 'Unarchive' to restore them to active duty.",
     ],
-    screenshotCaption: "Screenshot #31: Cold Storage Archive modal and Archive catalog with reflection notes and Unarchive button.",
+    screenshotCaption: "Cold Storage Archive modal and Archive catalog with reflection notes and Unarchive button.",
     wireframeHighlights: ["Structured Archive Reasons", "Reflection Notes", "1-Click Unarchive Restore"],
   },
   {
-    id: "data-transfer-bookmarks-import",
-    number: "32",
+    id: "gca-chronicles-archive-spec",
     category: "vault-backup",
-    categoryLabel: "Lists, Vault & Portability",
+    categoryLabel: "Vault, Lists & Portability",
+    title: "Grimoire Chronicles Archive (.gca) Portable Bundle Engine",
+    subtitle: "Universal, self-contained migration archive containing works, memories, access paths, credentials, and relations.",
+    whyItMatters:
+      "Enables effortless backup and transfer between Windows PC, macOS, Linux, and Android with zero reliance on cloud services.",
+    routePath: "/settings",
+    shortcutOrBadge: "Settings → Export .gca",
+    steps: [
+      "Go to Settings → Data Transfer & Portability.",
+      "Click 'Export Grimoire Archive (.gca)'.",
+      "Save the resulting file or transfer it to your phone via USB, local Wi-Fi, or cloud drive.",
+      "On your other device, simply select 'Import .gca File' from the landing screen to restore everything in seconds.",
+    ],
+    screenshotCaption: "Export Grimoire Archive dialog showing payload breakdown and instant download button.",
+    wireframeHighlights: ["Self-Contained Bundle", "Cross-Platform Compatible", "Complete Relational Fidelity"],
+  },
+  {
+    id: "data-transfer-bookmarks-import",
+    category: "vault-backup",
+    categoryLabel: "Vault, Lists & Portability",
     title: "Full JSON Vault Backup, CSV Importer & Browser Bookmarks HTML Parser",
     subtitle: "Export your entire library to portable JSON, or bulk-import thousands of browser bookmarks and CSV rows.",
     whyItMatters:
@@ -709,51 +1031,179 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
     shortcutOrBadge: "Settings → Data Transfer",
     steps: [
       "Go to Settings (/settings) and scroll to the 'Data Transfer & Portability' panel.",
-      "Click 'Export Full Backup (.json)' to download a complete snapshot of all Works, Progress, Memories, Lists, and Access Paths.",
-      "Click 'Import Browser Bookmarks (.html)' or 'Import CSV' to parse bookmark folders into candidate Works, review deduplication matches, and commit them to your Library.",
+      "Click 'Export Full Backup (.json)' to download a complete snapshot of all works, progress, memories, lists, and access paths.",
+      "Click 'Import Browser Bookmarks (.html)' or 'Import CSV' to parse bookmark folders into candidate works, review deduplication matches, and commit them to your Library.",
     ],
-    screenshotCaption: "Screenshot #32: Settings Data Transfer panel showing JSON Backup Export, CSV Importer, and Browser Bookmarks HTML parser.",
+    screenshotCaption: "Settings Data Transfer panel showing JSON Backup Export, CSV Importer, and Browser Bookmarks HTML parser.",
     wireframeHighlights: ["1-Click JSON Vault Export", "Chrome/Firefox HTML Importer", "Smart Deduplication Preview"],
+  },
+  {
+    id: "local-first-e2ee-sync",
+    category: "vault-backup",
+    categoryLabel: "Vault, Lists & Portability",
+    title: "Local-First Hybrid Logical Clock (HLC) CRDT Sync Engine",
+    subtitle: "Conflict-free multi-device synchronization with End-to-End Encryption across PC and mobile devices.",
+    whyItMatters:
+      "Read offline on the subway, on an airplane, or at home. When you reconnect, chapter progress merges seamlessly without conflicts or data overwrites.",
+    routePath: "/settings",
+    shortcutOrBadge: "Settings → Sync Hub",
+    steps: [
+      "Open Settings and locate the 'Sync & Relay Hub' section.",
+      "Inspect your local HLC timestamp and sync state.",
+      "Changes made locally are signed and queued into local SQLite/JSON storage.",
+      "When online, encrypted CRDT deltas synchronize with your relay or peer devices.",
+    ],
+    screenshotCaption: "Sync Hub status panel showing HLC clock drift, last sync timestamp, and encrypted relay status.",
+    wireframeHighlights: ["Local-First Architecture", "HLC CRDT Convergence", "End-to-End Encrypted Relay"],
+  },
+  {
+    id: "desktop-native-gui-launcher",
+    category: "vault-backup",
+    categoryLabel: "Vault, Lists & Portability",
+    title: "Dual Windows Desktop Deployment: Native Launcher & Standalone Studio",
+    subtitle: "Run Grimoire as an ultra-lightweight 56 KB native Windows GUI launcher or as a 35 MB standalone executable.",
+    whyItMatters:
+      "Experience a true native desktop application without terminal windows, console flicker, or browser address bars.",
+    routePath: "/settings",
+    shortcutOrBadge: "Grimoire.exe / Win32",
+    steps: [
+      "Double-click 'Grimoire.exe' in the Chronicles Vault root folder.",
+      "The native C# Win32 launcher starts silently with zero console flicker and loads the local workstation UI instantly.",
+      "Alternatively, run 'Grimoire-Studio.exe' for a fully self-contained PyInstaller distribution with embedded sync engine.",
+      "Enjoy full hardware acceleration, native window controls, and offline OPFS/SQLite performance.",
+    ],
+    screenshotCaption: "Grimoire Windows Desktop app running in dedicated frameless window with native OS integration.",
+    wireframeHighlights: ["56 KB Win32 Launcher", "35 MB PyInstaller Studio", "Zero Console Windows", "Hardware Accelerated"],
+  },
+];
+
+const COMPREHENSIVE_FAQ_ITEMS: readonly FaqItem[] = [
+  {
+    id: "faq-rooms-profiles",
+    category: "Account & Profiles",
+    question: "How do reading rooms and user profiles work in Grimoire?",
+    answer:
+      "In Grimoire, each 'Room' represents an isolated reading sanctum with its own visual theme, active shelf state, and personal motto. You can maintain multiple rooms (for instance, one for light novels, one for manga, and one for study) and switch between them instantly from the Sanctum Title Screen.",
+    highlights: ["Isolated Room Environments", "Per-Profile Themes", "Fast Switching via Lobby"],
+  },
+  {
+    id: "faq-signup-login",
+    category: "Account & Profiles",
+    question: "Can I sign up using an Email ID or Google Sign-In?",
+    answer:
+      "Yes! When visiting Grimoire without an active session, the first-time landing screen presents three prominent options: Sign Up, Sign In, or Import .gca File. You can create an account using your Google account (via 'Continue with Google'), an Email ID and password, or choose a purely offline local username for maximum privacy.",
+    highlights: ["Continue with Google", "Email ID & Password", "100% Offline Local Option"],
+  },
+  {
+    id: "faq-zero-works-empty-library",
+    category: "Account & Profiles",
+    question: "Why does my library start with 0 works when I log out or create a new account?",
+    answer:
+      "Grimoire strictly adheres to a zero-mock, clean-slate invariant. Unlike demo apps that flood your shelves with fake placeholder data, new accounts and logged-out sessions start completely empty with 0 works. You have full ownership to build your curated library or restore an existing .gca archive.",
+    highlights: ["Clean Slate Invariant", "Zero Mock Data", "Total User Ownership"],
+  },
+  {
+    id: "faq-credentials-storage",
+    category: "Security & Privacy",
+    question: "Where are my website usernames and passwords stored, and in what form?",
+    answer:
+      "Your website reading credentials (such as logins for Royal Road, MangaDex, or Webtoons) are stored locally on your device inside an encrypted vault partition (localStorage/IndexedDB key 'grimoire:vault:credentials'). They are encrypted using AES-GCM 256-bit with an encryption key derived via PBKDF2 (100,000 SHA-256 iterations) from your Vault Passphrase. They are NEVER sent to any remote server in plaintext.",
+    highlights: ["AES-GCM 256-bit Encryption", "PBKDF2 Key Derivation", "Zero-Knowledge Local Storage"],
+  },
+  {
+    id: "faq-server-data-form",
+    category: "Security & Privacy",
+    question: "Where and in what form is online server data like friend lists and sync records stored?",
+    answer:
+      "Grimoire operates on a Local-First, End-to-End Encrypted (E2EE) architecture. On your PC workstation, data is stored in an embedded Hybrid Logical Clock (HLC) JSON document store ('shared_vault_store.json') and local SQLite database. On the relay server, records and friend links exist solely as opaque, encrypted CRDT document envelopes. The relay server acts as an untrusted mailbox carrier and cannot read your library titles, friend lists, or reading progress.",
+    highlights: ["Local HLC Document Store", "Embedded SQLite", "Encrypted CRDT Envelopes", "Untrusted Blind Relay"],
+  },
+  {
+    id: "faq-panic-lock",
+    category: "Security & Privacy",
+    question: "What is the Private Vault and how does Panic Lock (Ctrl+Shift+L) work?",
+    answer:
+      "The Private Vault is an encrypted sanctuary for works you want kept strictly private. Private works are hidden from the normal library, search results, and Up Next until you unlock the vault. Pressing Ctrl+Shift+L triggers instant Panic Lock: it immediately wipes decrypted data and cryptographic keys from system memory and redirects your screen to the public library in under 20 milliseconds.",
+    highlights: ["Zero-Trace Stealth", "Ctrl+Shift+L Instant Purge", "Auto-Lock on Inactivity & Tab Blur"],
+  },
+  {
+    id: "faq-supported-formats",
+    category: "Readers & Media",
+    question: "What file formats can I read or play directly inside Grimoire?",
+    answer:
+      "Grimoire includes built-in offline readers and media players supporting: EPUB (with chapter TOC and typography controls), PDF (with continuous scroll, dual-page spread, and zoom), Webtoon / Comic strips (infinite vertical continuous scroll), Audiobooks (MP3, WAV, M4B with speed control and sleep timer), and Local Video (MP4, MKV, WebM with theater mode and subtitle tracks).",
+    highlights: ["EPUB & PDF Readers", "Continuous Webtoon Scroll", "Audiobook & Video Players"],
+  },
+  {
+    id: "faq-notes-vs-memories",
+    category: "Notes vs Memories",
+    question: "What is the difference between Notes and Memories?",
+    answer:
+      "Notes and Memories serve two distinctly different purposes: 'Notes' are a rough-work scratchpad used while actively reading to jot down quick character theories, realm progression tables, and temporary thoughts. 'Memories' are permanent, cherished emotional milestones—such as memorable quotes, pivotal plot revelations, and high-resolution screenshots—preserved to reminisce over years later.",
+    highlights: ["Notes = Active Reading Scratchpad", "Memories = Cherished Reminiscence & Screenshots"],
+  },
+  {
+    id: "faq-cross-medium-adaptations",
+    category: "Adaptations & Graph",
+    question: "How does Grimoire handle works that have both a Novel and a Manhwa or Anime?",
+    answer:
+      "Grimoire features a Cross-Medium Adaptation Graph. You can track the Web Novel, Manhwa, and Anime as distinct works with their own independent chapter progress, while linking them together via the 'Relations' tab. You can add Transition Chapter Notes (e.g. 'Anime Season 1 ends at Manhwa Chapter 110 and Novel Chapter 142') so you can seamlessly transition across mediums without losing your place.",
+    highlights: ["Independent Chapter Tracking", "Visual Relation Graph", "Transition Chapter Notes"],
+  },
+  {
+    id: "faq-frequent-websites",
+    category: "Portals & Passwords",
+    question: "How does Grimoire automatically detect my Frequent Reading Websites?",
+    answer:
+      "Grimoire continuously analyzes the Access Paths across all works in your library. Any website domain that has 5 or more works attached to it is automatically identified as a Frequent Reading Portal and prominently displayed in the Website Credential Keyring with its work count badge, direct homepage launcher, and catalog search integration.",
+    highlights: ["5+ Work Automatic Threshold", "Domain Aggregator", "1-Click Catalog Search"],
+  },
+  {
+    id: "faq-multi-source-mirrors",
+    category: "Portals & Passwords",
+    question: "What are Multi-Source Access Paths and what happens if a website shuts down?",
+    answer:
+      "Each work in Grimoire supports unlimited Access Paths (e.g., Official Publisher, Scanlation Group A, Backup Mirror B, Local EPUB). You can assign priority ordering and star your primary path. If a scanlation site goes offline or changes domains, simply update the path or promote a backup mirror with one click—all your chapter progress, notes, and memories remain completely intact.",
+    highlights: ["Unlimited Backup Mirrors", "1-Click Primary Promotion", "Zero Progress Loss on Dead Sites"],
+  },
+  {
+    id: "faq-gca-file-migration",
+    category: "Data & Portability",
+    question: "What is a .gca file and how do I transfer my library between devices?",
+    answer:
+      "A .gca file (Grimoire Chronicles Archive) is an open, portable JSON-based bundle containing your entire library: works, reading progress, memories, access paths, lists, categories, and encrypted vault records. You can export a .gca file from Settings → Data Transfer, and restore it on any other Windows PC, Mac, Linux, or Android device with one click on the landing page.",
+    highlights: ["Universal Portable Archive", "Cross-Platform Migration", "1-Click Import from Landing Page"],
+  },
+  {
+    id: "faq-browser-bookmarks-import",
+    category: "Data & Portability",
+    question: "Can I import my existing manga/novel bookmarks from Chrome or Firefox?",
+    answer:
+      "Yes! Grimoire includes a built-in Browser Bookmarks HTML Parser. Export your bookmarks from Chrome, Firefox, or Edge as an HTML file, upload it into Grimoire Settings → Data Transfer, and the smart parser will extract titles, URLs, and folders into candidate works with deduplication preview before committing them to your library.",
+    highlights: ["Chrome / Firefox / Edge HTML Importer", "Smart Deduplication Preview", "Folder Hierarchy Extraction"],
+  },
+  {
+    id: "faq-app-sizes-platforms",
+    category: "Platforms & Storage",
+    question: "What are the sizes and footprints of Grimoire on Windows PC and Android mobile?",
+    answer:
+      "On Windows PC: The native C# GUI launcher ('Grimoire.exe') is an ultra-lightweight 56 KB (56,320 bytes); the standalone PyInstaller executable ('Grimoire-Studio.exe') with bundled Python runtime and media parser is 35.2 MB; the core web bundle is ~1.1 MB minified (~320 KB gzipped). On Android: The native APK ('ChroniclesVault-Android-v1.0.apk') is 3.70 MB, with an installed device footprint of approximately 6 to 9 MB.",
+    highlights: ["Windows Launcher: 56 KB", "Windows Studio: 35.2 MB", "Android APK: 3.70 MB", "Installed Footprint: 6-9 MB"],
   },
 ];
 
 const CATEGORY_TABS = [
-  { id: "all", label: "All 32 Features", icon: Sparkles },
+  { id: "all", label: "All Features & Variants", icon: Sparkles },
   { id: "room-themes", label: "Room & Themes", icon: Palette },
-  { id: "library-views", label: "Library & Views", icon: BookOpen },
-  { id: "work-detail", label: "Work Detail", icon: Layers },
-  { id: "sources-video", label: "Sources & Video", icon: Film },
-  { id: "reader-shelf", label: "Ebook/Comic Reader", icon: HardDrive },
-  { id: "return-desk", label: "Up Next", icon: RotateCcw },
-  { id: "memory-lore", label: "Memory & Lore", icon: MessageSquare },
-  { id: "radar-merge", label: "Radar & Merge", icon: Radar },
-  { id: "vault-backup", label: "Vault & Backup", icon: Shield },
+  { id: "library-views", label: "Library & Shelves", icon: BookOpen },
+  { id: "work-detail", label: "Work Dossier", icon: Layers },
+  { id: "sources-video", label: "Sources & Portals", icon: Globe },
+  { id: "reader-shelf", label: "Readers & Media", icon: HardDrive },
+  { id: "return-desk", label: "Up Next & Hiatus", icon: RotateCcw },
+  { id: "memory-lore", label: "Memories & Notes", icon: MessageSquare },
+  { id: "radar-merge", label: "Radar & Deduplication", icon: Radar },
+  { id: "vault-backup", label: "Vault & Portability", icon: Shield },
 ] as const;
-
-const SCREENSHOT_STORAGE_KEY = "cv:feature_screenshots:v1";
-
-const CORE_SCREENSHOT_ITEMS = [
-  { id: "room-preloader-profiles", num: "01", name: "Sanctum Room Homepage & 3D Stage" },
-  { id: "three-distinct-themes", num: "02", name: "Theme Switcher & 4 Atmospheric Palettes" },
-  { id: "library-grid-shelf", num: "03", name: "Library Grid View & Cover Showcase" },
-  { id: "library-dense-table", num: "04", name: "Library Spreadsheet / Dense Table View" },
-  { id: "multi-select-bulk-actions", num: "05", name: "Multi-Select Bulk Actions Bar" },
-  { id: "work-detail-hero-dossier", num: "06", name: "Work Detail Hero & Media Access Sources" },
-  { id: "multi-source-access-paths", num: "07", name: "Multi-Source Streamer & Reader Paths" },
-  { id: "local-video-player-modal", num: "08", name: "Embedded HTML5 Local Video Player" },
-  { id: "epub-3d-reader", num: "09", name: "EPUB 3D Book Reader & Pagination" },
-  { id: "pdf-vector-reader", num: "10", name: "Compact PDF Reader (Normalized Zoom)" },
-  { id: "cbz-webtoon-reader", num: "11", name: "CBZ Comic/Manga Double-Page Reader" },
-  { id: "txt-spread-reader", num: "12", name: "TXT 2-Page Book Reader with Page Turn" },
-  { id: "return-desk-triage", num: "13", name: "Up Next Urgent Priority & Activity Feed" },
-  { id: "memories-quotes-timeline", num: "14", name: "Global Memories, Quotes & Lore Feed" },
-  { id: "curated-lists-publication", num: "15", name: "Editorial Social Sharing Card Generator" },
-  { id: "radar-capture-triage", num: "16", name: "Radar Browser Triage & Quick Capture" },
-  { id: "updates-certainty-inbox", num: "17", name: "Updates Feed with Certainty Badges" },
-  { id: "non-destructive-merge-wizard", num: "18", name: "Non-Destructive Duplicate Merge Wizard" },
-  { id: "zero-knowledge-private-vault", num: "19", name: "Zero-Knowledge Private Vault Unlock" },
-  { id: "cold-storage-archive", num: "20", name: "Cold Storage Archive & Retirement History" },
-];
 
 export interface FeaturesGuideProps {
   onNavigate?: (href: string) => void;
@@ -761,63 +1211,75 @@ export interface FeaturesGuideProps {
 }
 
 export function FeaturesGuide({ onNavigate, onEnterRoomAndNavigate }: FeaturesGuideProps) {
+  const [activeTab, setActiveTab] = React.useState<"features" | "faq">("features");
   const [selectedCategory, setSelectedCategory] = React.useState<string>("all");
   const [searchQuery, setSearchQuery] = React.useState<string>("");
-  const [statusFilter, setStatusFilter] = React.useState<"all" | "missing" | "attached">("all");
-  const [showChecklist, setShowChecklist] = React.useState<boolean>(false);
   const [expandedCards, setExpandedCards] = React.useState<Record<string, boolean>>(() => {
-    // Default the first 3 cards open, others compact
     return {
       "room-preloader-profiles": true,
       "three-distinct-themes": true,
       "library-grid-shelf": true,
     };
   });
+  const [expandedFaq, setExpandedFaq] = React.useState<Record<string, boolean>>({
+    "faq-rooms-profiles": true,
+    "faq-credentials-storage": true,
+    "faq-supported-formats": true,
+  });
 
-  const [customScreenshots, setCustomScreenshots] = React.useState<Record<string, string>>(() => {
+  const [customScreenshots] = React.useState<Record<string, string>>(() => {
     if (typeof window === "undefined") return {};
     try {
-      const raw = window.localStorage.getItem(SCREENSHOT_STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as Record<string, string>) : {};
+      const raw = window.localStorage.getItem("cv:feature_screenshots:v1");
+      return raw ? JSON.parse(raw) : {};
     } catch {
       return {};
     }
   });
 
-  const [activeUploadFeatureId, setActiveUploadFeatureId] = React.useState<string | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const filteredFeatures = React.useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return ALL_TINY_FEATURES.filter((feat) => {
+      const matchesCategory = selectedCategory === "all" || feat.category === selectedCategory;
+      if (!matchesCategory) return false;
+      if (!q) return true;
+      return (
+        feat.title.toLowerCase().includes(q) ||
+        feat.subtitle.toLowerCase().includes(q) ||
+        feat.whyItMatters.toLowerCase().includes(q) ||
+        feat.categoryLabel.toLowerCase().includes(q) ||
+        feat.shortcutOrBadge.toLowerCase().includes(q) ||
+        feat.steps.some((s) => s.toLowerCase().includes(q)) ||
+        feat.wireframeHighlights.some((h) => h.toLowerCase().includes(q))
+      );
+    });
+  }, [selectedCategory, searchQuery]);
 
-  const saveScreenshots = (next: Record<string, string>) => {
-    setCustomScreenshots(next);
-    try {
-      window.localStorage.setItem(SCREENSHOT_STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // Ignore quota errors if very large uncompressed images are added
-    }
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.currentTarget.value = "";
-    if (!file || !activeUploadFeatureId) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        saveScreenshots({
-          ...customScreenshots,
-          [activeUploadFeatureId]: reader.result,
-        });
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const attachedCount = React.useMemo(() => {
-    return CORE_SCREENSHOT_ITEMS.filter((item) => Boolean(customScreenshots[item.id])).length;
-  }, [customScreenshots]);
+  const filteredFaq = React.useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return COMPREHENSIVE_FAQ_ITEMS;
+    return COMPREHENSIVE_FAQ_ITEMS.filter((item) => {
+      return (
+        item.question.toLowerCase().includes(q) ||
+        item.answer.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q) ||
+        item.highlights.some((h) => h.toLowerCase().includes(q))
+      );
+    });
+  }, [searchQuery]);
 
   const toggleCard = (id: string) => {
-    setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
+    setExpandedCards((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const toggleFaq = (id: string) => {
+    setExpandedFaq((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
 
   const setAllCardsExpanded = (expanded: boolean) => {
@@ -828,60 +1290,18 @@ export function FeaturesGuide({ onNavigate, onEnterRoomAndNavigate }: FeaturesGu
     setExpandedCards(next);
   };
 
-  const scrollToFeature = (id: string) => {
-    setExpandedCards((prev) => ({ ...prev, [id]: true }));
-    setTimeout(() => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 60);
-  };
-
-  const filteredFeatures = React.useMemo(() => {
-    return ALL_TINY_FEATURES.filter((feature) => {
-      if (selectedCategory !== "all" && feature.category !== selectedCategory) {
-        return false;
-      }
-      const hasScreenshot = Boolean(customScreenshots[feature.id]);
-      if (statusFilter === "attached" && !hasScreenshot) return false;
-      if (statusFilter === "missing" && hasScreenshot) return false;
-
-      if (searchQuery.trim().length > 0) {
-        const q = searchQuery.toLowerCase();
-        return (
-          feature.title.toLowerCase().includes(q) ||
-          feature.subtitle.toLowerCase().includes(q) ||
-          feature.whyItMatters.toLowerCase().includes(q) ||
-          feature.categoryLabel.toLowerCase().includes(q) ||
-          feature.steps.some((s) => s.toLowerCase().includes(q))
-        );
-      }
-      return true;
-    });
-  }, [selectedCategory, searchQuery, statusFilter, customScreenshots]);
-
   const triggerJump = (routePath: string) => {
     if (onEnterRoomAndNavigate) {
       onEnterRoomAndNavigate(routePath);
     } else if (onNavigate) {
       onNavigate(routePath);
     } else {
-      window.location.href = routePath;
+      window.location.hash = `#${routePath}`;
     }
   };
 
   return (
     <div className="min-h-screen bg-[var(--gm-bg)] text-[var(--gm-text)] pb-24">
-      {/* Hidden file input for attaching screenshots */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileUpload}
-      />
-
       {/* Clean Sticky Header */}
       <header
         className="sticky top-0 z-40 border-b border-[var(--gm-border)] backdrop-blur-md px-4 sm:px-8 py-3"
@@ -900,31 +1320,45 @@ export function FeaturesGuide({ onNavigate, onEnterRoomAndNavigate }: FeaturesGu
             </button>
             <div className="h-4 w-px bg-[var(--gm-border)] hidden sm:block" />
             <div>
-              <h1 className="text-gm-base sm:text-gm-lg font-bold tracking-tight text-[var(--gm-text)]">
-                Help &amp; Feature Guide
+              <h1 className="text-gm-base sm:text-gm-lg font-bold tracking-tight text-[var(--gm-text)] flex items-center gap-2">
+                <span>Help &amp; Architectural Guide</span>
+                <span className="text-[10px] font-mono font-normal uppercase px-2 py-0.5 rounded-cv bg-[var(--gm-accent-muted)] text-[var(--gm-accent-strong)] border border-[var(--gm-accent)]/30">
+                  {ALL_TINY_FEATURES.length} Capabilities &amp; FAQ
+                </span>
               </h1>
               <p className="text-[11px] text-[var(--gm-text-muted)] hidden md:block">
-                32 architectural capabilities, step-by-step instructions &amp; screenshot slots
+                Comprehensive architectural capabilities, feature variants, step-by-step instructions &amp; interactive FAQ
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowChecklist((prev) => !prev)}
-              className={`inline-flex items-center gap-1.5 rounded-cv border px-3 py-1.5 text-gm-xs font-semibold transition-all cursor-pointer ${
-                showChecklist
-                  ? "border-[var(--gm-accent)] bg-[var(--gm-accent)] text-white"
-                  : "border-[var(--gm-border)] bg-[var(--gm-surface)] text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)]"
-              }`}
-            >
-              <Camera className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
-              <span>Screenshot Checklist</span>
-              <span className="rounded-full bg-[var(--gm-bg-elevated)] px-1.5 py-0.2 text-[10px] font-mono font-bold text-[var(--gm-text)]">
-                {attachedCount}/20
-              </span>
-            </button>
+            {/* View Switcher: Features vs FAQ */}
+            <div className="inline-flex rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] p-0.5 text-gm-xs">
+              <button
+                type="button"
+                onClick={() => setActiveTab("features")}
+                className={`px-3 py-1 font-semibold rounded-cv transition-all cursor-pointer ${
+                  activeTab === "features"
+                    ? "bg-[var(--gm-accent)] text-[var(--gm-accent-fg)] shadow-xs"
+                    : "text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
+                }`}
+              >
+                Features ({ALL_TINY_FEATURES.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("faq")}
+                className={`inline-flex items-center gap-1 px-3 py-1 font-semibold rounded-cv transition-all cursor-pointer ${
+                  activeTab === "faq"
+                    ? "bg-[var(--gm-accent)] text-[var(--gm-accent-fg)] shadow-xs"
+                    : "text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
+                }`}
+              >
+                <HelpCircle className="h-3 w-3" />
+                <span>FAQ ({COMPREHENSIVE_FAQ_ITEMS.length})</span>
+              </button>
+            </div>
 
             <button
               type="button"
@@ -939,68 +1373,7 @@ export function FeaturesGuide({ onNavigate, onEnterRoomAndNavigate }: FeaturesGu
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-6">
-        {/* Toggleable 20-Screenshot Checklist Panel */}
-        {showChecklist && (
-          <div className="mb-6 rounded-gm-xl border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-5 shadow-sm animate-in fade-in-50 duration-200">
-            <div className="flex items-center justify-between gap-4 pb-3 border-b border-[var(--gm-border)]">
-              <div>
-                <div className="flex items-center gap-2">
-                  <ListChecks className="h-4 w-4 text-[var(--gm-accent-strong)]" />
-                  <h2 className="text-gm-sm font-bold text-[var(--gm-text)]">
-                    20 Essential Help Guide Screenshots Checklist
-                  </h2>
-                </div>
-                <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5">
-                  Click any screenshot slot below to jump directly to its feature card and upload.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-gm-xs font-mono font-semibold text-[var(--gm-accent-strong)] bg-[var(--gm-accent-muted)] px-2.5 py-1 rounded-cv">
-                  {attachedCount} of 20 Attached ({Math.round((attachedCount / 20) * 100)}%)
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setShowChecklist(false)}
-                  className="rounded-cv p-1 text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)] transition-colors cursor-pointer"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 pt-3">
-              {CORE_SCREENSHOT_ITEMS.map((item) => {
-                const isAttached = Boolean(customScreenshots[item.id]);
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => scrollToFeature(item.id)}
-                    className={`flex items-center justify-between p-2 rounded-cv border text-left text-gm-xs transition-all cursor-pointer ${
-                      isAttached
-                        ? "border-[var(--gm-success)]/40 bg-[var(--gm-success-muted)]/20 text-[var(--gm-text)]"
-                        : "border-[var(--gm-border)] bg-[var(--gm-surface)] text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:border-[var(--gm-border-strong)]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 min-w-0 pr-1">
-                      <span className="font-mono text-[10px] font-bold text-[var(--gm-accent-strong)] shrink-0">
-                        #{item.num}
-                      </span>
-                      <span className="truncate">{item.name}</span>
-                    </div>
-                    {isAttached ? (
-                      <Check className="h-3.5 w-3.5 text-[var(--gm-success)] shrink-0" />
-                    ) : (
-                      <Camera className="h-3 w-3 text-[var(--gm-text-subtle)] shrink-0" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Search, Category & Filter Bar */}
+        {/* Search & Top Action Bar */}
         <div className="space-y-3 mb-6">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="relative flex-1 max-w-md">
@@ -1009,7 +1382,11 @@ export function FeaturesGuide({ onNavigate, onEnterRoomAndNavigate }: FeaturesGu
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search any feature, step, or shortcut…"
+                placeholder={
+                  activeTab === "features"
+                    ? "Search any feature, variant, or route…"
+                    : "Search frequently asked questions, security, formats…"
+                }
                 className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] pl-9 pr-3 py-1.5 text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:border-[var(--gm-border-focus)]"
               />
               {searchQuery && (
@@ -1023,255 +1400,286 @@ export function FeaturesGuide({ onNavigate, onEnterRoomAndNavigate }: FeaturesGu
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="inline-flex rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-0.5 text-gm-xs">
+            {activeTab === "features" && (
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setStatusFilter("all")}
-                  className={`px-2.5 py-1 rounded-sm transition-colors cursor-pointer ${
-                    statusFilter === "all"
-                      ? "bg-[var(--gm-surface)] font-semibold text-[var(--gm-text)]"
-                      : "text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
-                  }`}
+                  onClick={() => {
+                    const allOpen = Object.values(expandedCards).filter(Boolean).length > 5;
+                    setAllCardsExpanded(!allOpen);
+                  }}
+                  className="inline-flex items-center gap-1 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] px-2.5 py-1 text-gm-xs font-medium text-[var(--gm-text)] hover:bg-[var(--gm-surface)] transition-colors cursor-pointer"
                 >
-                  All ({ALL_TINY_FEATURES.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter("attached")}
-                  className={`px-2.5 py-1 rounded-sm transition-colors cursor-pointer ${
-                    statusFilter === "attached"
-                      ? "bg-[var(--gm-surface)] font-semibold text-[var(--gm-success)]"
-                      : "text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
-                  }`}
-                >
-                  Has Image ({attachedCount})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter("missing")}
-                  className={`px-2.5 py-1 rounded-sm transition-colors cursor-pointer ${
-                    statusFilter === "missing"
-                      ? "bg-[var(--gm-surface)] font-semibold text-[var(--gm-warning)]"
-                      : "text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
-                  }`}
-                >
-                  Needs Image ({ALL_TINY_FEATURES.length - attachedCount})
+                  <span>Toggle All Cards</span>
                 </button>
               </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  const allOpen = Object.values(expandedCards).filter(Boolean).length > 5;
-                  setAllCardsExpanded(!allOpen);
-                }}
-                className="inline-flex items-center gap-1 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] px-2.5 py-1 text-gm-xs font-medium text-[var(--gm-text)] hover:bg-[var(--gm-surface)] transition-colors cursor-pointer"
-              >
-                <span>Toggle All</span>
-              </button>
-            </div>
+            )}
           </div>
 
-          {/* Clean Category Badges */}
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {CATEGORY_TABS.map((tab) => {
-              const active = selectedCategory === tab.id;
+          {/* Clean Category Badges (For Features tab) */}
+          {activeTab === "features" && (
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {CATEGORY_TABS.map((tab) => {
+                const active = selectedCategory === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setSelectedCategory(tab.id)}
+                    className={`inline-flex items-center gap-1 rounded-cv px-2.5 py-1 text-gm-xs font-medium border transition-all cursor-pointer ${
+                      active
+                        ? "border-[var(--gm-accent)] bg-[var(--gm-accent)] text-[var(--gm-accent-fg)]"
+                        : "border-[var(--gm-border)] bg-[var(--gm-surface)]/60 text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:border-[var(--gm-border-strong)]"
+                    }`}
+                  >
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Tab 1: Comprehensive Features Catalog (No numbering) */}
+        {activeTab === "features" && (
+          <div className="space-y-4">
+            {filteredFeatures.map((feature) => {
+              const attachedScreenshot = customScreenshots[feature.id];
+              const isExpanded = expandedCards[feature.id] ?? false;
+
               return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setSelectedCategory(tab.id)}
-                  className={`inline-flex items-center gap-1 rounded-cv px-2.5 py-1 text-gm-xs font-medium border transition-all cursor-pointer ${
-                    active
-                      ? "border-[var(--gm-accent)] bg-[var(--gm-accent)] text-[var(--gm-accent-fg)]"
-                      : "border-[var(--gm-border)] bg-[var(--gm-surface)]/60 text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:border-[var(--gm-border-strong)]"
-                  }`}
+                <article
+                  key={feature.id}
+                  id={feature.id}
+                  className="rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] overflow-hidden shadow-2xs hover:border-[var(--gm-border-strong)] transition-all"
                 >
-                  <span>{tab.label}</span>
-                </button>
+                  {/* Clean Card Header Row without Numbering */}
+                  <div
+                    onClick={() => toggleCard(feature.id)}
+                    className="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 cursor-pointer select-none hover:bg-[var(--gm-surface)]/40 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h2 className="text-gm-sm sm:text-gm-base font-bold text-[var(--gm-text)] leading-snug">
+                            {feature.title}
+                          </h2>
+                          <span className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2 py-0.2 text-[10px] font-medium text-[var(--gm-text-muted)]">
+                            {feature.categoryLabel}
+                          </span>
+                          {attachedScreenshot && (
+                            <span className="inline-flex items-center gap-1 rounded-cv bg-[var(--gm-success-muted)] px-2 py-0.2 text-[10px] font-semibold text-[var(--gm-success)]">
+                              <Check className="h-2.5 w-2.5" /> Visual Attached
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5 line-clamp-1">
+                          {feature.subtitle}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        onClick={() => triggerJump(feature.routePath)}
+                        className="inline-flex items-center gap-1.5 rounded-cv bg-[var(--gm-surface)] border border-[var(--gm-border-strong)] px-2.5 py-1 text-gm-xs font-semibold text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] transition-colors cursor-pointer"
+                        title={`Open ${feature.routePath} live in app`}
+                      >
+                        <Play className="h-3 w-3 text-[var(--gm-accent-strong)]" />
+                        <span className="hidden sm:inline">Try in App</span>
+                        <span className="text-[10px] font-mono text-[var(--gm-text-subtle)]">
+                          {feature.routePath}
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => toggleCard(feature.id)}
+                        className="p-1 rounded-cv text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] cursor-pointer"
+                        aria-label={isExpanded ? "Collapse feature card" : "Expand feature card"}
+                      >
+                        {isExpanded ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Collapsible Card Details */}
+                  {isExpanded && (
+                    <div className="border-t border-[var(--gm-border)] p-4 sm:p-6 bg-[var(--gm-bg)]/40">
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        {/* Left 7 Columns: Rationale & Steps */}
+                        <div className="lg:col-span-7 space-y-4">
+                          {/* Why It Matters */}
+                          <div className="rounded-cv border-l-2 border-[var(--gm-accent)] bg-[var(--gm-surface)]/70 p-3 text-gm-xs text-[var(--gm-text)] leading-relaxed">
+                            <span className="font-bold text-[var(--gm-accent-strong)] mr-1">
+                              Why it matters:
+                            </span>
+                            {feature.whyItMatters}
+                          </div>
+
+                          {/* Step-by-Step Instructions */}
+                          <div className="space-y-2">
+                            <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--gm-text-muted)] font-mono">
+                              Step-by-Step Usage:
+                            </div>
+                            <ul className="space-y-2">
+                              {feature.steps.map((step, idx) => (
+                                <li
+                                  key={idx}
+                                  className="flex items-start gap-2.5 text-gm-xs text-[var(--gm-text)] leading-relaxed"
+                                >
+                                  <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--gm-accent-muted)] text-[10px] font-bold text-[var(--gm-accent-strong)] mt-0.5">
+                                    ✦
+                                  </span>
+                                  <span>{step}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+
+                        {/* Right 5 Columns: Architectural Feature Blueprint Frame */}
+                        <div className="lg:col-span-5 space-y-2.5">
+                          {attachedScreenshot ? (
+                            <div className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] overflow-hidden shadow-2xs">
+                              <div className="relative group aspect-[16/10] bg-black/50 flex items-center justify-center overflow-hidden">
+                                <img
+                                  src={attachedScreenshot}
+                                  alt={feature.title}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="rounded-cv border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-4 shadow-sm space-y-3 font-mono">
+                              <div className="flex items-center justify-between border-b border-[var(--gm-border)] pb-2.5">
+                                <div className="flex items-center gap-2">
+                                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                  <span className="font-bold text-[11px] text-[var(--gm-accent-strong)] tracking-wider">
+                                    FEATURE BLUEPRINT &amp; ARCHITECTURE
+                                  </span>
+                                </div>
+                                <span className="rounded-cv bg-[var(--gm-surface)] border border-[var(--gm-border)] px-2 py-0.5 text-[10px] text-[var(--gm-text-muted)] font-sans font-medium">
+                                  {feature.shortcutOrBadge}
+                                </span>
+                              </div>
+
+                              <div className="space-y-1">
+                                <div className="text-[10px] uppercase font-bold tracking-wider text-[var(--gm-text-subtle)]">
+                                  Target Route:
+                                </div>
+                                <div className="text-[var(--gm-accent-strong)] bg-[var(--gm-surface)] px-2.5 py-1 rounded-cv border border-[var(--gm-border)] text-gm-xs font-semibold">
+                                  {feature.routePath}
+                                </div>
+                              </div>
+
+                              <div className="space-y-1.5">
+                                <div className="text-[10px] uppercase font-bold tracking-wider text-[var(--gm-text-subtle)]">
+                                  Architecture Highlights:
+                                </div>
+                                <div className="flex flex-wrap gap-1.5 font-sans">
+                                  {feature.wireframeHighlights.map((hl, i) => (
+                                    <span
+                                      key={i}
+                                      className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--gm-text)]"
+                                    >
+                                      ✦ {hl}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <p className="text-[11px] italic font-sans text-[var(--gm-text-muted)] leading-relaxed pt-1.5 border-t border-[var(--gm-border)]/60">
+                                {feature.screenshotCaption}
+                              </p>
+
+                              <button
+                                type="button"
+                                onClick={() => triggerJump(feature.routePath)}
+                                className="w-full inline-flex items-center justify-center gap-2 rounded-cv border border-[var(--gm-accent)] bg-[var(--gm-accent)]/10 px-3 py-2 text-gm-xs font-sans font-bold text-[var(--gm-accent-strong)] hover:bg-[var(--gm-accent)] hover:text-[var(--gm-accent-fg)] transition-all cursor-pointer shadow-2xs"
+                              >
+                                <span>Launch Feature in App ({feature.routePath}) →</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </article>
               );
             })}
           </div>
-        </div>
+        )}
 
-        {/* Clean, Simple Feature Cards */}
-        <div className="space-y-4">
-          {filteredFeatures.map((feature) => {
-            const attachedScreenshot = customScreenshots[feature.id];
-            const isExpanded = expandedCards[feature.id] ?? false;
+        {/* Tab 2: Comprehensive FAQ Section */}
+        {activeTab === "faq" && (
+          <div className="space-y-4">
+            <div className="rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-surface)]/50 p-4 mb-2">
+              <h2 className="text-gm-base font-bold text-[var(--gm-text)] flex items-center gap-2">
+                <HelpCircle className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+                <span>Frequently Asked Questions &amp; Technical Reference</span>
+              </h2>
+              <p className="text-gm-xs text-[var(--gm-text-muted)] mt-1">
+                Everything you need to know about Grimoire's local-first architecture, zero-knowledge privacy, file formats, and multi-device synchronization.
+              </p>
+            </div>
 
-            return (
-              <article
-                key={feature.id}
-                id={feature.id}
-                className="rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] overflow-hidden shadow-2xs hover:border-[var(--gm-border-strong)] transition-all"
-              >
-                {/* Clean Card Header Row */}
-                <div
-                  onClick={() => toggleCard(feature.id)}
-                  className="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 cursor-pointer select-none hover:bg-[var(--gm-surface)]/40 transition-colors"
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <span className="font-mono text-gm-xs font-bold text-[var(--gm-accent-strong)] bg-[var(--gm-accent-muted)] px-2 py-0.5 rounded-cv shrink-0">
-                      #{feature.number}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h2 className="text-gm-sm sm:text-gm-base font-bold text-[var(--gm-text)] leading-snug">
-                          {feature.title}
-                        </h2>
-                        <span className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2 py-0.2 text-[10px] font-medium text-[var(--gm-text-muted)]">
-                          {feature.categoryLabel}
-                        </span>
-                        {attachedScreenshot && (
-                          <span className="inline-flex items-center gap-1 rounded-cv bg-[var(--gm-success-muted)] px-2 py-0.2 text-[10px] font-semibold text-[var(--gm-success)]">
-                            <Check className="h-2.5 w-2.5" /> Image Attached
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5 line-clamp-1">
-                        {feature.subtitle}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      type="button"
-                      onClick={() => triggerJump(feature.routePath)}
-                      className="inline-flex items-center gap-1.5 rounded-cv bg-[var(--gm-surface)] border border-[var(--gm-border-strong)] px-2.5 py-1 text-gm-xs font-semibold text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] transition-colors cursor-pointer"
-                      title={`Open ${feature.routePath} live in app`}
+            <div className="space-y-3">
+              {filteredFaq.map((faq) => {
+                const isOpen = expandedFaq[faq.id] ?? false;
+                return (
+                  <article
+                    key={faq.id}
+                    className="rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] overflow-hidden transition-all hover:border-[var(--gm-border-strong)]"
+                  >
+                    <div
+                      onClick={() => toggleFaq(faq.id)}
+                      className="p-4 sm:p-5 flex items-start justify-between gap-3 cursor-pointer select-none hover:bg-[var(--gm-surface)]/40 transition-colors"
                     >
-                      <Play className="h-3 w-3 text-[var(--gm-accent-strong)]" />
-                      <span className="hidden sm:inline">Try in App</span>
-                      <span className="text-[10px] font-mono text-[var(--gm-text-subtle)]">
-                        {feature.routePath}
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => toggleCard(feature.id)}
-                      className="p-1 rounded-cv text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] cursor-pointer"
-                      aria-label={isExpanded ? "Collapse feature card" : "Expand feature card"}
-                    >
-                      {isExpanded ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Collapsible Card Details */}
-                {isExpanded && (
-                  <div className="border-t border-[var(--gm-border)] p-4 sm:p-6 bg-[var(--gm-bg)]/40">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                      {/* Left 7 Columns: Rationale & Steps */}
-                      <div className="lg:col-span-7 space-y-4">
-                        {/* Why It Matters */}
-                        <div className="rounded-cv border-l-2 border-[var(--gm-accent)] bg-[var(--gm-surface)]/70 p-3 text-gm-xs text-[var(--gm-text)] leading-relaxed">
-                          <span className="font-bold text-[var(--gm-accent-strong)] mr-1">
-                            Why it matters:
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-cv bg-[var(--gm-surface)] border border-[var(--gm-border)] text-[var(--gm-accent-strong)] font-semibold">
+                            {faq.category}
                           </span>
-                          {feature.whyItMatters}
                         </div>
-
-                        {/* Step-by-Step Instructions */}
-                        <div className="space-y-2">
-                          <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--gm-text-muted)] font-mono">
-                            Step-by-Step Usage:
-                          </div>
-                          <ol className="space-y-2">
-                            {feature.steps.map((step, idx) => (
-                              <li
-                                key={idx}
-                                className="flex items-start gap-2.5 text-gm-xs text-[var(--gm-text)] leading-relaxed"
-                              >
-                                <span className="inline-flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-[var(--gm-accent-muted)] text-[10px] font-mono font-bold text-[var(--gm-accent-strong)] mt-0.5">
-                                  {idx + 1}
-                                </span>
-                                <span>{step}</span>
-                              </li>
-                            ))}
-                          </ol>
-                        </div>
+                        <h3 className="text-gm-sm sm:text-gm-base font-bold text-[var(--gm-text)] leading-snug pt-0.5">
+                          {faq.question}
+                        </h3>
                       </div>
-
-                      {/* Right 5 Columns: Clean Screenshot Frame */}
-                      <div className="lg:col-span-5 space-y-2.5">
-                        <div className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] overflow-hidden shadow-2xs">
-                          {attachedScreenshot ? (
-                            <div className="relative group aspect-[16/10] bg-black/50 flex items-center justify-center overflow-hidden">
-                              <img
-                                src={attachedScreenshot}
-                                alt={feature.title}
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
-                          ) : (
-                            <div
-                              onClick={() => {
-                                setActiveUploadFeatureId(feature.id);
-                                fileInputRef.current?.click();
-                              }}
-                              className="aspect-[16/10] p-4 flex flex-col items-center justify-center text-center cursor-pointer border-2 border-dashed border-[var(--gm-border)] hover:border-[var(--gm-accent)] bg-[var(--gm-surface)]/30 transition-colors"
-                            >
-                              <div className="h-9 w-9 rounded-full bg-[var(--gm-surface)] border border-[var(--gm-border)] flex items-center justify-center mb-2 text-[var(--gm-accent-strong)]">
-                                <Camera className="h-4 w-4" />
-                              </div>
-                              <span className="text-[11px] font-mono font-bold text-[var(--gm-accent-strong)]">
-                                Screenshot Slot #{feature.number}
-                              </span>
-                              <p className="text-[10px] text-[var(--gm-text-muted)] mt-1 max-w-xs leading-snug">
-                                {feature.screenshotCaption}
-                              </p>
-                              <span className="mt-2 text-[10px] font-semibold text-[var(--gm-accent)] underline">
-                                Click to attach image
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Screenshot Actions */}
-                        <div className="flex items-center justify-between gap-2 pt-1">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setActiveUploadFeatureId(feature.id);
-                              fileInputRef.current?.click();
-                            }}
-                            className="inline-flex items-center gap-1 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2.5 py-1 text-gm-xs font-medium text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] transition-colors cursor-pointer"
-                          >
-                            <Upload className="h-3 w-3 text-[var(--gm-accent-strong)]" />
-                            <span>{attachedScreenshot ? "Change Image" : "Attach Screenshot"}</span>
-                          </button>
-
-                          {attachedScreenshot && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const next = { ...customScreenshots };
-                                delete next[feature.id];
-                                saveScreenshots(next);
-                              }}
-                              className="inline-flex items-center gap-1 rounded-cv px-2 py-1 text-gm-xs text-[var(--gm-danger)] hover:bg-[var(--gm-danger-muted)] transition-colors cursor-pointer"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                              <span>Remove</span>
-                            </button>
-                          )}
-                        </div>
+                      <div className="shrink-0 pt-1 text-[var(--gm-text-muted)]">
+                        {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                       </div>
                     </div>
-                  </div>
-                )}
-              </article>
-            );
-          })}
-        </div>
+
+                    {isOpen && (
+                      <div className="border-t border-[var(--gm-border)] p-4 sm:p-5 bg-[var(--gm-bg)]/40 space-y-3">
+                        <p className="text-gm-xs sm:text-gm-sm text-[var(--gm-text)] leading-relaxed">
+                          {faq.answer}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {faq.highlights.map((hl, i) => (
+                            <span
+                              key={i}
+                              className="rounded-cv bg-[var(--gm-surface)] border border-[var(--gm-border)] px-2 py-0.5 text-[10px] font-medium text-[var(--gm-accent-strong)]"
+                            >
+                              ✦ {hl}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -28,6 +28,7 @@ import {
 } from '@grimoire/ui';
 import { clientRepository, useLibraryStore } from '@grimoire/state';
 import { DataTransferPanel } from '../components/features/Settings/DataTransferPanel';
+import { CredentialKeyringPanel } from '../components/features/Vault/CredentialKeyringPanel';
 
 export function Settings() {
   const [activeSection, setActiveSection] = React.useState('appearance');
@@ -36,6 +37,7 @@ export function Settings() {
 
   const navItems = [
     { id: 'appearance', label: 'Appearance', icon: Paintbrush },
+    { id: 'portals', label: 'Reading Portals & Credentials', icon: Key },
     { id: 'vault', label: 'Vault & Privacy', icon: Shield },
     { id: 'sources', label: 'Sources & Sync', icon: Globe },
     { id: 'data', label: 'Data & Backup', icon: Database },
@@ -209,6 +211,21 @@ export function Settings() {
                   })}
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeSection === 'portals' && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-gm-lg font-bold text-[var(--gm-text)]">
+                  Reading Portals &amp; Website Credential Manager
+                </h3>
+                <p className="text-gm-xs text-[var(--gm-text-muted)] mt-1">
+                  Secure login storage, custom search URLs, and auto-detected frequent reading portals.
+                </p>
+              </div>
+              <Separator />
+              <CredentialKeyringPanel />
             </div>
           )}
 

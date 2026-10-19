@@ -34,7 +34,10 @@ import {
   AlertTriangle,
   FileText,
   HelpCircle,
+  Archive,
+  Upload,
 } from "lucide-react";
+import { toast } from "@grimoire/ui";
 
 export interface RoomProfile {
   readonly id: string;
@@ -45,40 +48,15 @@ export interface RoomProfile {
   readonly themePreference: "midnight-arcana" | "parchment-ink" | "xianxia-realm" | "ink";
 }
 
-const DEFAULT_ROOMS: readonly RoomProfile[] = [
-  {
-    id: "main-sanctum",
-    name: "Grand Sanctum",
-    title: "Anime, Web Series, Movies & Multimedia Chamber",
-    motto: "Primary personal archive for serial fiction, animated series, and cinema.",
-    accentColor: "#4f46e5",
-    themePreference: "midnight-arcana",
-  },
-  {
-    id: "scholar-study",
-    name: "Antique Parchment",
-    title: "Sunlit Vellum Study, Light Novels & EPUBs",
-    motto: "Warm antique vellum paper, burnt sienna ink, and distraction-free deep reading.",
-    accentColor: "#ea580c",
-    themePreference: "parchment-ink",
-  },
-  {
-    id: "xianxia-pavilion",
-    name: "Blossom Pavilion",
-    title: "Cultivation Novels, Manhwa & Donghua Chamber",
-    motto: "Ten thousand chapters of ascension in sakura-white & crimson rose.",
-    accentColor: "#e11d48",
-    themePreference: "xianxia-realm",
-  },
-  {
-    id: "ink-atelier",
-    name: "Sumi-e Ink Atelier",
-    title: "Pure White Canvas & Stark Black Manga / Seinen Room",
-    motto: "High-contrast gallery white paper, obsidian sumi-e ink, and vermilion seals.",
-    accentColor: "#09090b",
-    themePreference: "ink",
-  },
-];
+export interface SavedProfileRecord {
+  readonly username: string;
+  readonly roomName?: string;
+  readonly themePreference?: RoomProfile["themePreference"];
+  readonly lastActiveAt?: string;
+}
+
+const SAVED_PROFILES_STORAGE_KEY = "cv:saved_profiles";
+
 
 export interface PopularSiteEntry {
   readonly id: string;
@@ -413,42 +391,57 @@ export function SanctumHome({
 
   // ─── Room (User Profile) State ────────────────────────────────
   const [rooms, setRooms] = React.useState<readonly RoomProfile[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_ROOMS;
+    if (typeof window === "undefined") return [];
     try {
       const saved = window.localStorage.getItem(CUSTOM_ROOMS_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved) as RoomProfile[];
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const defaultIds = new Set(DEFAULT_ROOMS.map((r) => r.id));
-          const customOnly = parsed.filter((r) => !defaultIds.has(r.id));
-          return [...DEFAULT_ROOMS, ...customOnly];
+        if (Array.isArray(parsed)) {
+          return parsed;
         }
       }
     } catch {
       // fallback
     }
-    return DEFAULT_ROOMS;
+    return [];
   });
 
   const [activeRoomId, setActiveRoomId] = React.useState<string>(() => {
-    if (typeof window === "undefined") return DEFAULT_ROOMS[0]!.id;
-    return window.localStorage.getItem(ROOM_STORAGE_KEY) || DEFAULT_ROOMS[0]!.id;
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem(ROOM_STORAGE_KEY) || "";
   });
 
   const [showCreateRoom, setShowCreateRoom] = React.useState(false);
   const [newRoomName, setNewRoomName] = React.useState("");
   const [newRoomTitle, setNewRoomTitle] = React.useState("");
 
-  // User Account (Persists in localStorage so signed-up users never have to sign in again)
+  // User Account (Strictly empty string if not signed in — zero demo user fallbacks)
   const [currentUser, setCurrentUser] = React.useState<string>(() => {
     if (typeof window === "undefined") return "";
     return window.localStorage.getItem("cv:username") || "";
   });
-  const [showSignUpModal, setShowSignUpModal] = React.useState(false);
-  const [signUpInput, setSignUpInput] = React.useState("");
+  const [savedProfiles, setSavedProfiles] = React.useState<SavedProfileRecord[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = window.localStorage.getItem(SAVED_PROFILES_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return [];
+  });
 
-  const activeRoom = React.useMemo(
-    () => rooms.find((r) => r.id === activeRoomId) ?? rooms[0]!,
+  const [showSignUpModal, setShowSignUpModal] = React.useState(false);
+  const [showSignInModal, setShowSignInModal] = React.useState(false);
+  const [signUpInput, setSignUpInput] = React.useState("");
+  const [signUpRoomName, setSignUpRoomName] = React.useState("");
+  const [signUpTheme, setSignUpTheme] = React.useState<RoomProfile["themePreference"]>("midnight-arcana");
+  const [signInInput, setSignInInput] = React.useState("");
+  const gcaFileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const activeRoom = React.useMemo<RoomProfile | null>(
+    () => rooms.find((r) => r.id === activeRoomId) ?? rooms[0] ?? null,
     [rooms, activeRoomId],
   );
 
@@ -572,7 +565,10 @@ export function SanctumHome({
       if (
         e.key === "Enter" &&
         isRoomReady &&
+        currentUser &&
         !showCreateRoom &&
+        !showSignUpModal &&
+        !showSignInModal &&
         document.activeElement?.tagName !== "INPUT"
       ) {
         handleEnterRoom();
@@ -580,7 +576,7 @@ export function SanctumHome({
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isRoomReady, showCreateRoom]);
+  }, [isRoomReady, currentUser, showCreateRoom, showSignUpModal, showSignInModal]);
 
   const handleSelectRoom = (room: RoomProfile) => {
     setActiveRoomId(room.id);
@@ -618,10 +614,248 @@ export function SanctumHome({
   };
 
   const handleEnterRoom = (targetRoute?: string) => {
+    if (!currentUser) {
+      toast({
+        title: "Archivist Profile Required",
+        description: "Please Sign Up, Sign In, or Import a .gca profile archive to enter your reading room.",
+        variant: "destructive",
+      });
+      return;
+    }
     setIsExitingToRoom(true);
     window.setTimeout(() => {
       onEnterRoom(targetRoute);
     }, 80);
+  };
+
+  const handleSignUpSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const uname = signUpInput.trim();
+    if (!uname) return;
+
+    const rName = signUpRoomName.trim() || `${uname}'s Sanctuary`;
+    const newRoom: RoomProfile = {
+      id: `room-${Date.now()}`,
+      name: rName,
+      title: `${uname}'s Reading Sanctum`,
+      motto: "Personal reading sanctuary in Grimoire.",
+      accentColor:
+        signUpTheme === "parchment-ink"
+          ? "#ea580c"
+          : signUpTheme === "xianxia-realm"
+            ? "#e11d48"
+            : signUpTheme === "ink"
+              ? "#09090b"
+              : "#4f46e5",
+      themePreference: signUpTheme,
+    };
+
+    const nextRooms = [...rooms, newRoom];
+    setRooms(nextRooms);
+    try {
+      window.localStorage.setItem(CUSTOM_ROOMS_STORAGE_KEY, JSON.stringify(nextRooms));
+      window.localStorage.setItem(ROOM_STORAGE_KEY, newRoom.id);
+      document.documentElement.setAttribute("data-theme", signUpTheme);
+      window.localStorage.setItem("grimoire-theme", signUpTheme);
+    } catch {}
+    setActiveRoomId(newRoom.id);
+
+    window.localStorage.setItem("cv:username", uname);
+    window.localStorage.setItem("cv:auth_token", `token-${Date.now()}`);
+    setCurrentUser(uname);
+
+    const nextProfiles: SavedProfileRecord[] = [
+      {
+        username: uname,
+        roomName: rName,
+        themePreference: signUpTheme,
+        lastActiveAt: new Date().toISOString(),
+      },
+      ...savedProfiles.filter((p) => p.username.toLowerCase() !== uname.toLowerCase()),
+    ];
+    setSavedProfiles(nextProfiles);
+    try {
+      window.localStorage.setItem(SAVED_PROFILES_STORAGE_KEY, JSON.stringify(nextProfiles));
+    } catch {}
+
+    setShowSignUpModal(false);
+    setSignUpInput("");
+    setSignUpRoomName("");
+
+    toast({
+      title: "Profile & Room Created",
+      description: `Welcome, @${uname}! Entering your reading room.`,
+      variant: "success",
+    });
+
+    onEnterRoom();
+  };
+
+  const handleSelectSavedProfile = (uname: string, themePref?: RoomProfile["themePreference"]) => {
+    window.localStorage.setItem("cv:username", uname);
+    window.localStorage.setItem("cv:auth_token", `token-${Date.now()}`);
+    setCurrentUser(uname);
+
+    if (themePref) {
+      document.documentElement.setAttribute("data-theme", themePref);
+      window.localStorage.setItem("grimoire-theme", themePref);
+    }
+
+    const updated: SavedProfileRecord[] = [
+      {
+        username: uname,
+        themePreference: themePref,
+        lastActiveAt: new Date().toISOString(),
+      },
+      ...savedProfiles.filter((p) => p.username.toLowerCase() !== uname.toLowerCase()),
+    ];
+    setSavedProfiles(updated);
+    try {
+      window.localStorage.setItem(SAVED_PROFILES_STORAGE_KEY, JSON.stringify(updated));
+    } catch {}
+
+    setShowSignInModal(false);
+    toast({
+      title: "Signed In",
+      description: `Welcome back, @${uname}!`,
+      variant: "success",
+    });
+    onEnterRoom();
+  };
+
+  const handleSignInSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const uname = signInInput.trim();
+    if (!uname) return;
+
+    handleSelectSavedProfile(uname);
+    setSignInInput("");
+  };
+
+  const handleImportGcaFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.currentTarget.value = "";
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      let parsed: any;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        toast({
+          title: "Import Failed",
+          description: "Invalid .gca or JSON file format.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const stateMod = await import("@grimoire/state");
+      let result = { worksCreated: 0, memoriesCreated: 0, relationsCreated: 0, listsRestored: 0, user: undefined as string | undefined };
+      if (parsed && Array.isArray(parsed.works)) {
+        const plannedIds = new Set<string>(parsed.works.map((w: any) => String(w.id)));
+        const res = stateMod.applyBackupImport(parsed, plannedIds);
+        result = { ...res, user: parsed.user?.username || parsed.account?.username };
+      }
+      stateMod.useLibraryStore.getState().refresh();
+
+      let detectedUser = result.user;
+      if (!detectedUser && parsed) {
+        detectedUser =
+          parsed.account?.username ||
+          parsed.user?.username ||
+          parsed.username ||
+          (typeof parsed.account === "string" ? parsed.account : undefined);
+      }
+      if (!detectedUser) {
+        detectedUser = file.name.replace(/\.(gca|cca|json)$/i, "");
+      }
+      if (!detectedUser || !detectedUser.trim()) {
+        detectedUser = "Archivist";
+      }
+
+      window.localStorage.setItem("cv:username", detectedUser);
+      window.localStorage.setItem("cv:auth_token", `token-${Date.now()}`);
+      setCurrentUser(detectedUser);
+
+      const nextSaved: SavedProfileRecord[] = [
+        {
+          username: detectedUser,
+          roomName: `${detectedUser}'s Chamber`,
+          themePreference: "midnight-arcana",
+          lastActiveAt: new Date().toISOString(),
+        },
+        ...savedProfiles.filter((p) => p.username.toLowerCase() !== detectedUser.toLowerCase()),
+      ];
+      setSavedProfiles(nextSaved);
+      try {
+        window.localStorage.setItem(SAVED_PROFILES_STORAGE_KEY, JSON.stringify(nextSaved));
+      } catch {}
+
+      toast({
+        title: "Profile Archive Restored",
+        description: `Imported ${result.worksCreated} works and ${result.memoriesCreated} memories. Welcome, @${detectedUser}!`,
+        variant: "success",
+      });
+
+      onEnterRoom();
+    } catch (err) {
+      toast({
+        title: "Import Failed",
+        description: err instanceof Error ? err.message : "Failed to import .gca archive.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLandingFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const stateMod = await import("@grimoire/state");
+      const parsed = stateMod.parseBackup(text);
+      if (!parsed.ok) {
+        toast({ title: "Import Failed", description: parsed.errors.join("; "), variant: "destructive" });
+        return;
+      }
+      const snapshot = parsed.value;
+      const plannedIds = new Set(snapshot.works.map((w) => w.id));
+      const res = stateMod.applyBackupImport(snapshot, plannedIds);
+      const anySnapshot = snapshot as unknown as { categories?: unknown[]; credentials?: unknown[] };
+      if (typeof window !== "undefined" && Array.isArray(anySnapshot.categories) && anySnapshot.categories.length > 0) {
+        try {
+          const rawStored = window.localStorage.getItem("cv:custom_categories:v1");
+          const existingCategories: any[] = rawStored ? JSON.parse(rawStored) : [];
+          const existingIds = new Set(existingCategories.map((c) => c.id));
+          const newCats = (anySnapshot.categories as any[]).filter((c) => !existingIds.has(c.id));
+          if (newCats.length > 0) {
+            window.localStorage.setItem("cv:custom_categories:v1", JSON.stringify([...existingCategories, ...newCats]));
+          }
+        } catch {}
+      }
+      if (typeof window !== "undefined" && Array.isArray(anySnapshot.credentials) && anySnapshot.credentials.length > 0) {
+        try {
+          const rawCreds = window.localStorage.getItem("grimoire:vault:credentials");
+          const existingCreds: any[] = rawCreds ? JSON.parse(rawCreds) : [];
+          const existingIds = new Set(existingCreds.map((c) => c.id));
+          const newCreds = (anySnapshot.credentials as any[]).filter((c) => !existingIds.has(c.id));
+          if (newCreds.length > 0) {
+            window.localStorage.setItem("grimoire:vault:credentials", JSON.stringify([...existingCreds, ...newCreds]));
+          }
+        } catch {}
+      }
+      toast({
+        title: "Seed Archive Imported!",
+        description: `Imported ${res.worksCreated} works, ${res.memoriesCreated} memories, ${res.relationsCreated} relations. Opening Sanctum Library!`,
+      });
+      handleEnterRoom("/library");
+    } catch (err: unknown) {
+      toast({ title: "Import Error", description: err instanceof Error ? err.message : "Failed to import", variant: "destructive" });
+    } finally {
+      e.target.value = "";
+    }
   };
 
   const handleQuickCaptureSite = async (site: PopularSiteEntry) => {
@@ -726,14 +960,20 @@ export function SanctumHome({
               { id: "xianxia-realm", label: "03 Blossom", roomIdx: 2 },
               { id: "ink", label: "04 Ink", roomIdx: 3 },
             ].map((t) => {
-              const isCurrentTheme = activeRoom.themePreference === t.id;
+              const isCurrentTheme = activeRoom?.themePreference === t.id;
               return (
                 <button
                   key={t.id}
                   type="button"
                   onClick={() => {
-                    const targetRoom = rooms[t.roomIdx] ?? rooms[0]!;
-                    handleSelectRoom(targetRoom);
+                    document.documentElement.setAttribute("data-theme", t.id);
+                    try {
+                      window.localStorage.setItem("grimoire-theme", t.id);
+                    } catch {}
+                    const targetRoom = rooms[t.roomIdx];
+                    if (targetRoom) {
+                      handleSelectRoom(targetRoom);
+                    }
                   }}
                   className={`px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider border-r last:border-r-0 border-[var(--gm-border)] transition-colors cursor-pointer ${
                     isCurrentTheme
@@ -781,21 +1021,59 @@ export function SanctumHome({
                 </button>
               </>
             )}
+            {currentUser ? (
+              <button
+                type="button"
+                onClick={() => setShowSignInModal(true)}
+                className="hidden sm:inline-flex items-center gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-3 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
+                title="Switch Profile"
+              >
+                <UserCheck className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
+                <span>@{currentUser}</span>
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowSignUpModal(true)}
+                  className="hidden sm:inline-flex items-center gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-3 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
+                >
+                  <UserPlus className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
+                  <span>Sign Up</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowSignInModal(true)}
+                  className="hidden sm:inline-flex items-center gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-3 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
+                >
+                  <KeyRound className="h-3.5 w-3.5 text-amber-500" />
+                  <span>Sign In</span>
+                </button>
+              </>
+            )}
             <button
               type="button"
-              onClick={() => setShowSignUpModal(true)}
-              className="hidden sm:inline-flex items-center gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-3 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
-              title="Sign up as new explorer or switch profile handle"
+              onClick={() => {
+                gcaFileInputRef.current?.click();
+              }}
+              className="inline-flex items-center gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-3 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
+              title="Import Grimoire Codex Archive (.gca)"
             >
-              <UserPlus className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
-              <span>Sign Up / Switch</span>
+              <Archive className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
+              <span>Import .gca</span>
             </button>
             <button
               type="button"
-              onClick={() => handleEnterRoom()}
+              onClick={() => {
+                if (!currentUser) {
+                  setShowSignInModal(true);
+                } else {
+                  handleEnterRoom();
+                }
+              }}
               className="inline-flex items-center gap-1.5 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] px-4 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-accent-fg)] shadow-[3px_3px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
             >
-              <span>Enter My Room</span>
+              <span>{currentUser ? "Enter My Room" : "Enter Room"}</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -841,7 +1119,7 @@ export function SanctumHome({
               {/* Title & Greeting */}
               <div className="space-y-2.5">
                 <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--gm-text-muted)]">
-                  SANCTUM RESIDENCE · {activeRoom.name.toUpperCase()}
+                  SANCTUM RESIDENCE · {(activeRoom?.name ?? "Reading Sanctum").toUpperCase()}
                 </div>
                 <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[var(--gm-text)] leading-tight">
                   {currentUser ? (
@@ -860,16 +1138,28 @@ export function SanctumHome({
                 </p>
               </div>
 
-              {/* High-Impact Game Title Primary Action Button */}
-              <div className="pt-2">
+              {/* High-Impact Game Title Primary Action Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
                 <button
                   type="button"
                   onClick={() => handleEnterRoom()}
-                  className="w-full inline-flex items-center justify-center gap-3 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] px-8 py-4 sm:py-5 text-gm-base sm:text-gm-lg font-mono font-extrabold uppercase tracking-wider text-[var(--gm-accent-fg)] shadow-[6px_6px_0px_var(--gm-border-strong)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-3 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] px-6 py-4 sm:py-5 text-gm-base sm:text-gm-lg font-mono font-extrabold uppercase tracking-wider text-[var(--gm-accent-fg)] shadow-[6px_6px_0px_var(--gm-border-strong)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
                 >
                   <Sparkles className="h-5 w-5" />
                   <span>ENTER YOUR ROOM ✦</span>
                   <ArrowRight className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById("landing-gca-import-input") as HTMLInputElement;
+                    if (el) el.click();
+                  }}
+                  className="inline-flex items-center justify-center gap-2 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-5 py-3.5 text-gm-sm font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] shadow-[4px_4px_0px_var(--gm-border-strong)] hover:bg-[var(--gm-surface-hover)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
+                  title="Import Grimoire Codex Archive (.gca) or Sample Pack"
+                >
+                  <Archive className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+                  <span>Import .gca File</span>
                 </button>
               </div>
 
@@ -1060,14 +1350,20 @@ export function SanctumHome({
                 {/* Cockpit Bottom Chamber Launcher Bar */}
                 <div className="pt-2 flex items-center justify-between border-t border-[var(--gm-border)]">
                   <span className="text-[10px] font-mono text-[var(--gm-text-muted)]">
-                    Chamber: <strong className="text-[var(--gm-text)]">{activeRoom.name}</strong>
+                    Chamber: <strong className="text-[var(--gm-text)]">{activeRoom?.name ?? "Lobby"}</strong>
                   </span>
                   <button
                     type="button"
-                    onClick={() => handleEnterRoom()}
+                    onClick={() => {
+                      if (!currentUser) {
+                        setShowSignInModal(true);
+                      } else {
+                        handleEnterRoom();
+                      }
+                    }}
                     className="inline-flex items-center gap-1.5 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] px-3.5 py-1.5 text-[11px] font-mono font-bold uppercase text-[var(--gm-accent-fg)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:opacity-95 transition-opacity cursor-pointer"
                   >
-                    <span>Launch Chamber →</span>
+                    <span>{currentUser ? "Launch Chamber →" : "Sign In to Enter →"}</span>
                   </button>
                 </div>
               </div>
@@ -1734,6 +2030,15 @@ export function SanctumHome({
           </div>
         </div>
       )}
+
+      {/* Hidden file input for Landing Page .gca / .json Archive Import */}
+      <input
+        id="landing-gca-import-input"
+        type="file"
+        accept=".gca,.cca,.json"
+        className="hidden"
+        onChange={handleLandingFileImport}
+      />
     </div>
   );
 }

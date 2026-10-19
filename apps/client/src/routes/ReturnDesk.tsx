@@ -278,7 +278,7 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
         <h1 className="text-gm-2xl sm:text-gm-3xl font-extrabold tracking-tight text-[var(--gm-text)]">
           Up Next
         </h1>
-        <p className="mt-1.5 text-gm-sm text-[var(--gm-text-muted)] max-w-xl">
+        <p className="mt-1.5 text-gm-sm text-[var(--gm-text-muted)] max-w-none">
           Pick up exactly where you left off. Review updates and memory briefings before continuing.
         </p>
       </div>
