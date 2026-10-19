@@ -19,7 +19,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-cv-xs font-medium text-[var(--cv-text-muted)] select-none"
+            className="text-gm-xs font-medium text-[var(--gm-text-muted)] select-none"
           >
             {label}
           </label>
@@ -33,21 +33,21 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             error ? errorId : hint ? hintId : undefined
           }
           className={cn(
-            'flex h-9 w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-1 text-cv-sm text-[var(--cv-text)] shadow-xs transition-colors',
-            'placeholder:text-[var(--cv-text-subtle)]',
-            'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--cv-border-focus)] focus-visible:border-[var(--cv-accent)]',
+            'flex h-9 w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-1 text-gm-sm text-[var(--gm-text)] shadow-xs transition-colors',
+            'placeholder:text-[var(--gm-text-subtle)]',
+            'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gm-border-focus)] focus-visible:border-[var(--gm-accent)]',
             'disabled:cursor-not-allowed disabled:opacity-50',
-            error && 'border-[var(--cv-danger)] focus-visible:ring-[var(--cv-danger)]',
+            error && 'border-[var(--gm-danger)] focus-visible:ring-[var(--gm-danger)]',
             className,
           )}
           {...props}
         />
         {error ? (
-          <p id={errorId} className="text-cv-xs text-[var(--cv-danger)]">
+          <p id={errorId} className="text-gm-xs text-[var(--gm-danger)]">
             {error}
           </p>
         ) : hint ? (
-          <p id={hintId} className="text-cv-xs text-[var(--cv-text-subtle)]">
+          <p id={hintId} className="text-gm-xs text-[var(--gm-text-subtle)]">
             {hint}
           </p>
         ) : null}

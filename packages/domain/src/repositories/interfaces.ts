@@ -5,7 +5,7 @@ import {
   MemoryId,
   CaptureId,
   CaptureBatchId,
-} from '@chronicles-vault/shared';
+} from '@grimoire/shared';
 import {
   Work,
   WorkSummary,

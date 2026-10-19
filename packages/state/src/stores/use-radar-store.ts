@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { normalizeUrl } from "@chronicles-vault/domain";
+import { normalizeUrl } from "@grimoire/domain";
 import { sanitizeRadarCaptureUrl, type RadarImportBatch } from "../radar-import";
 
 export type CaptureState = "pending" | "matched" | "created" | "merged" | "discarded" | "temporary";

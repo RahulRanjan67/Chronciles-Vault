@@ -1,7 +1,7 @@
 /**
  * Duplicate Candidate Detection Engine
  *
- * Implements pure domain logic for detecting potential duplicate Works in Chronicles Vault.
+ * Implements pure domain logic for detecting potential duplicate Works in Grimoire.
  *
  * Detects candidates using:
  * - Normalized titles (case/punctuation insensitive, subtitle stripping, lemmata, diacritics, roman numerals)

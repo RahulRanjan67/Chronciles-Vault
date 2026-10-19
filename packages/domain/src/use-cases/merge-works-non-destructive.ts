@@ -13,7 +13,7 @@
  * 6. Emits `work.merged` domain event.
  */
 
-import { WorkId, ArchiveRecordId, newId } from '@chronicles-vault/shared';
+import { WorkId, ArchiveRecordId, newId } from '@grimoire/shared';
 import {
   Work,
   ContentOrigin,

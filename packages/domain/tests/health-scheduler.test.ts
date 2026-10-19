@@ -12,7 +12,7 @@ import {
   createHealthMonitorState,
   type HealthProbeFn,
 } from '../dist/index.js';
-import type { AccessPathId, WorkId } from '@chronicles-vault/shared';
+import type { AccessPathId, WorkId } from '@grimoire/shared';
 
 function createMockWebPath(id: string = 'path-1', health: SourceHealth = SourceHealth.Healthy): WebAccessPath {
   return {

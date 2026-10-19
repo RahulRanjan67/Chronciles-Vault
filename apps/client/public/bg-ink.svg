@@ -17,8 +17,8 @@
     </radialGradient>
   </defs>
 
-  <!-- Pure Stark White Paper Canvas -->
-  <rect width="1920" height="1080" fill="#ffffff" />
+  <!-- Authentic Sumi-e Washi Stone Paper Canvas (0% stark white) -->
+  <rect width="1920" height="1080" fill="#e8e6e1" />
 
   <!-- Architectural Editorial Grid -->
   <rect width="1920" height="1080" fill="url(#editorial-grid)" />

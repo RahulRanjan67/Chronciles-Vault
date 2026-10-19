@@ -1,7 +1,7 @@
 /**
- * @chronicles-vault/database
+ * @grimoire/database
  *
- * SQLite database layer for Chronicles Vault using better-sqlite3.
+ * SQLite database layer for Grimoire using better-sqlite3.
  * Exports database connection management, migrations, repositories, and seed utilities.
  */
 

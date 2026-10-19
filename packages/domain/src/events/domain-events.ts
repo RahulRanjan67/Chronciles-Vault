@@ -5,7 +5,7 @@ import {
   MemoryId,
   CaptureId,
   newId,
-} from '@chronicles-vault/shared';
+} from '@grimoire/shared';
 import { Work } from '../entities/work.js';
 import { PersonalState } from '../entities/reading-relationship.js';
 import { ProgressEvent } from '../entities/progress.js';
@@ -160,7 +160,7 @@ export type VaultUnlockedEvent = BaseDomainEvent<
 // ---------------------------------------------------------------------------
 
 /**
- * Union of all domain events emitted across Chronicles Vault.
+ * Union of all domain events emitted across Grimoire.
  */
 export type DomainEvent =
   | WorkCreatedEvent

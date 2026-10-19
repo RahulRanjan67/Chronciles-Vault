@@ -81,7 +81,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex min-h-[320px] flex-col items-center justify-center rounded-cv-xl border border-dashed border-[var(--cv-border)] p-8 text-center bg-[var(--cv-bg-elevated)]/40',
+        'flex min-h-[320px] flex-col items-center justify-center rounded-gm-xl border border-dashed border-[var(--gm-border)] p-8 text-center bg-[var(--gm-bg-elevated)]/40',
         className,
       )}
       {...props}
@@ -89,15 +89,15 @@ export function EmptyState({
       {illustrationSlot ? (
         <div className="mb-4">{illustrationSlot}</div>
       ) : (
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-cv-full border border-[var(--cv-border)] bg-[var(--cv-surface)] shadow-xs">
-          <Icon className="h-6 w-6 text-[var(--cv-accent-strong)]" />
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-gm-full border border-[var(--gm-border)] bg-[var(--gm-surface)] shadow-xs">
+          <Icon className="h-6 w-6 text-[var(--gm-accent-strong)]" />
         </div>
       )}
 
-      <h3 className="text-cv-base font-semibold text-[var(--cv-text)] tracking-tight">
+      <h3 className="text-gm-base font-semibold text-[var(--gm-text)] tracking-tight">
         {finalTitle}
       </h3>
-      <p className="mt-1.5 max-w-sm text-cv-sm text-[var(--cv-text-muted)] leading-relaxed">
+      <p className="mt-1.5 max-w-sm text-gm-sm text-[var(--gm-text-muted)] leading-relaxed">
         {finalDesc}
       </p>
 

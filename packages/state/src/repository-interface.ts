@@ -26,7 +26,7 @@ import type {
   WorkRelationId,
   WorkRelationType,
   WorkSummary,
-} from "@chronicles-vault/domain";
+} from "@grimoire/domain";
 import {
   ClientRepository,
   clientRepository,

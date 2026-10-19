@@ -64,7 +64,7 @@ export function App() {
     return (
       <React.Suspense
         fallback={
-          <div className="min-h-screen bg-[var(--cv-bg)] text-[var(--cv-text)] flex items-center justify-center font-mono text-cv-sm">
+          <div className="min-h-screen bg-[var(--gm-bg)] text-[var(--gm-text)] flex items-center justify-center font-mono text-gm-sm">
             Opening Complete Feature Encyclopedia…
           </div>
         }
@@ -110,11 +110,11 @@ export function App() {
     );
   }
 
-  // Full Chronicles Vault Room Workspace
+  // Full Grimoire Room Workspace
   return (
     <React.Suspense
       fallback={
-        <div className="min-h-screen bg-[var(--cv-bg)] text-[var(--cv-text)] flex items-center justify-center font-mono text-cv-sm">
+        <div className="min-h-screen bg-[var(--gm-bg)] text-[var(--gm-text)] flex items-center justify-center font-mono text-gm-sm">
           Entering Your Room…
         </div>
       }

@@ -18,7 +18,7 @@
  * rather than published, so local file paths and blob URLs never leave the app.
  */
 
-import { PrivacyState } from "@chronicles-vault/domain";
+import { PrivacyState } from "@grimoire/domain";
 
 export type PublicationFindingKind =
   | "list_not_public"
@@ -423,7 +423,7 @@ export function renderPublicationMarkdown(doc: PublicationDocument): string {
     }
     lines.push("");
   });
-  lines.push(`_Generated ${escapeMarkdown(doc.generatedAt)} · Chronicles Vault_`);
+  lines.push(`_Generated ${escapeMarkdown(doc.generatedAt)} · Grimoire_`);
   return lines.join("\n") + "\n";
 }
 
@@ -659,14 +659,14 @@ export function renderPublicationHtml(doc: PublicationDocument): string {
 <body>
 <main>
 <header>
-<p class="eyebrow"><span>Chronicles Vault // Curated Index</span><span>${doc.entries.length} Works</span></p>
+<p class="eyebrow"><span>Grimoire // Curated Index</span><span>${doc.entries.length} Works</span></p>
 <h1>${escapeHtml(doc.title)}</h1>
 ${description}
 </header>
 <ol>
 ${items}
 </ol>
-<footer><span>Generated ${escapeHtml(doc.generatedAt)}</span><span>Chronicles Vault</span></footer>
+<footer><span>Generated ${escapeHtml(doc.generatedAt)}</span><span>Grimoire</span></footer>
 </main>
 </body>
 </html>

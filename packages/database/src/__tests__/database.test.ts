@@ -34,7 +34,7 @@ import {
   CaptureSource,
   UpdateCertainty,
   ArchiveReason,
-} from '@chronicles-vault/domain';
+} from '@grimoire/domain';
 
 describe('Database Layer & Repositories', () => {
   let db: Database.Database;

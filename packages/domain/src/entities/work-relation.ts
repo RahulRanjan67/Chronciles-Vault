@@ -2,7 +2,7 @@ import {
   WorkRelationId,
   WorkId,
   newId,
-} from '@chronicles-vault/shared';
+} from '@grimoire/shared';
 
 // ---------------------------------------------------------------------------
 // Enums

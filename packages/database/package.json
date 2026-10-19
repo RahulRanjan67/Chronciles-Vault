@@ -1,9 +1,9 @@
 {
-  "name": "@chronicles-vault/database",
+  "name": "@grimoire/database",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "SQLite database layer for Chronicles Vault using better-sqlite3",
+  "description": "SQLite database layer for Grimoire using better-sqlite3",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -25,8 +25,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@chronicles-vault/domain": "workspace:*",
-    "@chronicles-vault/shared": "workspace:*",
+    "@grimoire/domain": "workspace:*",
+    "@grimoire/shared": "workspace:*",
     "better-sqlite3": "^12.11.1"
   },
   "devDependencies": {

@@ -45,9 +45,9 @@ export function sanitizeEpubXhtml(source: string): string {
     }
     if (element.localName.toLowerCase() === "img") {
       const sourceUrl = element.getAttribute("src");
-      element.removeAttribute("data-cv-src");
+      element.removeAttribute("data-gm-src");
       if (sourceUrl) {
-        element.setAttribute("data-cv-src", sourceUrl);
+        element.setAttribute("data-gm-src", sourceUrl);
         element.removeAttribute("src");
       }
     }
@@ -81,7 +81,7 @@ export function sanitizeEpubXhtml(source: string): string {
     WHOLE_DOCUMENT: false,
     FORBID_TAGS,
     FORBID_ATTR: ["style", "srcset", "formaction", "xlink:href"],
-    ADD_ATTR: ["data-cv-src"],
+    ADD_ATTR: ["data-gm-src"],
     ALLOW_DATA_ATTR: false,
     SANITIZE_NAMED_PROPS: true,
     RETURN_TRUSTED_TYPE: false,
@@ -94,7 +94,7 @@ export function sanitizeEpubXhtml(source: string): string {
     }
     if (element.localName.toLowerCase() === "img") {
       for (const attribute of Array.from(element.attributes)) {
-        if (attribute.name.toLowerCase() !== "data-cv-src") {
+        if (attribute.name.toLowerCase() !== "data-gm-src") {
           element.removeAttribute(attribute.name);
         }
       }

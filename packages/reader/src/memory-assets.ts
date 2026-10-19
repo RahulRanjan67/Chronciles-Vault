@@ -10,7 +10,7 @@ export interface StoredMemoryImage {
   readonly createdAt: string;
 }
 
-const DATABASE_NAME = "chronicles-vault-reader";
+const DATABASE_NAME = "grimoire-reader";
 const DATABASE_VERSION = 4;
 const FILE_STORE_NAME = "local-files";
 const SESSION_STORE_NAME = "reading-sessions";

@@ -1,6 +1,6 @@
 {
   "appId": "com.chroniclesvault.app",
-  "appName": "Chronicles Vault",
+  "appName": "Grimoire",
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {
@@ -12,7 +12,7 @@
     "CapacitorSQLite": {
       "iosDatabaseLocation": "Library/CapacitorDatabase",
       "iosIsEncryption": false,
-      "iosKeychainPrefix": "chronicles-vault",
+      "iosKeychainPrefix": "grimoire",
       "androidIsEncryption": false
     },
     "Filesystem": {

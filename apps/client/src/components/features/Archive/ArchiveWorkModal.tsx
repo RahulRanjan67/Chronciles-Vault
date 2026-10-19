@@ -19,15 +19,15 @@ import {
   DialogHeader,
   DialogTitle,
   toast,
-} from '@chronicles-vault/ui';
+} from '@grimoire/ui';
 import {
   ArchiveReason,
   ArchiveRecord,
   formatProgressAnchor,
   ProgressAnchor,
-} from '@chronicles-vault/domain';
-import { WorkId } from '@chronicles-vault/shared';
-import { useWorkDetailStore } from '@chronicles-vault/state';
+} from '@grimoire/domain';
+import { WorkId } from '@grimoire/shared';
+import { useWorkDetailStore } from '@grimoire/state';
 
 export interface ArchiveWorkModalProps {
   open: boolean;
@@ -143,21 +143,21 @@ export function ArchiveWorkModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center gap-2 text-[var(--cv-accent-strong)]">
+          <div className="flex items-center gap-2 text-[var(--gm-accent-strong)]">
             <Archive className="h-5 w-5" />
-            <DialogTitle className="text-cv-lg font-bold">Archive Work</DialogTitle>
+            <DialogTitle className="text-gm-lg font-bold">Archive Work</DialogTitle>
           </div>
-          <DialogDescription className="text-cv-xs text-[var(--cv-text-muted)]">
-            Preserve <span className="font-semibold text-[var(--cv-text)]">"{workTitle}"</span> in your
+          <DialogDescription className="text-gm-xs text-[var(--gm-text-muted)]">
+            Preserve <span className="font-semibold text-[var(--gm-text)]">"{workTitle}"</span> in your
             archive. All reading history, progress milestones, access paths, and memories remain completely intact.
           </DialogDescription>
         </DialogHeader>
 
         {/* Progress Snapshot Banner */}
         {currentAnchor && (
-          <div className="rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-surface)]/60 px-3.5 py-2.5 flex items-center justify-between text-cv-xs">
-            <span className="text-[var(--cv-text-muted)]">Preserved Progress Snapshot:</span>
-            <span className="font-mono font-medium text-[var(--cv-accent-strong)]">
+          <div className="rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-surface)]/60 px-3.5 py-2.5 flex items-center justify-between text-gm-xs">
+            <span className="text-[var(--gm-text-muted)]">Preserved Progress Snapshot:</span>
+            <span className="font-mono font-medium text-[var(--gm-accent-strong)]">
               {formatProgressAnchor(currentAnchor)}
             </span>
           </div>
@@ -165,7 +165,7 @@ export function ArchiveWorkModal({
 
         {/* Nuanced Reasons Grid */}
         <div className="space-y-2">
-          <label className="text-cv-xs font-semibold uppercase tracking-wider text-[var(--cv-text-muted)]">
+          <label className="text-gm-xs font-semibold uppercase tracking-wider text-[var(--gm-text-muted)]">
             Archive Reason
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -177,20 +177,20 @@ export function ArchiveWorkModal({
                   key={opt.value}
                   type="button"
                   onClick={() => setSelectedReason(opt.value)}
-                  className={`flex items-start gap-2.5 p-3 text-left rounded-cv-lg border transition-all text-cv-xs ${
+                  className={`flex items-start gap-2.5 p-3 text-left rounded-gm-lg border transition-all text-gm-xs ${
                     isSelected
-                      ? 'border-[var(--cv-accent)] bg-[var(--cv-accent)]/10 text-[var(--cv-text)] ring-1 ring-[var(--cv-accent)] shadow-sm'
-                      : 'border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] text-[var(--cv-text-muted)] hover:border-[var(--cv-border-strong)] hover:text-[var(--cv-text)]'
+                      ? 'border-[var(--gm-accent)] bg-[var(--gm-accent)]/10 text-[var(--gm-text)] ring-1 ring-[var(--gm-accent)] shadow-sm'
+                      : 'border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] text-[var(--gm-text-muted)] hover:border-[var(--gm-border-strong)] hover:text-[var(--gm-text)]'
                   }`}
                 >
                   <Icon
                     className={`h-4 w-4 shrink-0 mt-0.5 ${
-                      isSelected ? 'text-[var(--cv-accent-strong)]' : 'text-[var(--cv-text-subtle)]'
+                      isSelected ? 'text-[var(--gm-accent-strong)]' : 'text-[var(--gm-text-subtle)]'
                     }`}
                   />
                   <div>
-                    <div className="font-medium text-[var(--cv-text)] leading-tight">{opt.label}</div>
-                    <div className="text-[11px] text-[var(--cv-text-subtle)] mt-0.5 leading-snug">
+                    <div className="font-medium text-[var(--gm-text)] leading-tight">{opt.label}</div>
+                    <div className="text-[11px] text-[var(--gm-text-subtle)] mt-0.5 leading-snug">
                       {opt.description}
                     </div>
                   </div>
@@ -205,12 +205,12 @@ export function ArchiveWorkModal({
           <div className="flex items-center justify-between">
             <label
               htmlFor="why-stopped-input"
-              className="text-cv-xs font-semibold uppercase tracking-wider text-[var(--cv-text-muted)] flex items-center gap-1.5"
+              className="text-gm-xs font-semibold uppercase tracking-wider text-[var(--gm-text-muted)] flex items-center gap-1.5"
             >
-              <Sparkles className="h-3.5 w-3.5 text-[var(--cv-accent-strong)]" />
+              <Sparkles className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
               Why Stopped / Parting Reflection
             </label>
-            <span className="text-[11px] text-[var(--cv-text-subtle)]">Optional</span>
+            <span className="text-[11px] text-[var(--gm-text-subtle)]">Optional</span>
           </div>
           <textarea
             id="why-stopped-input"
@@ -218,7 +218,7 @@ export function ArchiveWorkModal({
             value={whyStoppedNote}
             onChange={(e) => setWhyStoppedNote(e.target.value)}
             placeholder="Record why you put this work down, your concluding impression, or what would entice you to resume..."
-            className="w-full rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3.5 py-2.5 text-cv-sm text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent)] resize-none"
+            className="w-full rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3.5 py-2.5 text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent)] resize-none"
           />
         </div>
 

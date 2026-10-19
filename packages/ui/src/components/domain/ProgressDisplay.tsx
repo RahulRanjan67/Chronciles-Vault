@@ -122,10 +122,10 @@ export function ProgressDisplay({
   return (
     <span
       className={cn(
-        'font-mono text-cv-xs',
+        'font-mono text-gm-xs',
         emphasize
-          ? 'font-medium text-[var(--cv-accent-strong)]'
-          : 'text-[var(--cv-text-muted)]',
+          ? 'font-medium text-[var(--gm-accent-strong)]'
+          : 'text-[var(--gm-text-muted)]',
         className,
       )}
       {...props}

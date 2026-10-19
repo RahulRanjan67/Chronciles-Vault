@@ -6,13 +6,13 @@ import {
   applyUpdateCertaintyValidity,
   extractNumericProgress,
   selectFallbackAccessPath,
-} from "@chronicles-vault/domain";
+} from "@grimoire/domain";
 import {
   buildUpdateFeedId,
   useLibraryStore,
   useUpdatesStore,
-} from "@chronicles-vault/state";
-import type { HydratedWorkItem } from "@chronicles-vault/state";
+} from "@grimoire/state";
+import type { HydratedWorkItem } from "@grimoire/state";
 import {
   Badge,
   Button,
@@ -23,7 +23,7 @@ import {
   UpdateCertaintyBadge,
   relativeTime,
   toast,
-} from "@chronicles-vault/ui";
+} from "@grimoire/ui";
 
 const STALE_AFTER_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -156,31 +156,31 @@ export function Updates({ onNavigateWork }: UpdatesProps = {}) {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2.5">
-            <Sparkles className="h-6 w-6 text-[var(--cv-accent-strong)]" />
-            <h1 className="text-cv-2xl font-extrabold tracking-tight text-[var(--cv-text)]">
+            <Sparkles className="h-6 w-6 text-[var(--gm-accent-strong)]" />
+            <h1 className="text-gm-2xl font-extrabold tracking-tight text-[var(--gm-text)]">
               Updates Feed
             </h1>
             {unreadCount > 0 && (
-              <Badge variant="default" className="bg-[var(--cv-accent)]/20 text-[var(--cv-accent-strong)] font-mono">
+              <Badge variant="default" className="bg-[var(--gm-accent)]/20 text-[var(--gm-accent-strong)] font-mono">
                 {unreadCount} new
               </Badge>
             )}
           </div>
-          <p className="mt-1 text-cv-sm text-[var(--cv-text-muted)]">
+          <p className="mt-1 text-gm-sm text-[var(--gm-text-muted)]">
             Locally recorded releases and accumulated reading backlog. Source status reflects the
             latest locally stored health state; no websites are polled by this view.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-          <div className="inline-flex rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] p-0.5">
+          <div className="inline-flex rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] p-0.5">
             <button
               type="button"
               onClick={() => setFilterView("active")}
-              className={`rounded-cv-sm px-3 py-1 text-cv-xs font-medium transition-colors cursor-pointer ${
+              className={`rounded-gm-sm px-3 py-1 text-gm-xs font-medium transition-colors cursor-pointer ${
                 filterView === "active"
-                  ? "bg-[var(--cv-bg-elevated)] text-[var(--cv-text)] shadow-xs"
-                  : "text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+                  ? "bg-[var(--gm-bg-elevated)] text-[var(--gm-text)] shadow-xs"
+                  : "text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
               }`}
             >
               Active ({activeUpdates.length})
@@ -188,10 +188,10 @@ export function Updates({ onNavigateWork }: UpdatesProps = {}) {
             <button
               type="button"
               onClick={() => setFilterView("hidden")}
-              className={`rounded-cv-sm px-3 py-1 text-cv-xs font-medium transition-colors cursor-pointer ${
+              className={`rounded-gm-sm px-3 py-1 text-gm-xs font-medium transition-colors cursor-pointer ${
                 filterView === "hidden"
-                  ? "bg-[var(--cv-bg-elevated)] text-[var(--cv-text)] shadow-xs"
-                  : "text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+                  ? "bg-[var(--gm-bg-elevated)] text-[var(--gm-text)] shadow-xs"
+                  : "text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
               }`}
             >
               Snoozed / Dismissed ({hiddenUpdates.length})
@@ -203,7 +203,7 @@ export function Updates({ onNavigateWork }: UpdatesProps = {}) {
               variant="outline"
               size="sm"
               onClick={handleMarkAllSeen}
-              className="gap-1.5 text-cv-xs"
+              className="gap-1.5 text-gm-xs"
             >
               <CheckCheck className="h-3.5 w-3.5" />
               <span>Mark all seen</span>
@@ -227,7 +227,7 @@ export function Updates({ onNavigateWork }: UpdatesProps = {}) {
           }
         />
       ) : (
-        <div className="divide-y divide-[var(--cv-border)] overflow-hidden rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] shadow-sm">
+        <div className="divide-y divide-[var(--gm-border)] overflow-hidden rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] shadow-sm">
           {visibleUpdates.map((update) => {
             const isSeen = seenIds.includes(update.id);
             const isDismissed = dismissedIds.includes(update.id);
@@ -236,9 +236,9 @@ export function Updates({ onNavigateWork }: UpdatesProps = {}) {
             return (
               <div
                 key={update.id}
-                className={`flex flex-col justify-between gap-4 p-4 transition-colors hover:bg-[var(--cv-surface)]/50 sm:flex-row sm:items-center ${
+                className={`flex flex-col justify-between gap-4 p-4 transition-colors hover:bg-[var(--gm-surface)]/50 sm:flex-row sm:items-center ${
                   !isSeen && filterView === "active"
-                    ? "border-l-2 border-l-[var(--cv-accent-strong)] bg-[var(--cv-accent-muted)]/10"
+                    ? "border-l-2 border-l-[var(--gm-accent-strong)] bg-[var(--gm-accent-muted)]/10"
                     : ""
                 }`}
               >
@@ -248,7 +248,7 @@ export function Updates({ onNavigateWork }: UpdatesProps = {}) {
                     <div className="flex flex-wrap items-center gap-2">
                       {!isSeen && filterView === "active" && (
                         <span
-                          className="h-2 w-2 rounded-full bg-[var(--cv-accent-strong)] shrink-0"
+                          className="h-2 w-2 rounded-full bg-[var(--gm-accent-strong)] shrink-0"
                           title="Unread update"
                         />
                       )}
@@ -258,16 +258,16 @@ export function Updates({ onNavigateWork }: UpdatesProps = {}) {
                           markSeen(update.id);
                           onNavigateWork?.(update.workId);
                         }}
-                        className="truncate text-cv-sm font-semibold text-[var(--cv-text)] hover:text-[var(--cv-accent-strong)] transition-colors cursor-pointer text-left"
+                        className="truncate text-gm-sm font-semibold text-[var(--gm-text)] hover:text-[var(--gm-accent-strong)] transition-colors cursor-pointer text-left"
                       >
                         {update.workTitle}
                       </button>
                       <UpdateCertaintyBadge certainty={update.certainty} />
                     </div>
-                    <div className="mt-0.5 font-mono text-cv-xs text-[var(--cv-accent-strong)]">
+                    <div className="mt-0.5 font-mono text-gm-xs text-[var(--gm-accent-strong)]">
                       {update.label}
                       {update.accumulatedCount !== null && update.accumulatedCount > 0 && (
-                        <span className="ml-2 text-[var(--cv-text-muted)]">
+                        <span className="ml-2 text-[var(--gm-text-muted)]">
                           {update.accumulatedCount} new since your progress
                         </span>
                       )}
@@ -275,7 +275,7 @@ export function Updates({ onNavigateWork }: UpdatesProps = {}) {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap shrink-0 items-center gap-2.5 text-cv-xs text-[var(--cv-text-subtle)] sm:self-center">
+                <div className="flex flex-wrap shrink-0 items-center gap-2.5 text-gm-xs text-[var(--gm-text-subtle)] sm:self-center">
                   <span>{update.source}</span>
                   <SourceHealthBadge health={update.sourceHealth} />
                   <span className="font-mono">{relativeTime(update.date)}</span>
@@ -286,7 +286,7 @@ export function Updates({ onNavigateWork }: UpdatesProps = {}) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+                          className="h-7 w-7 text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
                           onClick={() => markSeen(update.id)}
                           title="Mark as seen"
                           aria-label={`Mark ${update.workTitle} ${update.label} as seen`}
@@ -297,7 +297,7 @@ export function Updates({ onNavigateWork }: UpdatesProps = {}) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+                        className="h-7 w-7 text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
                         onClick={() => {
                           snoozeUpdate(update.id);
                           toast({
@@ -313,7 +313,7 @@ export function Updates({ onNavigateWork }: UpdatesProps = {}) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-[var(--cv-text-muted)] hover:text-[var(--cv-danger)]"
+                        className="h-7 w-7 text-[var(--gm-text-muted)] hover:text-[var(--gm-danger)]"
                         onClick={() => {
                           dismissUpdate(update.id);
                           toast({
@@ -351,7 +351,7 @@ export function Updates({ onNavigateWork }: UpdatesProps = {}) {
                       asChild
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-[var(--cv-text-muted)]"
+                      className="h-7 w-7 text-[var(--gm-text-muted)]"
                     >
                       <a
                         href={update.sourceUrl}

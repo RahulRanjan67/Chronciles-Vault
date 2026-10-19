@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { WorkId } from '@chronicles-vault/shared';
-import { DuplicateCandidate, Work } from '@chronicles-vault/domain';
+import { WorkId } from '@grimoire/shared';
+import { DuplicateCandidate, Work } from '@grimoire/domain';
 import { clientRepository, MergeOptions } from '../client-repository';
 import { useLibraryStore } from './use-library-store';
 import { useReturnDeskStore } from './use-return-desk-store';

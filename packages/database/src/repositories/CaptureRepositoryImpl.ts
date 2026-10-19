@@ -14,7 +14,7 @@ import {
   CaptureState,
   CaptureSource,
   type CaptureRepository,
-} from '@chronicles-vault/domain';
+} from '@grimoire/domain';
 import { runInTransaction } from '../connection.js';
 
 interface CaptureRow {

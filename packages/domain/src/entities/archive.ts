@@ -2,7 +2,7 @@ import {
   ArchiveRecordId,
   WorkId,
   newId,
-} from '@chronicles-vault/shared';
+} from '@grimoire/shared';
 import { PersonalState } from './reading-relationship.js';
 import { ProgressAnchor, validateProgressAnchor } from './progress.js';
 

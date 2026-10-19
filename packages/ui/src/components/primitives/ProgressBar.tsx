@@ -25,10 +25,10 @@ export function ProgressBar({
   }[size];
 
   const fillClass = {
-    default: 'bg-[var(--cv-accent)]',
-    success: 'bg-[var(--cv-success)]',
-    warning: 'bg-[var(--cv-warning)]',
-    subtle: 'bg-[var(--cv-text-muted)]',
+    default: 'bg-[var(--gm-accent)]',
+    success: 'bg-[var(--gm-success)]',
+    warning: 'bg-[var(--gm-warning)]',
+    subtle: 'bg-[var(--gm-text-muted)]',
   }[variant];
 
   return (
@@ -38,7 +38,7 @@ export function ProgressBar({
       aria-valuemin={0}
       aria-valuemax={max}
       className={cn(
-        'w-full overflow-hidden rounded-full bg-[var(--cv-surface)]',
+        'w-full overflow-hidden rounded-full bg-[var(--gm-surface)]',
         heightClass,
         className,
       )}
@@ -46,7 +46,7 @@ export function ProgressBar({
     >
       <div
         className={cn(
-          'h-full rounded-full transition-all duration-[var(--cv-duration-base)] ease-[var(--cv-ease)]',
+          'h-full rounded-full transition-all duration-[var(--gm-duration-base)] ease-[var(--gm-ease)]',
           fillClass,
         )}
         style={{ width: `${percentage}%` }}

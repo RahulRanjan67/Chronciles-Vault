@@ -23,7 +23,7 @@ import {
   ProgressConfidence,
   type ReadingRepository,
   type ReadingListFilter,
-} from '@chronicles-vault/domain';
+} from '@grimoire/domain';
 import { runInTransaction } from '../connection.js';
 
 interface ReadingRelationshipRow {

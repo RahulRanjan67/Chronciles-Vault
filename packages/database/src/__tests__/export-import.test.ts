@@ -27,7 +27,7 @@ describe('Vault Export & Import Engine', () => {
     const exported = await exportVaultToJson(db);
 
     expect(exported.version).toBe(1);
-    expect(exported.source).toBe('chronicles-vault');
+    expect(exported.source).toBe('grimoire');
     expect(exported.counts.works).toBeGreaterThan(0);
     expect(exported.counts.readingRelationships).toBeGreaterThan(0);
     expect(exported.counts.accessPaths).toBeGreaterThan(0);

@@ -1,5 +1,5 @@
-import { AccessPathKind } from '@chronicles-vault/domain';
-import type { AccessPath, FeedAccessPath } from '@chronicles-vault/domain';
+import { AccessPathKind } from '@grimoire/domain';
+import type { AccessPath, FeedAccessPath } from '@grimoire/domain';
 import { describe, expect, it, vi } from 'vitest';
 import { AniListAdapter } from '../src/anilist.js';
 import { PublicFeedAdapter } from '../src/feed.js';

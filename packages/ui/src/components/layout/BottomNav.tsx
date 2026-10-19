@@ -51,10 +51,10 @@ export function BottomNav({
     <>
       <nav
         className={cn(
-          'md:hidden fixed bottom-0 inset-x-0 h-[var(--cv-bottom-nav-height)] z-[var(--cv-z-sticky)] border-t border-[var(--cv-border)] backdrop-blur-md px-1 flex items-center justify-around select-none pb-[env(safe-area-inset-bottom)]',
+          'md:hidden fixed bottom-0 inset-x-0 h-[var(--gm-bottom-nav-height)] z-[var(--gm-z-sticky)] border-t border-[var(--gm-border)] backdrop-blur-md px-1 flex items-center justify-around select-none pb-[env(safe-area-inset-bottom)]',
           className,
         )}
-        style={{ backgroundColor: 'var(--cv-glass-bg)' }}
+        style={{ backgroundColor: 'var(--gm-glass-bg)' }}
         {...props}
       >
         {BOTTOM_NAV_ITEMS.map((item) => {
@@ -70,14 +70,14 @@ export function BottomNav({
               className={cn(
                 'relative flex flex-1 flex-col items-center justify-center min-h-11 py-1 gap-1 transition-colors cursor-pointer',
                 active
-                  ? 'text-[var(--cv-accent-strong)]'
-                  : 'text-[var(--cv-text-subtle)] hover:text-[var(--cv-text-muted)]',
+                  ? 'text-[var(--gm-accent-strong)]'
+                  : 'text-[var(--gm-text-subtle)] hover:text-[var(--gm-text-muted)]',
               )}
             >
               <div className="relative">
                 <Icon className="h-5 w-5" />
                 {count !== undefined && count > 0 && (
-                  <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--cv-accent)] px-1 text-[9px] font-bold text-white shadow-xs">
+                  <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--gm-accent)] px-1 text-[9px] font-bold text-white shadow-xs">
                     {count > 99 ? '99+' : count}
                   </span>
                 )}
@@ -103,8 +103,8 @@ export function BottomNav({
           className={cn(
             'relative flex flex-1 flex-col items-center justify-center min-h-11 py-1 gap-1 transition-colors cursor-pointer',
             isMoreActive
-              ? 'text-[var(--cv-accent-strong)]'
-              : 'text-[var(--cv-text-subtle)] hover:text-[var(--cv-text-muted)]',
+              ? 'text-[var(--gm-accent-strong)]'
+              : 'text-[var(--gm-text-subtle)] hover:text-[var(--gm-text-muted)]',
           )}
         >
           <MoreHorizontal className="h-5 w-5" />
@@ -135,16 +135,16 @@ export function BottomNav({
                   type="button"
                   onClick={() => handleMoreNavigate(item.href)}
                   className={cn(
-                    'relative flex flex-col items-center justify-center gap-1.5 rounded-cv-lg border px-2 py-3 min-h-20 text-center transition-colors cursor-pointer',
+                    'relative flex flex-col items-center justify-center gap-1.5 rounded-gm-lg border px-2 py-3 min-h-20 text-center transition-colors cursor-pointer',
                     active
-                      ? 'border-[var(--cv-accent)] bg-[var(--cv-surface)] text-[var(--cv-accent-strong)]'
-                      : 'border-[var(--cv-border)] bg-[var(--cv-surface)]/50 text-[var(--cv-text-muted)] hover:bg-[var(--cv-surface)] hover:text-[var(--cv-text)]',
+                      ? 'border-[var(--gm-accent)] bg-[var(--gm-surface)] text-[var(--gm-accent-strong)]'
+                      : 'border-[var(--gm-border)] bg-[var(--gm-surface)]/50 text-[var(--gm-text-muted)] hover:bg-[var(--gm-surface)] hover:text-[var(--gm-text)]',
                   )}
                 >
                   <div className="relative">
                     <Icon className="h-5 w-5" />
                     {count !== undefined && count > 0 && (
-                      <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--cv-accent)] px-1 text-[9px] font-bold text-white shadow-xs">
+                      <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--gm-accent)] px-1 text-[9px] font-bold text-white shadow-xs">
                         {count > 99 ? '99+' : count}
                       </span>
                     )}
@@ -159,14 +159,14 @@ export function BottomNav({
               type="button"
               onClick={() => handleMoreNavigate('/vault')}
               className={cn(
-                'relative flex flex-col items-center justify-center gap-1.5 rounded-cv-lg border px-2 py-3 min-h-20 text-center transition-colors cursor-pointer',
+                'relative flex flex-col items-center justify-center gap-1.5 rounded-gm-lg border px-2 py-3 min-h-20 text-center transition-colors cursor-pointer',
                 isItemActive('/vault')
-                  ? 'border-[var(--cv-accent)] bg-[var(--cv-surface)] text-[var(--cv-accent-strong)]'
-                  : 'border-[var(--cv-border)] bg-[var(--cv-surface)]/50 text-[var(--cv-text-muted)] hover:bg-[var(--cv-surface)] hover:text-[var(--cv-text)]',
+                  ? 'border-[var(--gm-accent)] bg-[var(--gm-surface)] text-[var(--gm-accent-strong)]'
+                  : 'border-[var(--gm-border)] bg-[var(--gm-surface)]/50 text-[var(--gm-text-muted)] hover:bg-[var(--gm-surface)] hover:text-[var(--gm-text)]',
               )}
             >
               {isVaultUnlocked ? (
-                <Unlock className="h-5 w-5 text-[var(--cv-warning)]" />
+                <Unlock className="h-5 w-5 text-[var(--gm-warning)]" />
               ) : (
                 <Lock className="h-5 w-5" />
               )}

@@ -25,12 +25,12 @@ import {
   Input,
   PageContainer,
   toast,
-} from "@chronicles-vault/ui";
+} from "@grimoire/ui";
 import {
   useCategoriesStore,
   useLibraryStore,
   type CustomCategory,
-} from "@chronicles-vault/state";
+} from "@grimoire/state";
 
 export interface CategoriesProps {
   onNavigateWork?: (workId: string) => void;
@@ -188,11 +188,11 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-cv-2xl sm:text-cv-3xl font-extrabold tracking-tight text-[var(--cv-text)] flex items-center gap-3">
-            <Tag className="h-7 w-7 text-[var(--cv-accent-strong)]" />
+          <h1 className="text-gm-2xl sm:text-gm-3xl font-extrabold tracking-tight text-[var(--gm-text)] flex items-center gap-3">
+            <Tag className="h-7 w-7 text-[var(--gm-accent-strong)]" />
             <span>My Categories</span>
           </h1>
-          <p className="mt-1 text-cv-sm text-[var(--cv-text-muted)]">
+          <p className="mt-1 text-gm-sm text-[var(--gm-text-muted)]">
             Create custom genre categorizations, thematic tags, and curated reading shelves.
           </p>
         </div>
@@ -206,14 +206,14 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
       {/* Main Two-Pane View */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Categories List (5 cols) */}
-        <div className="lg:col-span-4 rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-4 shadow-sm space-y-3">
+        <div className="lg:col-span-4 rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 shadow-sm space-y-3">
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--cv-text-subtle)]" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--gm-text-subtle)]" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Filter categories…"
-              className="pl-9 text-cv-xs bg-[var(--cv-surface)]"
+              className="pl-9 text-gm-xs bg-[var(--gm-surface)]"
             />
           </div>
 
@@ -226,10 +226,10 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
                 <div
                   key={cat.id}
                   onClick={() => setSelectedCategoryId(cat.id)}
-                  className={`group flex items-start justify-between p-3 rounded-cv-lg border transition-all cursor-pointer select-none ${
+                  className={`group flex items-start justify-between p-3 rounded-gm-lg border transition-all cursor-pointer select-none ${
                     isSelected
-                      ? "border-[var(--cv-accent)] bg-[var(--cv-surface)] shadow-xs"
-                      : "border-[var(--cv-border)] bg-[var(--cv-surface)]/40 hover:bg-[var(--cv-surface)] hover:border-[var(--cv-border-strong)]"
+                      ? "border-[var(--gm-accent)] bg-[var(--gm-surface)] shadow-xs"
+                      : "border-[var(--gm-border)] bg-[var(--gm-surface)]/40 hover:bg-[var(--gm-surface)] hover:border-[var(--gm-border-strong)]"
                   }`}
                 >
                   <div className="flex-1 min-w-0 pr-2">
@@ -237,15 +237,15 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
                       <span
                         className={`inline-block h-2 w-2 rounded-full ${colorInfo.pill}`}
                       />
-                      <span className="font-semibold text-cv-sm text-[var(--cv-text)] truncate">
+                      <span className="font-semibold text-gm-sm text-[var(--gm-text)] truncate">
                         {cat.name}
                       </span>
-                      <span className="text-[10px] font-mono text-[var(--cv-text-subtle)]">
+                      <span className="text-[10px] font-mono text-[var(--gm-text-subtle)]">
                         ({cat.workIds.length})
                       </span>
                     </div>
                     {cat.description && (
-                      <p className="text-[11px] text-[var(--cv-text-muted)] line-clamp-1 leading-snug">
+                      <p className="text-[11px] text-[var(--gm-text-muted)] line-clamp-1 leading-snug">
                         {cat.description}
                       </p>
                     )}
@@ -256,7 +256,7 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
                       type="button"
                       onClick={(e) => handleOpenEdit(cat, e)}
                       title="Edit Category"
-                      className="p-1 rounded text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)] hover:bg-[var(--cv-surface-raised)]"
+                      className="p-1 rounded text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)] hover:bg-[var(--gm-surface-raised)]"
                     >
                       <Edit2 className="h-3 w-3" />
                     </button>
@@ -264,7 +264,7 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
                       type="button"
                       onClick={(e) => handleDeleteCategory(cat.id, e)}
                       title="Delete Category"
-                      className="p-1 rounded text-[var(--cv-text-subtle)] hover:text-[var(--cv-danger)] hover:bg-[var(--cv-surface-raised)]"
+                      className="p-1 rounded text-[var(--gm-text-subtle)] hover:text-[var(--gm-danger)] hover:bg-[var(--gm-surface-raised)]"
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>
@@ -274,7 +274,7 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
             })}
 
             {filteredCategories.length === 0 && (
-              <div className="p-6 text-center text-cv-xs text-[var(--cv-text-muted)]">
+              <div className="p-6 text-center text-gm-xs text-[var(--gm-text-muted)]">
                 No categories found matching &quot;{search}&quot;.
               </div>
             )}
@@ -282,11 +282,11 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
         </div>
 
         {/* Right Column: Category Details & Assigned Works (8 cols) */}
-        <div className="lg:col-span-8 rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-6 shadow-sm">
+        <div className="lg:col-span-8 rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-6 shadow-sm">
           {activeCategory ? (
             <div>
               {/* Category Banner */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-5 border-b border-[var(--cv-border)]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-5 border-b border-[var(--gm-border)]">
                 <div>
                   <div className="flex items-center gap-3">
                     <span
@@ -294,15 +294,15 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
                         COLOR_MAP[activeCategory.color]?.pill ?? "bg-indigo-500"
                       }`}
                     />
-                    <h2 className="text-cv-xl font-bold text-[var(--cv-text)]">
+                    <h2 className="text-gm-xl font-bold text-[var(--gm-text)]">
                       {activeCategory.name}
                     </h2>
-                    <span className="rounded-cv-full bg-[var(--cv-surface)] px-2 py-0.5 text-cv-xs text-[var(--cv-text-muted)] border border-[var(--cv-border)] font-mono">
+                    <span className="rounded-gm-full bg-[var(--gm-surface)] px-2 py-0.5 text-gm-xs text-[var(--gm-text-muted)] border border-[var(--gm-border)] font-mono">
                       {activeCategory.workIds.length} works
                     </span>
                   </div>
                   {activeCategory.description && (
-                    <p className="mt-2 text-cv-xs text-[var(--cv-text-muted)] leading-relaxed">
+                    <p className="mt-2 text-gm-xs text-[var(--gm-text-muted)] leading-relaxed">
                       {activeCategory.description}
                     </p>
                   )}
@@ -326,9 +326,9 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
                     <div
                       key={work.id}
                       onClick={() => onNavigateWork?.(work.id)}
-                      className="group flex flex-col overflow-hidden rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-surface)] hover:border-[var(--cv-border-strong)] transition-all cursor-pointer shadow-xs"
+                      className="group flex flex-col overflow-hidden rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-surface)] hover:border-[var(--gm-border-strong)] transition-all cursor-pointer shadow-xs"
                     >
-                      <div className="relative aspect-[3/4] w-full overflow-hidden bg-[var(--cv-bg)]">
+                      <div className="relative aspect-[3/4] w-full overflow-hidden bg-[var(--gm-bg)]">
                         <Cover
                           title={work.title}
                           src={work.coverRef ?? null}
@@ -336,7 +336,7 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
                           className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute top-2 right-2">
-                          <span className="rounded-cv-sm bg-black/70 backdrop-blur-xs px-1.5 py-0.5 text-[10px] font-mono text-white uppercase">
+                          <span className="rounded-gm-sm bg-black/70 backdrop-blur-xs px-1.5 py-0.5 text-[10px] font-mono text-white uppercase">
                             {work.contentType}
                           </span>
                         </div>
@@ -344,11 +344,11 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
 
                       <div className="p-3 flex-1 flex flex-col justify-between">
                         <div>
-                          <h4 className="font-semibold text-cv-sm text-[var(--cv-text)] group-hover:text-[var(--cv-accent-strong)] transition-colors line-clamp-1">
+                          <h4 className="font-semibold text-gm-sm text-[var(--gm-text)] group-hover:text-[var(--gm-accent-strong)] transition-colors line-clamp-1">
                             {work.title}
                           </h4>
                           {relationship?.currentAnchor && (
-                            <p className="text-[11px] text-[var(--cv-text-muted)] font-mono mt-0.5">
+                            <p className="text-[11px] text-[var(--gm-text-muted)] font-mono mt-0.5">
                               {relationship.currentAnchor.type === "chapter"
                                 ? `Ch. ${relationship.currentAnchor.chapter}`
                                 : ('title' in relationship.currentAnchor ? relationship.currentAnchor.title as string : null) ?? "Reading"}
@@ -356,9 +356,9 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
                           )}
                         </div>
 
-                        <div className="mt-3 flex items-center justify-between text-[11px] text-[var(--cv-text-subtle)] pt-2 border-t border-[var(--cv-border)]/50">
+                        <div className="mt-3 flex items-center justify-between text-[11px] text-[var(--gm-text-subtle)] pt-2 border-t border-[var(--gm-border)]/50">
                           <span className="capitalize">{relationship?.personalState ?? "Saved"}</span>
-                          <span className="flex items-center gap-1 text-[var(--cv-accent-strong)] font-medium">
+                          <span className="flex items-center gap-1 text-[var(--gm-accent-strong)] font-medium">
                             View <ArrowRight className="h-3 w-3" />
                           </span>
                         </div>
@@ -375,7 +375,7 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
               )}
             </div>
           ) : (
-            <div className="p-12 text-center text-[var(--cv-text-muted)]">
+            <div className="p-12 text-center text-[var(--gm-text-muted)]">
               Select or create a category to view works.
             </div>
           )}
@@ -396,7 +396,7 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
 
           <form onSubmit={handleSaveCategory} className="space-y-4 py-2">
             <div>
-              <label className="block text-cv-xs font-semibold text-[var(--cv-text)] mb-1">
+              <label className="block text-gm-xs font-semibold text-[var(--gm-text)] mb-1">
                 Category Name *
               </label>
               <Input
@@ -408,7 +408,7 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
             </div>
 
             <div>
-              <label className="block text-cv-xs font-semibold text-[var(--cv-text)] mb-1">
+              <label className="block text-gm-xs font-semibold text-[var(--gm-text)] mb-1">
                 Description
               </label>
               <textarea
@@ -416,12 +416,12 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="What distinguishes this category?"
                 rows={2}
-                className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-xs text-[var(--cv-text)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--cv-border-focus)]"
+                className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-xs text-[var(--gm-text)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gm-border-focus)]"
               />
             </div>
 
             <div>
-              <label className="block text-cv-xs font-semibold text-[var(--cv-text)] mb-2">
+              <label className="block text-gm-xs font-semibold text-[var(--gm-text)] mb-2">
                 Color Tag Accent
               </label>
               <div className="grid grid-cols-4 gap-2">
@@ -432,10 +432,10 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
                       key={cKey}
                       type="button"
                       onClick={() => setColor(cKey)}
-                      className={`flex items-center gap-2 p-2 rounded-cv border text-cv-xs capitalize transition-all ${
+                      className={`flex items-center gap-2 p-2 rounded-cv border text-gm-xs capitalize transition-all ${
                         isSelected
-                          ? "border-[var(--cv-text)] ring-1 ring-[var(--cv-text)] font-semibold"
-                          : "border-[var(--cv-border)] hover:bg-[var(--cv-surface)]"
+                          ? "border-[var(--gm-text)] ring-1 ring-[var(--gm-text)] font-semibold"
+                          : "border-[var(--gm-border)] hover:bg-[var(--gm-surface)]"
                       }`}
                     >
                       <span className={`h-3 w-3 rounded-full ${COLOR_MAP[cKey].pill}`} />
@@ -483,8 +483,8 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
                   onClick={() => toggleWorkInCategory(activeCategory.id, work.id)}
                   className={`flex items-center justify-between p-2.5 rounded-cv border transition-all cursor-pointer ${
                     isAssigned
-                      ? "border-[var(--cv-accent)] bg-[var(--cv-surface)]"
-                      : "border-[var(--cv-border)] hover:bg-[var(--cv-surface)]/60"
+                      ? "border-[var(--gm-accent)] bg-[var(--gm-surface)]"
+                      : "border-[var(--gm-border)] hover:bg-[var(--gm-surface)]/60"
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -495,10 +495,10 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
                       className="h-10 w-8 shrink-0 object-cover rounded-xs"
                     />
                     <div className="min-w-0">
-                      <p className="font-semibold text-cv-xs text-[var(--cv-text)] truncate">
+                      <p className="font-semibold text-gm-xs text-[var(--gm-text)] truncate">
                         {work.title}
                       </p>
-                      <p className="text-[10px] text-[var(--cv-text-muted)]">
+                      <p className="text-[10px] text-[var(--gm-text-muted)]">
                         {work.contentType} · {work.genres.slice(0, 2).join(", ")}
                       </p>
                     </div>
@@ -507,8 +507,8 @@ export function Categories({ onNavigateWork }: CategoriesProps) {
                   <div
                     className={`h-5 w-5 rounded flex items-center justify-center border transition-colors ${
                       isAssigned
-                        ? "bg-[var(--cv-accent)] border-[var(--cv-accent)] text-white"
-                        : "border-[var(--cv-border)]"
+                        ? "bg-[var(--gm-accent)] border-[var(--gm-accent)] text-white"
+                        : "border-[var(--gm-border)]"
                     }`}
                   >
                     {isAssigned && <Check className="h-3.5 w-3.5" />}

@@ -1,4 +1,4 @@
-import { WorkId } from '@chronicles-vault/shared';
+import { WorkId } from '@grimoire/shared';
 import { ProgressAnchor } from '../entities/progress.js';
 
 // ---------------------------------------------------------------------------

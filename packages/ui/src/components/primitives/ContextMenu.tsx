@@ -19,14 +19,14 @@ export const ContextMenuSubTrigger = React.forwardRef<
   <ContextMenuPrimitive.SubTrigger
     ref={ref}
     className={cn(
-      'flex cursor-default select-none items-center rounded-cv-sm px-2 py-1.5 text-cv-sm outline-none transition-colors focus:bg-[var(--cv-surface)] focus:text-[var(--cv-text)] data-[state=open]:bg-[var(--cv-surface)] data-[state=open]:text-[var(--cv-text)]',
+      'flex cursor-default select-none items-center rounded-gm-sm px-2 py-1.5 text-gm-sm outline-none transition-colors focus:bg-[var(--gm-surface)] focus:text-[var(--gm-text)] data-[state=open]:bg-[var(--gm-surface)] data-[state=open]:text-[var(--gm-text)]',
       inset && 'pl-8',
       className,
     )}
     {...props}
   >
     {children}
-    <ChevronRight className="ml-auto h-4 w-4 text-[var(--cv-text-subtle)]" />
+    <ChevronRight className="ml-auto h-4 w-4 text-[var(--gm-text-subtle)]" />
   </ContextMenuPrimitive.SubTrigger>
 ));
 ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName;
@@ -38,7 +38,7 @@ export const ContextMenuSubContent = React.forwardRef<
   <ContextMenuPrimitive.SubContent
     ref={ref}
     className={cn(
-      'z-[var(--cv-z-dropdown)] min-w-[8rem] overflow-hidden rounded-cv-md border border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] p-1 text-[var(--cv-text)] shadow-lg',
+      'z-[var(--gm-z-dropdown)] min-w-[8rem] overflow-hidden rounded-gm-md border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-1 text-[var(--gm-text)] shadow-lg',
       'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
       className,
     )}
@@ -55,7 +55,7 @@ export const ContextMenuContent = React.forwardRef<
     <ContextMenuPrimitive.Content
       ref={ref}
       className={cn(
-        'z-[var(--cv-z-dropdown)] min-w-[10rem] overflow-hidden rounded-cv-md border border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] p-1 text-[var(--cv-text)] shadow-xl',
+        'z-[var(--gm-z-dropdown)] min-w-[10rem] overflow-hidden rounded-gm-md border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-1 text-[var(--gm-text)] shadow-xl',
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
         className,
       )}
@@ -75,9 +75,9 @@ export const ContextMenuItem = React.forwardRef<
   <ContextMenuPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex cursor-pointer select-none items-center rounded-cv-sm px-2 py-1.5 text-cv-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-      'focus:bg-[var(--cv-surface)] focus:text-[var(--cv-text)]',
-      destructive && 'text-[var(--cv-danger)] focus:bg-[var(--cv-danger-muted)] focus:text-[var(--cv-danger)]',
+      'relative flex cursor-pointer select-none items-center rounded-gm-sm px-2 py-1.5 text-gm-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'focus:bg-[var(--gm-surface)] focus:text-[var(--gm-text)]',
+      destructive && 'text-[var(--gm-danger)] focus:bg-[var(--gm-danger-muted)] focus:text-[var(--gm-danger)]',
       inset && 'pl-8',
       className,
     )}
@@ -93,14 +93,14 @@ export const ContextMenuCheckboxItem = React.forwardRef<
   <ContextMenuPrimitive.CheckboxItem
     ref={ref}
     className={cn(
-      'relative flex cursor-pointer select-none items-center rounded-cv-sm py-1.5 pl-8 pr-2 text-cv-sm outline-none transition-colors focus:bg-[var(--cv-surface)] focus:text-[var(--cv-text)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'relative flex cursor-pointer select-none items-center rounded-gm-sm py-1.5 pl-8 pr-2 text-gm-sm outline-none transition-colors focus:bg-[var(--gm-surface)] focus:text-[var(--gm-text)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
     {...props}
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <ContextMenuPrimitive.ItemIndicator>
-        <Check className="h-4 w-4 text-[var(--cv-accent-strong)]" />
+        <Check className="h-4 w-4 text-[var(--gm-accent-strong)]" />
       </ContextMenuPrimitive.ItemIndicator>
     </span>
     {children}
@@ -115,14 +115,14 @@ export const ContextMenuRadioItem = React.forwardRef<
   <ContextMenuPrimitive.RadioItem
     ref={ref}
     className={cn(
-      'relative flex cursor-pointer select-none items-center rounded-cv-sm py-1.5 pl-8 pr-2 text-cv-sm outline-none transition-colors focus:bg-[var(--cv-surface)] focus:text-[var(--cv-text)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'relative flex cursor-pointer select-none items-center rounded-gm-sm py-1.5 pl-8 pr-2 text-gm-sm outline-none transition-colors focus:bg-[var(--gm-surface)] focus:text-[var(--gm-text)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
     {...props}
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <ContextMenuPrimitive.ItemIndicator>
-        <Circle className="h-2 w-2 fill-current text-[var(--cv-accent-strong)]" />
+        <Circle className="h-2 w-2 fill-current text-[var(--gm-accent-strong)]" />
       </ContextMenuPrimitive.ItemIndicator>
     </span>
     {children}
@@ -139,7 +139,7 @@ export const ContextMenuLabel = React.forwardRef<
   <ContextMenuPrimitive.Label
     ref={ref}
     className={cn(
-      'px-2 py-1.5 text-cv-xs font-semibold text-[var(--cv-text-muted)]',
+      'px-2 py-1.5 text-gm-xs font-semibold text-[var(--gm-text-muted)]',
       inset && 'pl-8',
       className,
     )}
@@ -154,7 +154,7 @@ export const ContextMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ContextMenuPrimitive.Separator
     ref={ref}
-    className={cn('-mx-1 my-1 h-px bg-[var(--cv-border)]', className)}
+    className={cn('-mx-1 my-1 h-px bg-[var(--gm-border)]', className)}
     {...props}
   />
 ));
@@ -167,7 +167,7 @@ export const ContextMenuShortcut = ({
   return (
     <span
       className={cn(
-        'ml-auto text-cv-xs tracking-widest text-[var(--cv-text-subtle)] font-mono',
+        'ml-auto text-gm-xs tracking-widest text-[var(--gm-text-subtle)] font-mono',
         className,
       )}
       {...props}

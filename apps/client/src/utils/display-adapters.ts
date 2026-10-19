@@ -8,16 +8,16 @@
 import type {
   ProgressAnchor as DomainProgressAnchor,
   MemoryType as DomainMemoryType,
-} from '@chronicles-vault/domain';
+} from '@grimoire/domain';
 import {
   formatProgressAnchor as formatDomainAnchor,
   normalizeProgressAnchor,
   SourceHealth,
-} from '@chronicles-vault/domain';
+} from '@grimoire/domain';
 import type {
   ProgressAnchor as UIProgressAnchor,
   SourceHealthType,
-} from '@chronicles-vault/ui';
+} from '@grimoire/ui';
 
 // ---------------------------------------------------------------------------
 // SourceHealth → SourceHealthType

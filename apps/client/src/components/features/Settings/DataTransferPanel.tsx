@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Download, FileText, FileJson, FileSpreadsheet, Archive, Upload } from "lucide-react";
-import { Button, toast } from "@chronicles-vault/ui";
+import { Button, toast } from "@grimoire/ui";
 import {
   VAULT_EXPORT_CONFIRMATION,
   applyBackupImport,
@@ -21,8 +21,8 @@ import {
   type BackupSource,
   type BackupWork,
   type CandidateWork,
-} from "@chronicles-vault/state";
-import { useVaultStore } from "@chronicles-vault/vault";
+} from "@grimoire/state";
+import { useVaultStore } from "@grimoire/vault";
 import { loadUnlockedVaultNotes } from "../../../utils/vault-notes";
 
 const encoder = new TextEncoder();
@@ -165,13 +165,15 @@ export function DataTransferPanel() {
     });
   };
 
-  const exportAs = async (format: "json" | "csv" | "md" | "zip") => {
+  const exportAs = async (format: "gca" | "json" | "csv" | "md" | "zip") => {
     setBusy(true);
     try {
       const snapshot = await buildSnapshot();
       if (!snapshot) return;
-      const base = `chronicles-vault-${stamp()}`;
-      if (format === "json") {
+      const base = `grimoire-${stamp()}`;
+      if (format === "gca") {
+        downloadBytes(`${base}.gca`, encoder.encode(serializeBackup(snapshot)), "application/json");
+      } else if (format === "json") {
         downloadBytes(`${base}.json`, encoder.encode(serializeBackup(snapshot)), "application/json");
       } else if (format === "csv") {
         downloadBytes(`${base}-works.csv`, encoder.encode(worksToCsv(snapshot.works)), "text/csv");
@@ -179,6 +181,7 @@ export function DataTransferPanel() {
         downloadBytes(`${base}-notes.md`, encoder.encode(memoriesToMarkdown(snapshot.works, snapshot.memories)), "text/markdown");
       } else {
         const bundle = createStoredZip([
+          { name: "backup.gca", data: encoder.encode(serializeBackup(snapshot)) },
           { name: "backup.json", data: encoder.encode(serializeBackup(snapshot)) },
           { name: "works.csv", data: encoder.encode(worksToCsv(snapshot.works)) },
           { name: "notes.md", data: encoder.encode(memoriesToMarkdown(snapshot.works, snapshot.memories)) },
@@ -206,7 +209,7 @@ export function DataTransferPanel() {
     const text = await file.text();
     const index = existingIndex();
 
-    if (name.endsWith(".json")) {
+    if (name.endsWith(".gca") || name.endsWith(".cca") || name.endsWith(".json")) {
       const parsed = parseBackup(text);
       if (!parsed.ok) {
         setPreview({ kind: "error", fileName: file.name, errors: parsed.errors });
@@ -279,7 +282,7 @@ export function DataTransferPanel() {
       return;
     }
 
-    setPreview({ kind: "error", fileName: file.name, errors: ["Choose a .json backup, a .csv file, or a browser bookmarks .html file."] });
+    setPreview({ kind: "error", fileName: file.name, errors: ["Choose a Grimoire Codex Archive (.gca), JSON backup (.json), CSV file (.csv), or browser bookmarks HTML file."] });
   };
 
   const confirmImport = () => {
@@ -311,13 +314,16 @@ export function DataTransferPanel() {
   return (
     <div className="space-y-8">
       <section className="space-y-4">
-        <h4 className="text-cv-sm font-semibold text-[var(--cv-text)]">Export</h4>
-        <p className="text-cv-xs text-[var(--cv-text-muted)]">
+        <h4 className="text-gm-sm font-semibold text-[var(--gm-text)]">Export</h4>
+        <p className="text-gm-xs text-[var(--gm-text-muted)]">
           Exports include your library, access paths, notes, and relations. Vault records are excluded unless you confirm below.
         </p>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" disabled={busy} onClick={() => void exportAs("json")} className="gap-1.5">
-            <FileJson className="h-3.5 w-3.5" /> JSON backup
+          <Button size="sm" disabled={busy} onClick={() => void exportAs("gca")} className="gap-1.5">
+            <Archive className="h-3.5 w-3.5" /> Grimoire Archive (.gca)
+          </Button>
+          <Button size="sm" variant="outline" disabled={busy} onClick={() => void exportAs("json")} className="gap-1.5">
+            <FileJson className="h-3.5 w-3.5" /> Raw JSON
           </Button>
           <Button size="sm" variant="outline" disabled={busy} onClick={() => void exportAs("csv")} className="gap-1.5">
             <FileSpreadsheet className="h-3.5 w-3.5" /> Works (CSV)
@@ -330,8 +336,8 @@ export function DataTransferPanel() {
           </Button>
         </div>
 
-        <div className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] p-4 space-y-3">
-          <label className="flex items-start gap-2.5 text-cv-xs text-[var(--cv-text)]">
+        <div className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] p-4 space-y-3">
+          <label className="flex items-start gap-2.5 text-gm-xs text-[var(--gm-text)]">
             <input
               type="checkbox"
               className="mt-0.5"
@@ -344,7 +350,7 @@ export function DataTransferPanel() {
             />
             <span>
               Include Private Vault notes.
-              <span className="block text-[var(--cv-text-subtle)]">
+              <span className="block text-[var(--gm-text-subtle)]">
                 {vaultUnlocked
                   ? "Vault notes will be written in plain text. Store the file somewhere safe."
                   : "Unlock the Private Vault to include its notes."}
@@ -353,14 +359,14 @@ export function DataTransferPanel() {
           </label>
           {includeVault && (
             <div className="space-y-1.5">
-              <label className="text-[11px] font-medium text-[var(--cv-text-muted)]" htmlFor="vault-export-confirm">
+              <label className="text-[11px] font-medium text-[var(--gm-text-muted)]" htmlFor="vault-export-confirm">
                 Type {VAULT_EXPORT_CONFIRMATION} to confirm
               </label>
               <input
                 id="vault-export-confirm"
                 value={vaultConfirmation}
                 onChange={(event) => setVaultConfirmation(event.target.value)}
-                className="w-full max-w-xs rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-3 py-1.5 text-cv-sm text-[var(--cv-text)] focus:outline-none focus:ring-2 focus:ring-[var(--cv-border-focus)]"
+                className="w-full max-w-xs rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-3 py-1.5 text-gm-sm text-[var(--gm-text)] focus:outline-none focus:ring-2 focus:ring-[var(--gm-border-focus)]"
                 autoComplete="off"
               />
             </div>
@@ -369,18 +375,18 @@ export function DataTransferPanel() {
       </section>
 
       <section className="space-y-4">
-        <h4 className="text-cv-sm font-semibold text-[var(--cv-text)]">Import</h4>
-        <p className="text-cv-xs text-[var(--cv-text-muted)]">
-          Accepts a JSON backup, a works CSV (title, content_type, genres, tags, privacy_state, description, access_url), or a browser bookmarks HTML file. You see a preview before anything is written. Duplicates are skipped.
+        <h4 className="text-gm-sm font-semibold text-[var(--gm-text)]">Import</h4>
+        <p className="text-gm-xs text-[var(--gm-text-muted)]">
+          Accepts a Grimoire Codex Archive (.gca), Chronicle Codex Archive (.cca), JSON backup, works CSV, or browser bookmarks HTML file. You see a preview before anything is written. Duplicates are skipped.
         </p>
         <div className="flex flex-wrap items-center gap-3">
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-cv border border-[var(--cv-border)] px-3 py-2 text-cv-sm text-[var(--cv-text)] hover:bg-[var(--cv-surface-hover)]">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-cv border border-[var(--gm-border)] px-3 py-2 text-gm-sm text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)]">
             <Upload className="h-3.5 w-3.5" />
             Choose file
             <input
               ref={fileInput}
               type="file"
-              accept=".json,.csv,.html,.htm,application/json,text/csv,text/html"
+              accept=".gca,.cca,.json,.csv,.html,.htm,application/json,text/csv,text/html"
               className="sr-only"
               onChange={(event) => void onFileChosen(event.target.files?.[0])}
             />
@@ -393,7 +399,7 @@ export function DataTransferPanel() {
         </div>
 
         {preview?.kind === "error" && (
-          <div className="rounded-cv border border-[var(--cv-danger)]/30 bg-[var(--cv-danger-muted)] p-4 text-cv-xs text-[var(--cv-text)]">
+          <div className="rounded-cv border border-[var(--gm-danger)]/30 bg-[var(--gm-danger-muted)] p-4 text-gm-xs text-[var(--gm-text)]">
             <p className="font-semibold">Cannot import {preview.fileName}</p>
             <ul className="mt-2 list-disc space-y-1 pl-5">
               {preview.errors.map((error) => (
@@ -404,29 +410,29 @@ export function DataTransferPanel() {
         )}
 
         {preview && preview.kind !== "error" && (
-          <div className="rounded-cv border border-[var(--cv-border-strong)] bg-[var(--cv-surface)] p-4 space-y-3">
-            <p className="text-cv-sm font-semibold text-[var(--cv-text)]">Preview: {preview.fileName}</p>
-            <p className="text-cv-xs text-[var(--cv-text-muted)]">
-              Will add <strong className="text-[var(--cv-text)]">{importCount}</strong> work{importCount === 1 ? "" : "s"}
-              {" · "}skipping <strong className="text-[var(--cv-text)]">{preview.kind === "backup" ? preview.duplicateTitles.length : preview.duplicates.length}</strong> duplicate{(preview.kind === "backup" ? preview.duplicateTitles.length : preview.duplicates.length) === 1 ? "" : "s"}
+          <div className="rounded-cv border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] p-4 space-y-3">
+            <p className="text-gm-sm font-semibold text-[var(--gm-text)]">Preview: {preview.fileName}</p>
+            <p className="text-gm-xs text-[var(--gm-text-muted)]">
+              Will add <strong className="text-[var(--gm-text)]">{importCount}</strong> work{importCount === 1 ? "" : "s"}
+              {" · "}skipping <strong className="text-[var(--gm-text)]">{preview.kind === "backup" ? preview.duplicateTitles.length : preview.duplicates.length}</strong> duplicate{(preview.kind === "backup" ? preview.duplicateTitles.length : preview.duplicates.length) === 1 ? "" : "s"}
               {preview.kind === "candidates" && preview.invalid.length > 0 ? ` · ${preview.invalid.length} invalid row${preview.invalid.length === 1 ? "" : "s"} ignored` : ""}.
             </p>
             {preview.kind === "candidates" && preview.invalid.length > 0 && (
-              <ul className="list-disc space-y-0.5 pl-5 text-[11px] text-[var(--cv-danger)]">
+              <ul className="list-disc space-y-0.5 pl-5 text-[11px] text-[var(--gm-danger)]">
                 {preview.invalid.slice(0, 5).map((row) => (
                   <li key={`${row.line}-${row.reason}`}>Line {row.line}: {row.reason}</li>
                 ))}
               </ul>
             )}
             {preview.kind === "candidates" && (
-              <ul className="max-h-40 overflow-y-auto list-disc space-y-0.5 pl-5 text-[11px] text-[var(--cv-text-subtle)]">
+              <ul className="max-h-40 overflow-y-auto list-disc space-y-0.5 pl-5 text-[11px] text-[var(--gm-text-subtle)]">
                 {preview.create.slice(0, 50).map((candidate) => (
                   <li key={`${candidate.sourceLine}-${candidate.title}`}>{candidate.title}</li>
                 ))}
               </ul>
             )}
             {preview.kind === "backup" && (
-              <p className="text-[11px] text-[var(--cv-text-subtle)]">
+              <p className="text-[11px] text-[var(--gm-text-subtle)]">
                 Restores works, access paths, notes, relations, and personal lists from this backup.
               </p>
             )}
@@ -443,10 +449,10 @@ export function DataTransferPanel() {
       </section>
 
       <section className="space-y-2">
-        <h4 className="text-cv-sm font-semibold text-[var(--cv-text)] flex items-center gap-2">
+        <h4 className="text-gm-sm font-semibold text-[var(--gm-text)] flex items-center gap-2">
           <Download className="h-3.5 w-3.5" /> Browser extension handoff
         </h4>
-        <p className="text-cv-xs text-[var(--cv-text-muted)]">
+        <p className="text-gm-xs text-[var(--gm-text-muted)]">
           Radar can also take captured tabs from the browser companion. Captures stay in Radar until you confirm them.
         </p>
       </section>

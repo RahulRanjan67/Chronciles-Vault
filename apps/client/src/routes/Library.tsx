@@ -9,33 +9,32 @@ import {
   Square,
   Star,
   Tag,
+  Trash2,
   Unlock,
-  UserCheck,
   X,
 } from 'lucide-react';
-import { Badge, Button, Input, PageContainer, toast } from '@chronicles-vault/ui';
+import { Badge, Button, Input, PageContainer, toast } from '@grimoire/ui';
 import {
   clientRepository,
-  DEMO_USER_ACCOUNT,
   useLibraryStore,
   useListsStore,
   selectFilteredWorks,
   LibraryViewMode,
-} from '@chronicles-vault/state';
+} from '@grimoire/state';
 import {
   IndexedDbVaultRepository,
   createVaultKey,
   useVaultStore,
   vaultSession,
-} from '@chronicles-vault/vault';
+} from '@grimoire/vault';
 import {
   ArchiveReason,
   PersonalState,
   PrivacyState,
   formatProgressAnchor,
   type ShelfPriorityTier,
-} from '@chronicles-vault/domain';
-import type { WorkId } from '@chronicles-vault/shared';
+} from '@grimoire/domain';
+import type { WorkId } from '@grimoire/shared';
 import {
   LibraryFilterState,
   LibraryFilters,
@@ -104,6 +103,7 @@ export function Library({ onNavigateWork }: LibraryProps) {
   /* Opens the create-work modal when the command palette requests it,
      including requests made before this route mounted. */
   React.useEffect(() => {
+    storeState.refresh();
     if (consumeCreateWorkRequest()) setCreateModalOpen(true);
     return subscribeCreateWorkRequest(() => {
       if (consumeCreateWorkRequest()) setCreateModalOpen(true);
@@ -294,15 +294,46 @@ export function Library({ onNavigateWork }: LibraryProps) {
     });
   };
 
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    const count = selectedIds.length;
+    if (typeof window !== "undefined" && !window.confirm(`Move ${count} selected work(s) to Return Desk / Discarded?`)) return;
+    for (const id of selectedIds) {
+      clientRepository.deleteWork(id as WorkId);
+    }
+    storeState.refresh();
+    setSelectedIds([]);
+    toast({
+      title: 'Works deleted',
+      description: `Moved ${count} work(s) to Return Desk.`,
+    });
+  };
+
+  const handleBulkPurge = () => {
+    if (selectedIds.length === 0) return;
+    const count = selectedIds.length;
+    if (typeof window !== "undefined" && !window.confirm(`Permanently purge ${count} selected work(s) and all linked memories? This action cannot be reversed.`)) return;
+    for (const id of selectedIds) {
+      clientRepository.purgeWork(id as WorkId);
+    }
+    storeState.refresh();
+    setSelectedIds([]);
+    toast({
+      title: 'Works permanently purged',
+      description: `Erased ${count} work(s) from database.`,
+      variant: 'destructive',
+    });
+  };
+
   return (
     <PageContainer maxWidth="wide">
       {/* Page Title & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <div>
-          <h1 className="text-cv-2xl sm:text-cv-3xl font-extrabold tracking-tight text-[var(--cv-text)]">
+          <h1 className="text-gm-2xl sm:text-gm-3xl font-extrabold tracking-tight text-[var(--gm-text)]">
             Library
           </h1>
-          <p className="mt-1 text-cv-sm text-[var(--cv-text-muted)]">Your personal collection across every medium.</p>
+          <p className="mt-1 text-gm-sm text-[var(--gm-text-muted)]">Your personal collection across every medium.</p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           <Button
@@ -329,7 +360,7 @@ export function Library({ onNavigateWork }: LibraryProps) {
 
       {/* Bulk Operations Bar */}
       {bulkMode && (
-        <div className="mb-6 rounded-cv-xl border border-[var(--cv-accent-muted)] bg-[var(--cv-bg-elevated)] p-4 shadow-md space-y-3">
+        <div className="mb-6 rounded-gm-xl border border-[var(--gm-accent-muted)] bg-[var(--gm-bg-elevated)] p-4 shadow-md space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <Badge variant="default" className="font-mono">
@@ -338,7 +369,7 @@ export function Library({ onNavigateWork }: LibraryProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 text-cv-xs"
+                className="h-7 text-gm-xs"
                 onClick={() => setSelectedIds(filteredItems.map((i) => i.work.id))}
               >
                 Select All ({filteredItems.length})
@@ -347,7 +378,7 @@ export function Library({ onNavigateWork }: LibraryProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 text-cv-xs"
+                  className="h-7 text-gm-xs"
                   onClick={() => setSelectedIds([])}
                 >
                   Clear
@@ -360,7 +391,7 @@ export function Library({ onNavigateWork }: LibraryProps) {
                 setBulkMode(false);
                 setSelectedIds([]);
               }}
-              className="text-cv-xs text-[var(--cv-text-muted)] hover:text-[var(--cv-text)] inline-flex items-center gap-1 cursor-pointer"
+              className="text-gm-xs text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] inline-flex items-center gap-1 cursor-pointer"
             >
               <X className="h-3.5 w-3.5" /> Close
             </button>
@@ -375,14 +406,14 @@ export function Library({ onNavigateWork }: LibraryProps) {
                   key={item.work.id}
                   type="button"
                   onClick={() => toggleSelectWork(item.work.id)}
-                  className={`inline-flex items-center gap-1.5 rounded-cv-full border px-2.5 py-1 text-cv-xs transition-colors cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 rounded-gm-full border px-2.5 py-1 text-gm-xs transition-colors cursor-pointer ${
                     isSelected
-                      ? 'border-[var(--cv-accent-strong)] bg-[var(--cv-accent)]/20 text-[var(--cv-text)] font-medium'
-                      : 'border-[var(--cv-border)] bg-[var(--cv-surface)] text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]'
+                      ? 'border-[var(--gm-accent-strong)] bg-[var(--gm-accent)]/20 text-[var(--gm-text)] font-medium'
+                      : 'border-[var(--gm-border)] bg-[var(--gm-surface)] text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]'
                   }`}
                 >
                   {isSelected ? (
-                    <CheckSquare className="h-3 w-3 text-[var(--cv-accent-strong)] shrink-0" />
+                    <CheckSquare className="h-3 w-3 text-[var(--gm-accent-strong)] shrink-0" />
                   ) : (
                     <Square className="h-3 w-3 shrink-0" />
                   )}
@@ -393,7 +424,7 @@ export function Library({ onNavigateWork }: LibraryProps) {
           </div>
 
           {/* Action Controls */}
-          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--cv-border)] text-cv-xs">
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--gm-border)] text-gm-xs">
             <select
               disabled={selectedIds.length === 0}
               defaultValue=""
@@ -404,7 +435,7 @@ export function Library({ onNavigateWork }: LibraryProps) {
                 }
               }}
               aria-label="Bulk status change"
-              className="h-8 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-2 text-cv-xs text-[var(--cv-text)] disabled:opacity-40"
+              className="h-8 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2 text-gm-xs text-[var(--gm-text)] disabled:opacity-40"
             >
               <option value="">Set Status…</option>
               <option value="reading">Reading</option>
@@ -425,7 +456,7 @@ export function Library({ onNavigateWork }: LibraryProps) {
                 }
               }}
               aria-label="Bulk shelf tier change"
-              className="h-8 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-2 text-cv-xs text-[var(--cv-text)] disabled:opacity-40"
+              className="h-8 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2 text-gm-xs text-[var(--gm-text)] disabled:opacity-40"
             >
               <option value="">Shelf Tier…</option>
               <option value="standard">Standard</option>
@@ -445,7 +476,7 @@ export function Library({ onNavigateWork }: LibraryProps) {
                   }
                 }}
                 aria-label="Bulk add to personal list"
-                className="h-8 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-2 text-cv-xs text-[var(--cv-text)] disabled:opacity-40"
+                className="h-8 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2 text-gm-xs text-[var(--gm-text)] disabled:opacity-40"
               >
                 <option value="">Add to List…</option>
                 {myLists.map((list) => (
@@ -466,7 +497,7 @@ export function Library({ onNavigateWork }: LibraryProps) {
                 }
               }}
               aria-label="Bulk privacy change"
-              className="h-8 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-2 text-cv-xs text-[var(--cv-text)] disabled:opacity-40"
+              className="h-8 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2 text-gm-xs text-[var(--gm-text)] disabled:opacity-40"
             >
               <option value="">Privacy…</option>
               <option value="public">Public</option>
@@ -479,30 +510,55 @@ export function Library({ onNavigateWork }: LibraryProps) {
                 onChange={(e) => setBulkTagInput(e.target.value)}
                 placeholder="Add #tag…"
                 disabled={selectedIds.length === 0}
-                className="h-8 w-28 text-cv-xs"
+                className="h-8 w-28 text-gm-xs"
               />
               <Button
                 size="sm"
                 variant="outline"
                 disabled={selectedIds.length === 0 || !bulkTagInput.trim()}
                 onClick={handleBulkTag}
-                className="h-8 gap-1 text-cv-xs"
+                className="h-8 gap-1 text-gm-xs"
               >
                 <Tag className="h-3 w-3" />
                 <span>Tag</span>
               </Button>
             </div>
 
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={selectedIds.length === 0}
-              onClick={handleBulkArchive}
-              className="h-8 gap-1 text-cv-xs text-[var(--cv-danger)] ml-auto"
-            >
-              <ArchiveIcon className="h-3.5 w-3.5" />
-              <span>Archive Selected</span>
-            </Button>
+            <div className="flex items-center gap-2 ml-auto">
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={selectedIds.length === 0}
+                onClick={handleBulkArchive}
+                className="h-8 gap-1 text-gm-xs text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
+                title="Move selected to archive"
+              >
+                <ArchiveIcon className="h-3.5 w-3.5" />
+                <span>Archive</span>
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={selectedIds.length === 0}
+                onClick={handleBulkDelete}
+                className="h-8 gap-1 text-gm-xs text-[var(--gm-danger)] hover:bg-[var(--gm-danger-muted)]"
+                title="Move selected to Return Desk"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Delete</span>
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={selectedIds.length === 0}
+                onClick={handleBulkPurge}
+                className="h-8 gap-1 text-gm-xs text-[var(--gm-danger)] hover:bg-[var(--gm-danger-muted)]"
+                title="Permanently remove selected works from database"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Purge</span>
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -541,12 +597,12 @@ export function Library({ onNavigateWork }: LibraryProps) {
           emptyStateSlot={
             totalCount === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 text-center gap-4">
-                <BookPlus className="h-12 w-12 text-[var(--cv-text-muted)]" />
+                <BookPlus className="h-12 w-12 text-[var(--gm-text-muted)]" />
                 <div>
-                  <p className="text-cv-lg font-semibold text-[var(--cv-text)]">
+                  <p className="text-gm-lg font-semibold text-[var(--gm-text)]">
                     Your library is empty
                   </p>
-                  <p className="text-cv-sm text-[var(--cv-text-muted)] mt-1">
+                  <p className="text-gm-sm text-[var(--gm-text-muted)] mt-1">
                     Add your first work to get started.
                   </p>
                 </div>
@@ -608,12 +664,12 @@ interface LibraryBoardViewProps {
 }
 
 const BOARD_COLUMNS: Array<{ state: string; label: string; colorVar: string }> = [
-  { state: 'reading', label: 'Reading', colorVar: 'var(--cv-accent-strong)' },
-  { state: 'planned', label: 'Planned', colorVar: 'var(--cv-text-muted)' },
+  { state: 'reading', label: 'Reading', colorVar: 'var(--gm-accent-strong)' },
+  { state: 'planned', label: 'Planned', colorVar: 'var(--gm-text-muted)' },
   { state: 'waiting', label: 'Waiting', colorVar: '#f59e0b' },
   { state: 'stalled', label: 'Stalled', colorVar: '#ef4444' },
   { state: 'completed', label: 'Completed', colorVar: '#22c55e' },
-  { state: 'paused', label: 'Paused', colorVar: 'var(--cv-text-subtle)' },
+  { state: 'paused', label: 'Paused', colorVar: 'var(--gm-text-subtle)' },
 ];
 
 function LibraryBoardView({ items, onWorkClick, onContinue }: LibraryBoardViewProps) {
@@ -631,18 +687,18 @@ function LibraryBoardView({ items, onWorkClick, onContinue }: LibraryBoardViewPr
                 style={{ borderColor: col.colorVar }}
               >
                 <span
-                  className="text-cv-xs font-bold uppercase tracking-wider"
+                  className="text-gm-xs font-bold uppercase tracking-wider"
                   style={{ color: col.colorVar }}
                 >
                   {col.label}
                 </span>
-                <span className="ml-auto text-cv-xs text-[var(--cv-text-muted)] font-medium bg-[var(--cv-surface)] rounded-full px-2 py-0.5">
+                <span className="ml-auto text-gm-xs text-[var(--gm-text-muted)] font-medium bg-[var(--gm-surface)] rounded-full px-2 py-0.5">
                   {columnItems.length}
                 </span>
               </div>
               <div className="flex flex-col gap-2 min-h-24">
                 {columnItems.length === 0 ? (
-                  <div className="text-cv-xs text-[var(--cv-text-subtle)] px-1 py-4 text-center italic">
+                  <div className="text-gm-xs text-[var(--gm-text-subtle)] px-1 py-4 text-center italic">
                     No works
                   </div>
                 ) : (
@@ -682,20 +738,20 @@ function BoardCard({
     health === 'healthy' ? '#22c55e'
     : health === 'degraded' ? '#f59e0b'
     : health === 'unavailable' ? '#ef4444'
-    : health === 'local' ? 'var(--cv-accent-strong)'
-    : 'var(--cv-text-subtle)';
+    : health === 'local' ? 'var(--gm-accent-strong)'
+    : 'var(--gm-text-subtle)';
 
   return (
     <button
       type="button"
       onClick={() => onWorkClick?.(item.work.id)}
-      className="w-full text-left rounded-cv bg-[var(--cv-bg-elevated)] border border-[var(--cv-border)] p-3 hover:border-[var(--cv-accent-muted)] transition-colors group cursor-pointer"
+      className="w-full text-left rounded-cv bg-[var(--gm-bg-elevated)] border border-[var(--gm-border)] p-3 hover:border-[var(--gm-accent-muted)] transition-colors group cursor-pointer"
     >
-      <p className="text-cv-sm font-semibold text-[var(--cv-text)] line-clamp-2 group-hover:text-[var(--cv-accent-strong)] transition-colors">
+      <p className="text-gm-sm font-semibold text-[var(--gm-text)] line-clamp-2 group-hover:text-[var(--gm-accent-strong)] transition-colors">
         {item.work.title}
       </p>
       <div className="flex items-center justify-between mt-2 gap-2">
-        <span className="text-cv-xs text-[var(--cv-text-muted)]">
+        <span className="text-gm-xs text-[var(--gm-text-muted)]">
           {item.work.contentType}
           {progressLabel ? ` · ${progressLabel}` : ''}
         </span>
@@ -712,7 +768,7 @@ function BoardCard({
             e.stopPropagation();
             onContinue(item.work.id);
           }}
-          className="mt-2 w-full text-center text-cv-xs font-medium text-[var(--cv-accent-strong)] hover:underline cursor-pointer"
+          className="mt-2 w-full text-center text-gm-xs font-medium text-[var(--gm-accent-strong)] hover:underline cursor-pointer"
         >
           Continue →
         </button>

@@ -19,6 +19,11 @@ import {
   Film,
   Pencil,
   Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Volume1,
+  FileAudio,
   Copy,
   Image as ImageIcon,
   Heart,
@@ -52,7 +57,7 @@ import {
   cn,
   relativeTime,
   toast,
-} from "@chronicles-vault/ui";
+} from "@grimoire/ui";
 import {
   clientRepository,
   useFandomLinksStore,
@@ -60,7 +65,7 @@ import {
   useLibraryStore,
   useNotebookStore,
   useWorkDetailStore,
-} from "@chronicles-vault/state";
+} from "@grimoire/state";
 import {
   PersonalState,
   PrivacyState,
@@ -73,8 +78,8 @@ import {
   type ShelfPriorityTier,
   type WorkCreator,
   type WorkCreatorRole,
-} from "@chronicles-vault/domain";
-import type { MemoryId, WorkId } from "@chronicles-vault/shared";
+} from "@grimoire/domain";
+import type { MemoryId, WorkId } from "@grimoire/shared";
 import { toUIHealth, toUIMemoryType } from "../utils/display-adapters";
 import { ArchiveWorkModal } from "../components/features/Archive/ArchiveWorkModal";
 import { MergeWizardModal } from "../components/features/Merge/MergeWizardModal";
@@ -82,7 +87,7 @@ import { WorkRelationTree } from "../components/features/Relations/WorkRelationT
 import { WorkNotebookPanel } from "../components/features/WorkDetail/WorkNotebookPanel";
 import { WorkFandomLinksPanel } from "../components/features/WorkDetail/WorkFandomLinksPanel";
 import { ResumeReadingModal } from "../components/features/Reader";
-import { seedDemoShelfFiles } from "../utils/demo-shelf-files";
+import { openLocalDiskPath } from "../utils/local-media";
 
 export interface WorkDetailProps {
   workId?: string;
@@ -159,6 +164,163 @@ export function WorkDetail({
     };
   }, []);
 
+  // Audiobook Live Player state
+  const [audioIsPlaying, setAudioIsPlaying] = React.useState(false);
+  const [audioCurrentTime, setAudioCurrentTime] = React.useState<number>(0);
+  const [audioDuration, setAudioDuration] = React.useState<number>(2740);
+  const [audioVolume, setAudioVolume] = React.useState<number>(1);
+  const [audioIsMuted, setAudioIsMuted] = React.useState(false);
+  const [audioPlaybackRate, setAudioPlaybackRate] = React.useState<number>(1);
+  const [localAudioUrl, setLocalAudioUrl] = React.useState<string | null>(null);
+  const [localAudioFileName, setLocalAudioFileName] = React.useState<string | null>(null);
+  const audioFileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const audioElementRef = React.useRef<HTMLAudioElement | null>(null);
+
+  const currentAccessPaths = activeItem?.accessPaths ?? [];
+  const currentAnchor = activeItem?.relationship?.currentAnchor ?? null;
+  const audioAccessPath = currentAccessPaths.find(
+    (p) =>
+      (p.kind === "web" && typeof (p as any).url === "string" && /\.(mp3|m4b|m4a|wav|ogg|aac|flac)$/i.test((p as any).url)) ||
+      (p.kind === "local_file" && typeof (p as any).filePath === "string" && /\.(mp3|m4b|m4a|wav|ogg|aac|flac)$/i.test((p as any).filePath)),
+  );
+  const playableAudioPathUrl = (audioAccessPath as any)?.url ?? null;
+
+  React.useEffect(() => {
+    if (currentAnchor && (currentAnchor as any).type === "audiobook") {
+      const anyAnchor = currentAnchor as any;
+      if (typeof anyAnchor.timestampSeconds === "number") {
+        setAudioCurrentTime(anyAnchor.timestampSeconds);
+      }
+      if (typeof anyAnchor.totalSeconds === "number" && anyAnchor.totalSeconds > 0) {
+        setAudioDuration(anyAnchor.totalSeconds);
+      }
+    }
+  }, [currentAnchor]);
+
+  React.useEffect(() => {
+    return () => {
+      if (localAudioUrl) {
+        URL.revokeObjectURL(localAudioUrl);
+      }
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, [localAudioUrl]);
+
+  // Audio playback ticker for synthetic / fallback audio
+  React.useEffect(() => {
+    if (!audioIsPlaying) return;
+    const interval = setInterval(() => {
+      setAudioCurrentTime((prev) => {
+        const next = prev + 1;
+        if (audioDuration && next >= audioDuration) {
+          setAudioIsPlaying(false);
+          return audioDuration;
+        }
+        return next;
+      });
+    }, 1000 / audioPlaybackRate);
+
+    return () => clearInterval(interval);
+  }, [audioIsPlaying, audioDuration, audioPlaybackRate]);
+
+  const handleAudioTimeUpdate = () => {
+    if (audioElementRef.current) {
+      setAudioCurrentTime(audioElementRef.current.currentTime);
+      if (audioElementRef.current.duration && !Number.isNaN(audioElementRef.current.duration)) {
+        setAudioDuration(audioElementRef.current.duration);
+      }
+    }
+  };
+
+  const handleAudioSeek = (newTime: number) => {
+    setAudioCurrentTime(newTime);
+    if (audioElementRef.current) {
+      audioElementRef.current.currentTime = newTime;
+    }
+    if (work && anchor && anchor.type === "audiobook") {
+      updateRelationshipInLibrary(work.id, {
+        currentAnchor: {
+          ...anchor,
+          timestampSeconds: Math.floor(newTime),
+          totalSeconds: audioDuration || anchor.totalSeconds,
+        },
+      });
+    }
+  };
+
+  const toggleAudioPlay = () => {
+    if (audioIsPlaying) {
+      setAudioIsPlaying(false);
+      if (audioElementRef.current) {
+        audioElementRef.current.pause();
+      }
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    } else {
+      setAudioIsPlaying(true);
+      if (audioElementRef.current && (localAudioUrl || playableAudioPathUrl)) {
+        audioElementRef.current.play().catch(() => {});
+      } else if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        const anyAnchor = anchor as any;
+        const textToRead = `${work.title}. ${anyAnchor?.title ?? "Audiobook"}. Narrated by ${anyAnchor?.narrator ?? "Soundbooth Theater"}. ${work.description}`;
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        utterance.rate = audioPlaybackRate;
+        utterance.onend = () => setAudioIsPlaying(false);
+        window.speechSynthesis.speak(utterance);
+      }
+      toast({
+        title: "Audiobook Playing",
+        description: `Now playing: ${(anchor as any)?.title ?? work.title}`,
+      });
+    }
+  };
+
+  const handleUploadAudioFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (localAudioUrl) URL.revokeObjectURL(localAudioUrl);
+    const url = URL.createObjectURL(file);
+    setLocalAudioUrl(url);
+    setLocalAudioFileName(file.name);
+    setAudioIsPlaying(true);
+    if (audioElementRef.current) {
+      audioElementRef.current.src = url;
+      audioElementRef.current.play().catch(() => {});
+    }
+    toast({
+      title: "Audiobook File Loaded",
+      description: `Playing ${file.name} directly in browser.`,
+      variant: "success",
+    });
+  };
+
+  const handleAudioVolumeChange = (newVol: number) => {
+    setAudioVolume(newVol);
+    setAudioIsMuted(newVol === 0);
+    if (audioElementRef.current) {
+      audioElementRef.current.volume = newVol;
+      audioElementRef.current.muted = newVol === 0;
+    }
+  };
+
+  const toggleAudioMute = () => {
+    if (audioIsMuted) {
+      setAudioIsMuted(false);
+      if (audioElementRef.current) audioElementRef.current.muted = false;
+    } else {
+      setAudioIsMuted(true);
+      if (audioElementRef.current) audioElementRef.current.muted = true;
+    }
+  };
+
+  const skipAudio = (secondsDelta: number) => {
+    const newTime = Math.max(0, Math.min(audioCurrentTime + secondsDelta, audioDuration || 999999));
+    handleAudioSeek(newTime);
+  };
+
   const [newMemoryBody, setNewMemoryBody] = React.useState("");
   const [newMemoryTitle, setNewMemoryTitle] = React.useState("");
   const [newMemoryAttemptId, setNewMemoryAttemptId] = React.useState("");
@@ -181,6 +343,7 @@ export function WorkDetail({
   const [archiveModalOpen, setArchiveModalOpen] = React.useState(false);
   const [mergeModalOpen, setMergeModalOpen] = React.useState(false);
   const [resumeModalOpen, setResumeModalOpen] = React.useState(false);
+  const [showAccessLinksModal, setShowAccessLinksModal] = React.useState(false);
   const [fetchingCover, setFetchingCover] = React.useState(false);
   const [showUrlInput, setShowUrlInput] = React.useState(false);
   const [customCoverUrl, setCustomCoverUrl] = React.useState("");
@@ -269,16 +432,12 @@ export function WorkDetail({
   };
 
   const handleResume = async () => {
-    const { listLocalFiles } = await import("@chronicles-vault/reader");
-    let files = await listLocalFiles().catch(() => []);
-    if (files.length === 0) {
-      try {
-        await seedDemoShelfFiles();
-        files = await listLocalFiles();
-      } catch {
-        // ignore
-      }
+    if (work?.contentType === ContentType.Audiobook) {
+      toggleAudioPlay();
+      return;
     }
+    const { listLocalFiles } = await import("@grimoire/reader");
+    const files = await listLocalFiles().catch(() => []);
 
     // 1. Direct local file linked via accessPaths
     const localPath = accessPaths.find((p) => p.kind === "local_file" && p.fileId);
@@ -324,7 +483,18 @@ export function WorkDetail({
       return;
     }
 
-    // 4. Otherwise open ResumeReadingModal to choose web source, video, or shelf EPUB
+    // 4. If web access paths exist, open directly (1 link) or show picker (2+)
+    const webPaths = accessPaths.filter((p): p is typeof p & { url: string } => p.kind === "web" && typeof p.url === "string" && p.url.length > 0);
+    if (webPaths.length === 1 && webPaths[0]) {
+      window.open(webPaths[0].url, "_blank");
+      return;
+    }
+    if (webPaths.length > 1) {
+      setShowAccessLinksModal(true);
+      return;
+    }
+
+    // 5. Otherwise open ResumeReadingModal to choose web source, video, or shelf EPUB
     setResumeModalOpen(true);
   };
 
@@ -342,13 +512,13 @@ export function WorkDetail({
             variant="ghost"
             size="sm"
             onClick={onBack}
-            className="gap-2 text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+            className="gap-2 text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Library</span>
           </Button>
         </div>
-        <div className="text-center py-24 text-[var(--cv-text-muted)]">Work not found.</div>
+        <div className="text-center py-24 text-[var(--gm-text-muted)]">Work not found.</div>
       </PageContainer>
     );
   }
@@ -565,7 +735,7 @@ export function WorkDetail({
           variant="ghost"
           size="sm"
           onClick={onBack}
-          className="gap-2 text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+          className="gap-2 text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back to Library</span>
@@ -573,7 +743,7 @@ export function WorkDetail({
       </div>
 
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-cv-2xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-6 sm:p-8 shadow-lg mb-8">
+      <div className="relative overflow-hidden rounded-gm-2xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-6 sm:p-8 shadow-lg mb-8">
         <div className="flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
           <div className="flex flex-col items-center shrink-0 mx-auto md:mx-0 w-44 sm:w-56">
             <Cover
@@ -589,7 +759,7 @@ export function WorkDetail({
                 size="sm"
                 onClick={handleFetchCoverFromWeb}
                 disabled={fetchingCover}
-                className="w-full gap-1.5 text-xs text-[var(--cv-accent-strong)] hover:bg-[var(--cv-accent)]/10"
+                className="w-full gap-1.5 text-xs text-[var(--gm-accent-strong)] hover:bg-[var(--gm-accent)]/10"
               >
                 <RefreshCw className={cn("h-3 w-3", fetchingCover && "animate-spin")} />
                 <span>{fetchingCover ? "Fetching..." : "Fetch Official Cover"}</span>
@@ -599,7 +769,7 @@ export function WorkDetail({
                   variant="ghost"
                   size="sm"
                   onClick={() => coverFileInputRef.current?.click()}
-                  className="flex-1 gap-1 text-[11px] text-[var(--cv-text-muted)] hover:text-[var(--cv-text)] border border-[var(--cv-border)]"
+                  className="flex-1 gap-1 text-[11px] text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] border border-[var(--gm-border)]"
                 >
                   <Upload className="h-3 w-3" />
                   <span>Upload</span>
@@ -608,7 +778,7 @@ export function WorkDetail({
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowUrlInput(!showUrlInput)}
-                  className="flex-1 gap-1 text-[11px] text-[var(--cv-text-muted)] hover:text-[var(--cv-text)] border border-[var(--cv-border)]"
+                  className="flex-1 gap-1 text-[11px] text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] border border-[var(--gm-border)]"
                 >
                   <LinkIcon className="h-3 w-3" />
                   <span>URL</span>
@@ -656,10 +826,10 @@ export function WorkDetail({
             <div>
               {/* Meta chips */}
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="rounded-cv-sm bg-[var(--cv-surface)] px-2 py-0.5 font-mono text-[11px] uppercase text-[var(--cv-text-muted)] border border-[var(--cv-border)]">
+                <span className="rounded-gm-sm bg-[var(--gm-surface)] px-2 py-0.5 font-mono text-[11px] uppercase text-[var(--gm-text-muted)] border border-[var(--gm-border)]">
                   {work.contentType}
                 </span>
-                <span className="rounded-cv-sm bg-[var(--cv-surface)] px-2 py-0.5 text-[11px] text-[var(--cv-text-muted)] border border-[var(--cv-border)]">
+                <span className="rounded-gm-sm bg-[var(--gm-surface)] px-2 py-0.5 text-[11px] text-[var(--gm-text-muted)] border border-[var(--gm-border)]">
                   {work.origin} · {work.publicationState}
                 </span>
                 {preferredPath && (
@@ -676,20 +846,20 @@ export function WorkDetail({
               </div>
 
               {/* Title */}
-              <h1 className="text-cv-2xl sm:text-cv-3xl font-extrabold tracking-tight text-[var(--cv-text)]">
+              <h1 className="text-gm-2xl sm:text-gm-3xl font-extrabold tracking-tight text-[var(--gm-text)]">
                 {work.title}
               </h1>
 
               {/* Alt titles */}
               {work.alternativeTitles.length > 0 && (
-                <p className="mt-1 text-cv-xs text-[var(--cv-text-subtle)]">
+                <p className="mt-1 text-gm-xs text-[var(--gm-text-subtle)]">
                   Also known as: {work.alternativeTitles.join(" · ")}
                 </p>
               )}
 
               {/* Description */}
               {work.description && (
-                <p className="mt-4 text-cv-sm text-[var(--cv-text-muted)] leading-relaxed max-w-2xl">
+                <p className="mt-4 text-gm-sm text-[var(--gm-text-muted)] leading-relaxed max-w-2xl">
                   {work.description}
                 </p>
               )}
@@ -699,7 +869,7 @@ export function WorkDetail({
                 {work.genres.map((g) => (
                   <span
                     key={g}
-                    className="rounded-cv-full bg-[var(--cv-surface)] px-2.5 py-0.5 text-cv-xs text-[var(--cv-text-muted)]"
+                    className="rounded-gm-full bg-[var(--gm-surface)] px-2.5 py-0.5 text-gm-xs text-[var(--gm-text-muted)]"
                   >
                     {g}
                   </span>
@@ -708,15 +878,15 @@ export function WorkDetail({
             </div>
 
             {/* Progress & Status Controls */}
-            <div className="mt-6 pt-5 border-t border-[var(--cv-border)] flex flex-col gap-4">
+            <div className="mt-6 pt-5 border-t border-[var(--gm-border)] flex flex-col gap-4">
               {/* Personal State & Shelf Tier Selector */}
               <div className="flex flex-wrap items-center gap-3">
-                <span className="text-cv-xs text-[var(--cv-text-muted)]">Status:</span>
+                <span className="text-gm-xs text-[var(--gm-text-muted)]">Status:</span>
                 <Select
                   value={relationship?.personalState ?? "planned"}
                   onValueChange={handleStateChange}
                 >
-                  <SelectTrigger className="w-44 h-8 text-cv-sm">
+                  <SelectTrigger className="w-44 h-8 text-gm-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -728,12 +898,12 @@ export function WorkDetail({
                   </SelectContent>
                 </Select>
 
-                <span className="text-cv-xs text-[var(--cv-text-muted)] ml-2">Shelf Tier:</span>
+                <span className="text-gm-xs text-[var(--gm-text-muted)] ml-2">Shelf Tier:</span>
                 <Select
                   value={relationship?.shelfTier ?? "standard"}
                   onValueChange={handleShelfTierChange}
                 >
-                  <SelectTrigger className="w-44 h-8 text-cv-sm">
+                  <SelectTrigger className="w-44 h-8 text-gm-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -748,8 +918,8 @@ export function WorkDetail({
 
               {/* Progress Adjuster */}
               <div className="flex flex-wrap items-center gap-3">
-                <span className="text-cv-xs text-[var(--cv-text-muted)]">Progress:</span>
-                <span className="text-cv-sm font-medium text-[var(--cv-text)]">{anchorLabel}</span>
+                <span className="text-gm-xs text-[var(--gm-text-muted)]">Progress:</span>
+                <span className="text-gm-sm font-medium text-[var(--gm-text)]">{anchorLabel}</span>
                 <div className="flex items-center gap-1">
                   <Button
                     variant="outline"
@@ -776,8 +946,17 @@ export function WorkDetail({
                   className="gap-1.5 ml-2"
                   onClick={handleResume}
                 >
-                  <BookOpen className="h-3.5 w-3.5" />
-                  Resume
+                  {work.contentType === ContentType.Audiobook ? (
+                    <>
+                      {audioIsPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 fill-current" />}
+                      <span>{audioIsPlaying ? "Pause Audio" : "Listen / Play"}</span>
+                    </>
+                  ) : (
+                    <>
+                      <BookOpen className="h-3.5 w-3.5" />
+                      <span>Resume</span>
+                    </>
+                  )}
                 </Button>
 
                 <div className="flex items-center gap-2 ml-auto">
@@ -788,18 +967,36 @@ export function WorkDetail({
                     onClick={() => setMergeModalOpen(true)}
                     title="Merge duplicates into this record"
                   >
-                    <GitMerge className="h-3.5 w-3.5 text-[var(--cv-accent-strong)]" />
+                    <GitMerge className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
                     <span>Merge</span>
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="gap-1.5 text-[var(--cv-text-muted)] hover:text-red-400"
+                    className="gap-1.5 text-[var(--gm-text-muted)] hover:text-red-400"
                     onClick={() => setArchiveModalOpen(true)}
                     title="Archive this work out of active library"
                   >
                     <ArchiveIcon className="h-3.5 w-3.5" />
                     <span>Archive</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (typeof window !== 'undefined' && !window.confirm(`Permanently purge "${work.title}" and all its records? This cannot be undone.`)) return;
+                      try {
+                        clientRepository.purgeWork(work.id as WorkId);
+                        toast({ title: 'Work purged', description: `"${work.title}" was permanently removed.` });
+                        if (onBack) onBack();
+                      } catch (err) {
+                        toast({ title: 'Purge failed', description: err instanceof Error ? err.message : 'Unknown error', variant: 'destructive' });
+                      }
+                    }}
+                    className="gap-1.5 text-gm-xs text-[var(--gm-danger)] hover:bg-[var(--gm-danger-muted)]"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Permanently Purge</span>
                   </Button>
                 </div>
               </div>
@@ -807,6 +1004,176 @@ export function WorkDetail({
           </div>
         </div>
       </div>
+
+      {/* Audiobook Support: Live Audio Player Bar */}
+      {work.contentType === ContentType.Audiobook && (
+        <div className="mb-6 rounded-gm-xl border-2 border-[var(--gm-accent-strong)] bg-[var(--gm-bg-elevated)] p-4 sm:p-5 shadow-lg space-y-3">
+          {/* Hidden audio element and local file input */}
+          <audio
+            ref={audioElementRef}
+            src={localAudioUrl || playableAudioPathUrl || undefined}
+            onTimeUpdate={handleAudioTimeUpdate}
+            onEnded={() => setAudioIsPlaying(false)}
+            onPlay={() => setAudioIsPlaying(true)}
+            onPause={() => setAudioIsPlaying(false)}
+            preload="metadata"
+            className="hidden"
+          />
+          <input
+            ref={audioFileInputRef}
+            type="file"
+            accept="audio/*,.mp3,.m4b,.m4a,.wav,.ogg,.aac,.flac"
+            onChange={handleUploadAudioFile}
+            className="hidden"
+          />
+
+          {/* Top Bar: Title, Chapter, Narrator, Status */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--gm-border)] pb-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-cv bg-[var(--gm-accent)]/15 text-[var(--gm-accent-strong)]">
+                <Headphones className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-gm-sm font-bold text-[var(--gm-text)] truncate">
+                    {(anchor as any)?.title ?? `${work.title} — Audio Edition`}
+                  </h3>
+                  <Badge variant="default" className="text-[10px] font-mono shrink-0">
+                    {audioIsPlaying ? "PLAYING" : "PAUSED"}
+                  </Badge>
+                </div>
+                <p className="text-gm-xs text-[var(--gm-text-muted)] truncate">
+                  {(anchor as any)?.narrator ? <span>Narrated by <strong className="text-[var(--gm-text)]">{(anchor as any).narrator}</strong> · </span> : null}
+                  {(anchor as any)?.track !== undefined && <span>Track {(anchor as any).track} · </span>}
+                  {(anchor as any)?.chapter !== undefined && <span>Chapter {(anchor as any).chapter} · </span>}
+                  <span>{localAudioFileName ? `Local File: ${localAudioFileName}` : (audioAccessPath ? "Soundbooth / Linked Audio" : "Sanctum Audio Engine")}</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => audioFileInputRef.current?.click()}
+                className="h-7 text-[11px] gap-1"
+                title="Select a local audio file from disk to stream"
+              >
+                <Upload className="h-3 w-3" />
+                <span>{localAudioFileName ? "Switch Audio File" : "Choose Audio File"}</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Center Scrubber Progress Slider */}
+          <div className="space-y-1.5 pt-1">
+            <div className="flex items-center justify-between text-gm-xs font-mono text-[var(--gm-text-muted)]">
+              <span>
+                {Math.floor(audioCurrentTime / 60)}:{String(Math.floor(audioCurrentTime % 60)).padStart(2, "0")}
+              </span>
+              <span className="text-[11px]">
+                {Math.round(((audioCurrentTime) / (audioDuration || 1)) * 100)}% Complete
+              </span>
+              <span>
+                {Math.floor((audioDuration || 2740) / 60)}:{String(Math.floor((audioDuration || 2740) % 60)).padStart(2, "0")}
+              </span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={audioDuration || 2740}
+              value={audioCurrentTime}
+              onChange={(e) => handleAudioSeek(Number(e.target.value))}
+              className="w-full h-2 rounded-none bg-[var(--gm-surface)] accent-[var(--gm-accent-strong)] cursor-pointer"
+            />
+          </div>
+
+          {/* Bottom Player Controls */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+            {/* Play, Skip Back, Skip Forward */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => skipAudio(-15)}
+                className="h-8 px-2 text-gm-xs font-mono gap-1"
+                title="Skip back 15 seconds"
+              >
+                <SkipBack className="h-3.5 w-3.5" />
+                <span>-15s</span>
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={toggleAudioPlay}
+                className="h-8 px-4 text-gm-xs font-bold gap-1.5 bg-[var(--gm-accent-strong)] text-white hover:opacity-95 cursor-pointer"
+              >
+                {audioIsPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-white" />}
+                <span>{audioIsPlaying ? "PAUSE" : "PLAY"}</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => skipAudio(30)}
+                className="h-8 px-2 text-gm-xs font-mono gap-1"
+                title="Skip forward 30 seconds"
+              >
+                <SkipForward className="h-3.5 w-3.5" />
+                <span>+30s</span>
+              </Button>
+            </div>
+
+            {/* Volume Control */}
+            <div className="flex items-center gap-2 min-w-[130px]">
+              <button
+                type="button"
+                onClick={toggleAudioMute}
+                className="text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] cursor-pointer"
+                title={audioIsMuted ? "Unmute" : "Mute"}
+              >
+                {audioIsMuted || audioVolume === 0 ? (
+                  <VolumeX className="h-4 w-4" />
+                ) : audioVolume < 0.5 ? (
+                  <Volume1 className="h-4 w-4" />
+                ) : (
+                  <Volume2 className="h-4 w-4" />
+                )}
+              </button>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={audioIsMuted ? 0 : audioVolume}
+                onChange={(e) => handleAudioVolumeChange(Number(e.target.value))}
+                className="w-20 sm:w-24 h-1.5 accent-[var(--gm-accent-strong)] cursor-pointer"
+                title="Volume"
+              />
+            </div>
+
+            {/* Speed Selector */}
+            <div className="flex items-center gap-1.5 ml-auto">
+              <span className="text-[11px] font-mono text-[var(--gm-text-muted)]">Speed:</span>
+              <select
+                value={String(audioPlaybackRate)}
+                onChange={(e) => {
+                  const rate = Number(e.target.value);
+                  setAudioPlaybackRate(rate);
+                  if (audioElementRef.current) audioElementRef.current.playbackRate = rate;
+                }}
+                className="h-7 rounded-none border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2 text-gm-xs font-mono text-[var(--gm-text)] cursor-pointer focus:outline-none"
+              >
+                <option value="0.75">0.75×</option>
+                <option value="1">1.0×</option>
+                <option value="1.25">1.25×</option>
+                <option value="1.5">1.5×</option>
+                <option value="1.75">1.75×</option>
+                <option value="2">2.0×</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Detail Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -838,43 +1205,43 @@ export function WorkDetail({
         <TabsContent value="overview" className="mt-6">
           <div className="grid gap-6 md:grid-cols-2">
             {/* Stats card */}
-            <div className="rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-5">
-              <h3 className="text-cv-sm font-semibold text-[var(--cv-text)] mb-4">Reading Stats</h3>
-              <dl className="space-y-2 text-cv-sm">
+            <div className="rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-5">
+              <h3 className="text-gm-sm font-semibold text-[var(--gm-text)] mb-4">Reading Stats</h3>
+              <dl className="space-y-2 text-gm-sm">
                 <div className="flex justify-between">
-                  <dt className="text-[var(--cv-text-muted)]">Status</dt>
-                  <dd className="font-medium text-[var(--cv-text)]">
+                  <dt className="text-[var(--gm-text-muted)]">Status</dt>
+                  <dd className="font-medium text-[var(--gm-text)]">
                     {relationship?.personalState ?? "—"}
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-[var(--cv-text-muted)]">Shelf Priority</dt>
-                  <dd className="font-medium text-[var(--cv-text)]">
+                  <dt className="text-[var(--gm-text-muted)]">Shelf Priority</dt>
+                  <dd className="font-medium text-[var(--gm-text)]">
                     {relationship?.shelfTier
                       ? relationship.shelfTier.replace("_", " ")
                       : "standard"}
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-[var(--cv-text-muted)]">Current</dt>
-                  <dd className="font-medium text-[var(--cv-text)]">{anchorLabel}</dd>
+                  <dt className="text-[var(--gm-text-muted)]">Current</dt>
+                  <dd className="font-medium text-[var(--gm-text)]">{anchorLabel}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-[var(--cv-text-muted)]">Last active</dt>
-                  <dd className="font-medium text-[var(--cv-text)]">
+                  <dt className="text-[var(--gm-text-muted)]">Last active</dt>
+                  <dd className="font-medium text-[var(--gm-text)]">
                     {relationship?.lastActiveAt ? relativeTime(relationship.lastActiveAt) : "—"}
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-[var(--cv-text-muted)]">Started</dt>
-                  <dd className="font-medium text-[var(--cv-text)]">
+                  <dt className="text-[var(--gm-text-muted)]">Started</dt>
+                  <dd className="font-medium text-[var(--gm-text)]">
                     {relationship?.startedAt ? relativeTime(relationship.startedAt) : "—"}
                   </dd>
                 </div>
                 {updates.length > 0 && (
                   <div className="flex justify-between">
-                    <dt className="text-[var(--cv-text-muted)]">Latest release</dt>
-                    <dd className="font-medium text-[var(--cv-accent-strong)]">
+                    <dt className="text-[var(--gm-text-muted)]">Latest release</dt>
+                    <dd className="font-medium text-[var(--gm-accent-strong)]">
                       {updates[0]?.label ?? "—"}
                     </dd>
                   </div>
@@ -883,32 +1250,32 @@ export function WorkDetail({
             </div>
 
             {/* Tags */}
-            <div className="rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-5">
-              <h3 className="text-cv-sm font-semibold text-[var(--cv-text)] mb-4">Tags</h3>
+            <div className="rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-5">
+              <h3 className="text-gm-sm font-semibold text-[var(--gm-text)] mb-4">Tags</h3>
               <div className="flex flex-wrap gap-2">
                 {work.tags.length > 0 ? (
                   work.tags.map((t) => (
                     <span
                       key={t}
-                      className="rounded-cv px-2.5 py-1 text-cv-xs bg-[var(--cv-surface)] text-[var(--cv-text-muted)] border border-[var(--cv-border)]"
+                      className="rounded-cv px-2.5 py-1 text-gm-xs bg-[var(--gm-surface)] text-[var(--gm-text-muted)] border border-[var(--gm-border)]"
                     >
                       #{t}
                     </span>
                   ))
                 ) : (
-                  <p className="text-cv-xs text-[var(--cv-text-subtle)]">No tags.</p>
+                  <p className="text-gm-xs text-[var(--gm-text-subtle)]">No tags.</p>
                 )}
               </div>
             </div>
 
             {/* Extended Bibliographic Metadata Card */}
-            <div className="md:col-span-2 rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-5">
+            <div className="md:col-span-2 rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-5">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-cv-sm font-semibold text-[var(--cv-text)]">
+                  <h3 className="text-gm-sm font-semibold text-[var(--gm-text)]">
                     Bibliographic Metadata & Rating
                   </h3>
-                  <p className="text-cv-xs text-[var(--cv-text-muted)]">
+                  <p className="text-gm-xs text-[var(--gm-text-muted)]">
                     Optional creator credits, personal rating, chapter/volume counts, and content warnings.
                   </p>
                 </div>
@@ -917,7 +1284,7 @@ export function WorkDetail({
                     variant="outline"
                     size="sm"
                     onClick={handleOpenMetadataEditor}
-                    className="gap-1.5 text-cv-xs"
+                    className="gap-1.5 text-gm-xs"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     <span>Edit Metadata</span>
@@ -926,9 +1293,9 @@ export function WorkDetail({
               </div>
 
               {editingMetadata ? (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-cv-xs">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-gm-xs">
                   <label className="space-y-1">
-                    <span className="text-[var(--cv-text-muted)]">Personal Rating (0–10)</span>
+                    <span className="text-[var(--gm-text-muted)]">Personal Rating (0–10)</span>
                     <Input
                       type="number"
                       min={0}
@@ -940,7 +1307,7 @@ export function WorkDetail({
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[var(--cv-text-muted)]">Creator / Author Name</span>
+                    <span className="text-[var(--gm-text-muted)]">Creator / Author Name</span>
                     <Input
                       value={metaCreatorName}
                       onChange={(e) => setMetaCreatorName(e.target.value)}
@@ -948,11 +1315,11 @@ export function WorkDetail({
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[var(--cv-text-muted)]">Creator Role</span>
+                    <span className="text-[var(--gm-text-muted)]">Creator Role</span>
                     <select
                       value={metaCreatorRole}
                       onChange={(e) => setMetaCreatorRole(e.target.value as WorkCreatorRole)}
-                      className="w-full h-9 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-2.5 text-cv-xs text-[var(--cv-text)]"
+                      className="w-full h-9 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2.5 text-gm-xs text-[var(--gm-text)]"
                     >
                       <option value="author">Author</option>
                       <option value="artist">Artist</option>
@@ -962,7 +1329,7 @@ export function WorkDetail({
                     </select>
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[var(--cv-text-muted)]">Total Chapters / Episodes</span>
+                    <span className="text-[var(--gm-text-muted)]">Total Chapters / Episodes</span>
                     <Input
                       type="number"
                       min={0}
@@ -972,7 +1339,7 @@ export function WorkDetail({
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[var(--cv-text-muted)]">Total Volumes</span>
+                    <span className="text-[var(--gm-text-muted)]">Total Volumes</span>
                     <Input
                       type="number"
                       min={0}
@@ -982,7 +1349,7 @@ export function WorkDetail({
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[var(--cv-text-muted)]">Total Pages</span>
+                    <span className="text-[var(--gm-text-muted)]">Total Pages</span>
                     <Input
                       type="number"
                       min={0}
@@ -992,7 +1359,7 @@ export function WorkDetail({
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[var(--cv-text-muted)]">Original Title</span>
+                    <span className="text-[var(--gm-text-muted)]">Original Title</span>
                     <Input
                       value={metaOriginalTitle}
                       onChange={(e) => setMetaOriginalTitle(e.target.value)}
@@ -1000,7 +1367,7 @@ export function WorkDetail({
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[var(--cv-text-muted)]">Original Language</span>
+                    <span className="text-[var(--gm-text-muted)]">Original Language</span>
                     <Input
                       value={metaOriginalLanguage}
                       onChange={(e) => setMetaOriginalLanguage(e.target.value)}
@@ -1008,11 +1375,11 @@ export function WorkDetail({
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[var(--cv-text-muted)]">Content Rating</span>
+                    <span className="text-[var(--gm-text-muted)]">Content Rating</span>
                     <select
                       value={metaContentRating}
                       onChange={(e) => setMetaContentRating(e.target.value as ContentRating)}
-                      className="w-full h-9 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-2.5 text-cv-xs text-[var(--cv-text)]"
+                      className="w-full h-9 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2.5 text-gm-xs text-[var(--gm-text)]"
                     >
                       <option value="everyone">Everyone</option>
                       <option value="teen">Teen</option>
@@ -1021,7 +1388,7 @@ export function WorkDetail({
                     </select>
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[var(--cv-text-muted)]">Start Date</span>
+                    <span className="text-[var(--gm-text-muted)]">Start Date</span>
                     <Input
                       type="date"
                       value={metaStartDate}
@@ -1029,7 +1396,7 @@ export function WorkDetail({
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[var(--cv-text-muted)]">End Date</span>
+                    <span className="text-[var(--gm-text-muted)]">End Date</span>
                     <Input
                       type="date"
                       value={metaEndDate}
@@ -1037,7 +1404,7 @@ export function WorkDetail({
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[var(--cv-text-muted)]">Content Warnings (comma-separated)</span>
+                    <span className="text-[var(--gm-text-muted)]">Content Warnings (comma-separated)</span>
                     <Input
                       value={metaContentWarnings}
                       onChange={(e) => setMetaContentWarnings(e.target.value)}
@@ -1058,24 +1425,24 @@ export function WorkDetail({
                   </div>
                 </div>
               ) : (
-                <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-cv-xs">
-                  <div className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] p-3">
-                    <dt className="text-[var(--cv-text-subtle)]">Personal Rating</dt>
-                    <dd className="mt-1 font-mono text-cv-sm font-semibold text-[var(--cv-accent-strong)]">
+                <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-gm-xs">
+                  <div className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] p-3">
+                    <dt className="text-[var(--gm-text-subtle)]">Personal Rating</dt>
+                    <dd className="mt-1 font-mono text-gm-sm font-semibold text-[var(--gm-accent-strong)]">
                       {work.rating !== undefined && work.rating !== null ? `${work.rating} / 10` : "Unrated"}
                     </dd>
                   </div>
-                  <div className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] p-3">
-                    <dt className="text-[var(--cv-text-subtle)]">Creators</dt>
-                    <dd className="mt-1 font-medium text-[var(--cv-text)]">
+                  <div className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] p-3">
+                    <dt className="text-[var(--gm-text-subtle)]">Creators</dt>
+                    <dd className="mt-1 font-medium text-[var(--gm-text)]">
                       {work.creators && work.creators.length > 0
                         ? work.creators.map((c) => `${c.name} (${c.role})`).join(", ")
                         : "—"}
                     </dd>
                   </div>
-                  <div className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] p-3">
-                    <dt className="text-[var(--cv-text-subtle)]">Extent</dt>
-                    <dd className="mt-1 font-mono text-[var(--cv-text)]">
+                  <div className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] p-3">
+                    <dt className="text-[var(--gm-text-subtle)]">Extent</dt>
+                    <dd className="mt-1 font-mono text-[var(--gm-text)]">
                       {[
                         work.totalChapters ? `${work.totalChapters} ch` : null,
                         work.totalVolumes ? `${work.totalVolumes} vol` : null,
@@ -1085,9 +1452,9 @@ export function WorkDetail({
                         .join(" · ") || "—"}
                     </dd>
                   </div>
-                  <div className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] p-3">
-                    <dt className="text-[var(--cv-text-subtle)]">Original Title / Rating</dt>
-                    <dd className="mt-1 text-[var(--cv-text)]">
+                  <div className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] p-3">
+                    <dt className="text-[var(--gm-text-subtle)]">Original Title / Rating</dt>
+                    <dd className="mt-1 text-[var(--gm-text)]">
                       {work.originalTitle ?? "—"}
                       {work.contentRating ? ` · ${work.contentRating}` : ""}
                     </dd>
@@ -1097,94 +1464,127 @@ export function WorkDetail({
             </div>
 
             {/* Relations Section in Overview */}
-            <div className="md:col-span-2 rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-5">
+            <div className="md:col-span-2 rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-5">
               <WorkRelationTree workId={work.id} onNavigateWork={onNavigateWork} />
             </div>
 
-            {/* Audiobook Player Console — only shown for audiobook contentType */}
-            {work.contentType === ContentType.Audiobook && anchor?.type === "audiobook" && (
-              <div className="md:col-span-2 rounded-none border-2 border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] shadow-[4px_4px_0px_var(--cv-border-strong)]">
-                <div className="flex items-center gap-2 px-4 py-2 border-b border-[var(--cv-border)] bg-[var(--cv-surface)]">
-                  <Headphones className="h-4 w-4 text-[var(--cv-accent-strong)]" />
-                  <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--cv-text-subtle)]">
-                    [ AUDIOBOOK CONSOLE ]
-                  </span>
+            {/* Audiobook Player Console — shown for audiobook contentType */}
+            {work.contentType === ContentType.Audiobook && (
+              <div className="md:col-span-2 rounded-none border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] shadow-[4px_4px_0px_var(--gm-border-strong)]">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--gm-border)] bg-[var(--gm-surface)]">
+                  <div className="flex items-center gap-2">
+                    <Headphones className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+                    <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--gm-text-subtle)]">
+                      [ AUDIOBOOK CONSOLE ]
+                    </span>
+                  </div>
+                  <Badge variant="default" className="text-[10px] font-mono">
+                    {audioIsPlaying ? "PLAYING" : "STANDBY"}
+                  </Badge>
                 </div>
                 <div className="p-4 grid gap-3">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      {anchor.narrator && (
-                        <p className="text-cv-xs text-[var(--cv-text-muted)]">
-                          <span className="font-semibold text-[var(--cv-text)]">Narrator:</span> {anchor.narrator}
+                      {(anchor as any)?.narrator ? (
+                        <p className="text-gm-xs text-[var(--gm-text-muted)]">
+                          <span className="font-semibold text-[var(--gm-text)]">Narrator:</span> {(anchor as any).narrator}
                         </p>
-                      )}
-                      {anchor.title && (
-                        <p className="text-cv-xs text-[var(--cv-text-muted)] mt-0.5">
-                          <span className="font-semibold text-[var(--cv-text)]">Book:</span> {anchor.title}
-                        </p>
-                      )}
-                      <p className="text-cv-xs text-[var(--cv-text-muted)] mt-0.5">
-                        <span className="font-semibold text-[var(--cv-text)]">Track:</span> {anchor.track}
-                        {anchor.chapter !== undefined && (
-                          <span className="ml-2">· <span className="font-semibold text-[var(--cv-text)]">Chapter:</span> {anchor.chapter}</span>
+                      ) : null}
+                      <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5">
+                        <span className="font-semibold text-[var(--gm-text)]">Book:</span> {(anchor as any)?.title ?? work.title}
+                      </p>
+                      <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5">
+                        <span className="font-semibold text-[var(--gm-text)]">Track:</span> {(anchor as any)?.track ?? 1}
+                        {(anchor as any)?.chapter !== undefined && (
+                          <span className="ml-2">· <span className="font-semibold text-[var(--gm-text)]">Chapter:</span> {(anchor as any).chapter}</span>
                         )}
                       </p>
                     </div>
-                    <div className="text-right font-mono text-cv-xs text-[var(--cv-text-muted)]">
-                      {anchor.timestampSeconds !== undefined && (
-                        <span>
-                          {Math.floor(anchor.timestampSeconds / 60)}:{String(anchor.timestampSeconds % 60).padStart(2, "0")}
-                          {anchor.totalSeconds && (
-                            <span> / {Math.floor(anchor.totalSeconds / 60)}:{String(anchor.totalSeconds % 60).padStart(2, "0")}</span>
-                          )}
-                        </span>
-                      )}
+                    <div className="text-right font-mono text-gm-xs text-[var(--gm-text-muted)]">
+                      <span>
+                        {Math.floor(audioCurrentTime / 60)}:{String(Math.floor(audioCurrentTime % 60)).padStart(2, "0")}
+                        <span> / {Math.floor((audioDuration || 2740) / 60)}:{String(Math.floor((audioDuration || 2740) % 60)).padStart(2, "0")}</span>
+                      </span>
                     </div>
                   </div>
 
-                  {/* Progress bar */}
-                  {anchor.timestampSeconds !== undefined && anchor.totalSeconds && anchor.totalSeconds > 0 && (
-                    <div className="w-full h-1.5 rounded-none bg-[var(--cv-surface)] overflow-hidden border border-[var(--cv-border)]">
-                      <div
-                        className="h-full bg-[var(--cv-accent-strong)] transition-all"
-                        style={{ width: `${Math.min(100, (anchor.timestampSeconds / anchor.totalSeconds) * 100)}%` }}
-                      />
-                    </div>
-                  )}
+                  {/* Live Progress Scrubber */}
+                  <div className="space-y-1">
+                    <input
+                      type="range"
+                      min={0}
+                      max={audioDuration || 2740}
+                      value={audioCurrentTime}
+                      onChange={(e) => handleAudioSeek(Number(e.target.value))}
+                      className="w-full h-2 rounded-none bg-[var(--gm-surface)] accent-[var(--gm-accent-strong)] cursor-pointer"
+                    />
+                  </div>
 
-                  {/* Pseudo controls */}
-                  <div className="flex items-center gap-2">
+                  {/* Interactive Controls */}
+                  <div className="flex items-center gap-2 flex-wrap">
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1 rounded-none border border-[var(--cv-border-strong)] bg-[var(--cv-surface)] px-2.5 py-1 text-[11px] font-mono shadow-[2px_2px_0px_var(--cv-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_var(--cv-accent)] transition-all cursor-pointer"
+                      onClick={() => skipAudio(-15)}
+                      className="inline-flex items-center gap-1 rounded-none border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-1 text-[11px] font-mono shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_var(--gm-accent)] transition-all cursor-pointer"
+                      title="Skip back 15 seconds"
                     >
                       <SkipBack className="h-3 w-3" />
                       <span>-15s</span>
                     </button>
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1 rounded-none border-2 border-[var(--cv-accent-strong)] bg-[var(--cv-accent-strong)] px-3 py-1 text-[11px] font-mono font-bold text-white shadow-[2px_2px_0px_var(--cv-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
+                      onClick={toggleAudioPlay}
+                      className="inline-flex items-center gap-1 rounded-none border-2 border-[var(--gm-accent-strong)] bg-[var(--gm-accent-strong)] px-3 py-1 text-[11px] font-mono font-bold text-white shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
                     >
-                      <Play className="h-3 w-3 fill-white" />
-                      <span>PLAY</span>
+                      {audioIsPlaying ? (
+                        <>
+                          <Pause className="h-3 w-3 fill-white" />
+                          <span>PAUSE</span>
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-3 w-3 fill-white" />
+                          <span>PLAY</span>
+                        </>
+                      )}
                     </button>
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1 rounded-none border border-[var(--cv-border-strong)] bg-[var(--cv-surface)] px-2.5 py-1 text-[11px] font-mono shadow-[2px_2px_0px_var(--cv-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_var(--cv-accent)] transition-all cursor-pointer"
+                      onClick={() => skipAudio(30)}
+                      className="inline-flex items-center gap-1 rounded-none border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-1 text-[11px] font-mono shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_var(--gm-accent)] transition-all cursor-pointer"
+                      title="Skip forward 30 seconds"
                     >
                       <SkipForward className="h-3 w-3" />
                       <span>+30s</span>
                     </button>
-                    <select className="ml-auto font-mono text-[11px] border border-[var(--cv-border-strong)] bg-[var(--cv-surface)] px-2 py-1 rounded-none text-[var(--cv-text)] cursor-pointer focus:outline-none">
-                      <option value="1.0">1.0×</option>
+                    <button
+                      type="button"
+                      onClick={() => audioFileInputRef.current?.click()}
+                      className="inline-flex items-center gap-1 rounded-none border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-1 text-[11px] font-mono shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
+                      title="Attach local audio file"
+                    >
+                      <Upload className="h-3 w-3" />
+                      <span>Attach Audio</span>
+                    </button>
+                    <select
+                      value={String(audioPlaybackRate)}
+                      onChange={(e) => {
+                        const rate = Number(e.target.value);
+                        setAudioPlaybackRate(rate);
+                        if (audioElementRef.current) audioElementRef.current.playbackRate = rate;
+                      }}
+                      className="ml-auto font-mono text-[11px] border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2 py-1 rounded-none text-[var(--gm-text)] cursor-pointer focus:outline-none"
+                    >
+                      <option value="0.75">0.75×</option>
+                      <option value="1">1.0×</option>
                       <option value="1.25">1.25×</option>
                       <option value="1.5">1.5×</option>
                       <option value="1.75">1.75×</option>
-                      <option value="2.0">2.0×</option>
+                      <option value="2">2.0×</option>
                     </select>
                   </div>
-                  <p className="text-[10px] text-[var(--cv-text-subtle)] font-mono">
-                    ⚠ Player controls are UI placeholders — connect your actual audiobook player to update progress.
+                  <p className="text-[10px] text-[var(--gm-text-muted)] font-mono">
+                    ✓ Interactive audio player — playback progress automatically syncs with your reading anchor.
                   </p>
                 </div>
               </div>
@@ -1194,7 +1594,7 @@ export function WorkDetail({
 
         {/* Relations Tab */}
         <TabsContent value="relations" className="mt-6">
-          <div className="rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-6 shadow-sm">
+          <div className="rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-6 shadow-sm">
             <WorkRelationTree workId={work.id} onNavigateWork={onNavigateWork} />
           </div>
         </TabsContent>
@@ -1202,7 +1602,7 @@ export function WorkDetail({
         {/* Access Paths Tab */}
         <TabsContent value="sources" className="mt-6">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <p className="text-cv-xs text-[var(--cv-text-muted)]">
+            <p className="text-gm-xs text-[var(--gm-text-muted)]">
               URLs, local ebook files, and local video references linked to this work.
             </p>
             <div className="flex items-center gap-2">
@@ -1215,7 +1615,7 @@ export function WorkDetail({
                   setShowAddSource(false);
                 }}
               >
-                <Film className="h-3.5 w-3.5 text-[var(--cv-accent-strong)]" />
+                <Film className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
                 Link Local Video
               </Button>
               <Button
@@ -1235,9 +1635,9 @@ export function WorkDetail({
 
           {/* Link Local Video Reference form */}
           {showLinkVideo && (
-            <div className="mb-4 rounded-cv-lg border border-[var(--cv-accent-muted)] bg-[var(--cv-bg-elevated)] p-4 flex flex-col gap-3">
+            <div className="mb-4 rounded-gm-lg border border-[var(--gm-accent-muted)] bg-[var(--gm-bg-elevated)] p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <p className="text-cv-xs font-semibold text-[var(--cv-text)]">
+                <p className="text-gm-xs font-semibold text-[var(--gm-text)]">
                   Link Local Video File Reference (Anime / Donghua / Local Media)
                 </p>
                 <Button
@@ -1245,7 +1645,7 @@ export function WorkDetail({
                   variant="outline"
                   size="sm"
                   onClick={() => videoFileInputRef.current?.click()}
-                  className="h-7 text-cv-xs gap-1.5"
+                  className="h-7 text-gm-xs gap-1.5"
                 >
                   <Upload className="h-3 w-3" />
                   Pick Video File
@@ -1267,19 +1667,19 @@ export function WorkDetail({
                 />
               </div>
               <input
-                className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-sm text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent-muted)]"
+                className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent-muted)]"
                 placeholder="Episode or Release Label (e.g. Season 1 BD 1080p - Ep 01)"
                 value={videoLabel}
                 onChange={(e) => setVideoLabel(e.target.value)}
               />
               <input
-                className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-sm text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent-muted)] font-mono"
+                className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent-muted)] font-mono"
                 placeholder="Local file path, filename, or video URL (e.g. D:/Anime/Episode_01.mp4)"
                 value={videoPath}
                 onChange={(e) => setVideoPath(e.target.value)}
               />
               {videoSizeBytes > 0 && (
-                <p className="text-cv-xs text-[var(--cv-text-muted)] font-mono">
+                <p className="text-gm-xs text-[var(--gm-text-muted)] font-mono">
                   Selected file: {(videoSizeBytes / (1024 * 1024)).toFixed(2)} MB ({videoMimeType})
                 </p>
               )}
@@ -1326,21 +1726,21 @@ export function WorkDetail({
 
           {/* Add source form */}
           {showAddSource && (
-            <div className="mb-4 rounded-cv-lg border border-[var(--cv-accent-muted)] bg-[var(--cv-bg-elevated)] p-4 flex flex-col gap-3">
+            <div className="mb-4 rounded-gm-lg border border-[var(--gm-accent-muted)] bg-[var(--gm-bg-elevated)] p-4 flex flex-col gap-3">
               <input
-                className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-sm text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent-muted)]"
+                className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent-muted)]"
                 placeholder="Label (e.g. MangaDex)"
                 value={newSourceLabel}
                 onChange={(e) => setNewSourceLabel(e.target.value)}
               />
               <input
-                className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-sm text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent-muted)]"
+                className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent-muted)]"
                 placeholder="URL (https://...)"
                 value={newSourceUrl}
                 onChange={(e) => setNewSourceUrl(e.target.value)}
               />
               <input
-                className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-sm text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent-muted)]"
+                className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent-muted)]"
                 placeholder="Provider name (optional)"
                 value={newSourceProvider}
                 onChange={(e) => setNewSourceProvider(e.target.value)}
@@ -1358,12 +1758,12 @@ export function WorkDetail({
 
           <div className="space-y-3">
             {accessPaths.length === 0 ? (
-              <div className="rounded-cv-lg border border-dashed border-[var(--cv-border)] bg-[var(--cv-surface)]/40 p-8 text-center">
-                <p className="text-cv-sm font-semibold text-[var(--cv-text)] mb-1">
+              <div className="rounded-gm-lg border border-dashed border-[var(--gm-border)] bg-[var(--gm-surface)]/40 p-8 text-center">
+                <p className="text-gm-sm font-semibold text-[var(--gm-text)] mb-1">
                   No access paths connected
                 </p>
-                <p className="text-cv-xs text-[var(--cv-text-muted)] max-w-md mx-auto">
-                  A Work in Chronicles Vault is permanent. Even when websites change domains or sources disappear, your reading progress, notes, and relationship remain safe forever. Add a reading source above.
+                <p className="text-gm-xs text-[var(--gm-text-muted)] max-w-md mx-auto">
+                  A Work in Grimoire is permanent. Even when websites change domains or sources disappear, your reading progress, notes, and relationship remain safe forever. Add a reading source above.
                 </p>
               </div>
             ) : (
@@ -1394,12 +1794,12 @@ export function WorkDetail({
                 return (
                   <div
                     key={path.id}
-                    className="rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-4 flex flex-col gap-3"
+                    className="rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 flex flex-col gap-3"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <span className="text-cv-sm font-semibold text-[var(--cv-text)]">
+                          <span className="text-gm-sm font-semibold text-[var(--gm-text)]">
                             {path.label ?? provider ?? path.kind}
                           </span>
                           {isVideoPath && (
@@ -1409,48 +1809,77 @@ export function WorkDetail({
                             </Badge>
                           )}
                           {sizeBytes !== null && sizeBytes > 0 && (
-                            <span className="text-[11px] font-mono text-[var(--cv-text-subtle)]">
+                            <span className="text-[11px] font-mono text-[var(--gm-text-subtle)]">
                               {(sizeBytes / (1024 * 1024)).toFixed(1)} MB
                             </span>
                           )}
                           {path.isPreferred && (
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--cv-accent-strong)]">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--gm-accent-strong)]">
                               preferred
                             </span>
                           )}
                         </div>
                         {provider && (
-                          <p className="text-cv-xs text-[var(--cv-text-muted)]">{provider}</p>
+                          <p className="text-gm-xs text-[var(--gm-text-muted)]">{provider}</p>
                         )}
                         {url && (
-                          <p className="text-cv-xs font-mono text-[var(--cv-text-subtle)] truncate mt-0.5">
-                            {url}
-                          </p>
+                          <div className="mt-0.5">
+                            {isVideoPath ? (
+                              <button
+                                type="button"
+                                onClick={() => void openLocalDiskPath(url, path.label ?? undefined)}
+                                className="text-left text-gm-xs font-mono text-[var(--gm-accent-strong)] hover:underline flex items-center gap-1.5 cursor-pointer group"
+                                title="Tap to open in system default video player app (VLC, Windows Media Player, MPC)"
+                              >
+                                <ExternalLink className="h-3 w-3 shrink-0 opacity-70 group-hover:opacity-100" />
+                                <span className="truncate">{url}</span>
+                              </button>
+                            ) : (
+                              <p className="text-gm-xs font-mono text-[var(--gm-text-subtle)] truncate">
+                                {url}
+                              </p>
+                            )}
+                          </div>
                         )}
                       </div>
                       <div className="flex flex-wrap items-center gap-1.5 flex-shrink-0">
                         <SourceHealthIndicator health={toUIHealth(path.health)} size="sm" />
 
                         {isVideoPath && (
-                          <Button
-                            variant={isPlayerOpen ? "default" : "outline"}
-                            size="sm"
-                            className="h-7 px-2.5 text-[11px] gap-1"
-                            onClick={() =>
-                              setActiveVideoPathId((prev) => (prev === path.id ? null : path.id))
-                            }
-                            title="Watch or preview linked video"
-                          >
-                            <Play className="h-3 w-3" />
-                            <span>{isPlayerOpen ? "Hide Player" : "Watch"}</span>
-                          </Button>
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-2.5 text-[11px] gap-1 text-[var(--gm-accent-strong)] hover:bg-[var(--gm-accent)]/10"
+                              onClick={() => {
+                                if (url) void openLocalDiskPath(url, path.label ?? undefined);
+                                else toast({ title: "No file path available for this video" });
+                              }}
+                              title="Open video directly in system default player app (VLC, Media Player)"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              <span>Default App</span>
+                            </Button>
+                            <Button
+                              variant={isPlayerOpen ? "default" : "outline"}
+                              size="sm"
+                              className="h-7 px-2.5 text-[11px] gap-1"
+                              onClick={() =>
+                                setActiveVideoPathId((prev) => (prev === path.id ? null : path.id))
+                              }
+                              title="Watch in embedded video player"
+                            >
+                              <Play className="h-3 w-3" />
+                              <span>{isPlayerOpen ? "Hide Player" : "Watch"}</span>
+                            </Button>
+                          </>
                         )}
 
                         {!path.isPreferred && (
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 px-2 text-[11px] text-[var(--cv-text-muted)] hover:text-[var(--cv-accent-strong)]"
+                            className="h-7 px-2 text-[11px] text-[var(--gm-text-muted)] hover:text-[var(--gm-accent-strong)]"
                             onClick={() => {
                               setPreferredAccessPath(path.id);
                               toast({ title: "Preferred source updated" });
@@ -1465,7 +1894,7 @@ export function WorkDetail({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+                          className="h-7 w-7 text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
                           disabled={checkingPathId === path.id}
                           onClick={async () => {
                             setCheckingPathId(path.id);
@@ -1490,7 +1919,7 @@ export function WorkDetail({
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+                            className="h-7 w-7 text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
                             onClick={() => {
                               window.open(url, "_blank", "noopener,noreferrer");
                             }}
@@ -1504,7 +1933,7 @@ export function WorkDetail({
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+                            className="h-7 w-7 text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
                             onClick={() => {
                               if (navigator.clipboard) {
                                 void navigator.clipboard.writeText(url);
@@ -1523,7 +1952,7 @@ export function WorkDetail({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-[var(--cv-text-muted)] hover:text-red-500 hover:bg-red-500/10"
+                          className="h-7 w-7 text-[var(--gm-text-muted)] hover:text-red-500 hover:bg-red-500/10"
                           onClick={() => {
                             if (videoObjectUrls[path.id]) {
                               URL.revokeObjectURL(videoObjectUrls[path.id]!);
@@ -1546,7 +1975,7 @@ export function WorkDetail({
                     </div>
 
                     {isVideoPath && isPlayerOpen && (
-                      <div className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] p-3 space-y-2">
+                      <div className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] p-3 space-y-2">
                         {playableSrc ? (
                           <div className="space-y-2">
                             <video
@@ -1555,44 +1984,72 @@ export function WorkDetail({
                               preload="metadata"
                               className="w-full max-h-96 rounded-cv bg-black"
                             />
-                            <div className="flex items-center justify-between text-cv-xs text-[var(--cv-text-muted)]">
-                              <span>Playing: {path.label ?? url}</span>
+                            <div className="flex flex-wrap items-center justify-between gap-2 text-gm-xs text-[var(--gm-text-muted)]">
+                              <span className="truncate max-w-xs">Playing: {path.label ?? url}</span>
+                              <div className="flex items-center gap-2">
+                                {url && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 text-gm-xs gap-1"
+                                    onClick={() => void openLocalDiskPath(url, path.label ?? undefined)}
+                                    title="Open this file in system default video player (VLC / Media Player)"
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                    Open in Default App
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 text-gm-xs gap-1"
+                                  onClick={() => {
+                                    setReattachTargetPathId(path.id);
+                                    reattachVideoInputRef.current?.click();
+                                  }}
+                                >
+                                  <Upload className="h-3 w-3" />
+                                  Switch Video File
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2">
+                            <div className="text-gm-xs text-[var(--gm-text-muted)]">
+                              <p className="font-semibold text-[var(--gm-text)]">
+                                Local video reference saved ({url})
+                              </p>
+                              <p className="mt-0.5">
+                                Launch directly in your default system player (VLC / Media Player) or select the video file from your device to stream embedded.
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {url && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5 shrink-0"
+                                  onClick={() => void openLocalDiskPath(url, path.label ?? undefined)}
+                                  title="Launch file in system video player"
+                                >
+                                  <ExternalLink className="h-3.5 w-3.5" />
+                                  Open in Default App
+                                </Button>
+                              )}
                               <Button
-                                variant="ghost"
+                                variant="default"
                                 size="sm"
-                                className="h-7 text-cv-xs gap-1"
+                                className="gap-1.5 shrink-0"
                                 onClick={() => {
                                   setReattachTargetPathId(path.id);
                                   reattachVideoInputRef.current?.click();
                                 }}
                               >
-                                <Upload className="h-3 w-3" />
-                                Switch Video File
+                                <Upload className="h-3.5 w-3.5" />
+                                Select File to Play
                               </Button>
                             </div>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2">
-                            <div className="text-cv-xs text-[var(--cv-text-muted)]">
-                              <p className="font-semibold text-[var(--cv-text)]">
-                                Local video reference saved ({url})
-                              </p>
-                              <p className="mt-0.5">
-                                Because browser sandboxes do not persist raw disk handles across page reloads, select the video file from your device to stream it right here.
-                              </p>
-                            </div>
-                            <Button
-                              variant="default"
-                              size="sm"
-                              className="gap-1.5 shrink-0"
-                              onClick={() => {
-                                setReattachTargetPathId(path.id);
-                                reattachVideoInputRef.current?.click();
-                              }}
-                            >
-                              <Upload className="h-3.5 w-3.5" />
-                              Select File to Play
-                            </Button>
                           </div>
                         )}
                       </div>
@@ -1607,7 +2064,7 @@ export function WorkDetail({
         {/* Memories Tab */}
         <TabsContent value="memories" className="mt-6">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-cv-xs text-[var(--cv-text-muted)]">
+            <p className="text-gm-xs text-[var(--gm-text-muted)]">
               Quotes, notes, theories, and reflections captured while reading.
             </p>
             <Button
@@ -1623,16 +2080,16 @@ export function WorkDetail({
 
           {/* Add memory form */}
           {showAddMemory && (
-            <div className="mb-4 rounded-cv-lg border border-[var(--cv-accent-muted)] bg-[var(--cv-bg-elevated)] p-4 flex flex-col gap-3">
+            <div className="mb-4 rounded-gm-lg border border-[var(--gm-accent-muted)] bg-[var(--gm-bg-elevated)] p-4 flex flex-col gap-3">
               <div className="grid gap-3 sm:grid-cols-2">
                 <input
-                  className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-sm text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent-muted)]"
+                  className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent-muted)]"
                   placeholder="Title (optional)"
                   value={newMemoryTitle}
                   onChange={(e) => setNewMemoryTitle(e.target.value)}
                 />
                 <input
-                  className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-sm text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent-muted)] font-mono"
+                  className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent-muted)] font-mono"
                   placeholder="Reread pass / attempt ID (optional, e.g. reread-2026)"
                   value={newMemoryAttemptId}
                   onChange={(e) => setNewMemoryAttemptId(e.target.value)}
@@ -1640,7 +2097,7 @@ export function WorkDetail({
               </div>
               <textarea
                 rows={3}
-                className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-sm text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent-muted)] resize-none"
+                className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent-muted)] resize-none"
                 placeholder="Quote, note, theory, reaction…"
                 value={newMemoryBody}
                 onChange={(e) => setNewMemoryBody(e.target.value)}
@@ -1650,7 +2107,7 @@ export function WorkDetail({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1.5 rounded-none border border-[var(--cv-border-strong)] bg-[var(--cv-surface)] px-2.5 py-1 text-[11px] font-mono shadow-[2px_2px_0px_var(--cv-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+                  className="inline-flex items-center gap-1.5 rounded-none border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-1 text-[11px] font-mono shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
                   onClick={() => memoryImageInputRef.current?.click()}
                 >
                   <ImageIcon className="h-3.5 w-3.5" />
@@ -1661,11 +2118,11 @@ export function WorkDetail({
                     <img
                       src={pendingMemoryImageUrl}
                       alt="Memory attachment preview"
-                      className="h-12 w-16 object-cover rounded-none border border-[var(--cv-border-strong)]"
+                      className="h-12 w-16 object-cover rounded-none border border-[var(--gm-border-strong)]"
                     />
                     <button
                       type="button"
-                      className="text-[11px] text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)] cursor-pointer font-mono"
+                      className="text-[11px] text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)] cursor-pointer font-mono"
                       onClick={() => setPendingMemoryImageUrl(null)}
                     >
                       ✕ remove
@@ -1704,10 +2161,10 @@ export function WorkDetail({
 
 
           {memories.length === 0 ? (
-            <div className="text-center py-12 text-[var(--cv-text-subtle)]">
+            <div className="text-center py-12 text-[var(--gm-text-subtle)]">
               <Star className="h-8 w-8 mx-auto mb-3 opacity-30" />
-              <p className="text-cv-sm">No memories captured yet.</p>
-              <p className="text-cv-xs mt-1">Save quotes, notes, and reactions as you read.</p>
+              <p className="text-gm-sm">No memories captured yet.</p>
+              <p className="text-gm-xs mt-1">Save quotes, notes, and reactions as you read.</p>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
@@ -1721,7 +2178,7 @@ export function WorkDetail({
                     }
                     createdAt={m.createdAt}
                   />
-                  <div className="flex items-center justify-between px-1 text-[11px] text-[var(--cv-text-muted)]">
+                  <div className="flex items-center justify-between px-1 text-[11px] text-[var(--gm-text-muted)]">
                     <div className="flex items-center gap-2">
                       <Badge
                         variant={m.privacyState === PrivacyState.Private ? "muted" : "accent"}
@@ -1730,7 +2187,7 @@ export function WorkDetail({
                         {m.privacyState}
                       </Badge>
                       {m.readingAttemptId && (
-                        <span className="font-mono text-[10px] text-[var(--cv-text-subtle)]">
+                        <span className="font-mono text-[10px] text-[var(--gm-text-subtle)]">
                           Attempt: {m.readingAttemptId}
                         </span>
                       )}
@@ -1739,7 +2196,7 @@ export function WorkDetail({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 px-2 text-[11px] text-[var(--cv-text-muted)]"
+                        className="h-6 px-2 text-[11px] text-[var(--gm-text-muted)]"
                         onClick={() => {
                           const nextPrivacy =
                             m.privacyState === PrivacyState.Private
@@ -1760,7 +2217,7 @@ export function WorkDetail({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 text-[var(--cv-text-muted)] hover:text-red-400"
+                        className="h-6 w-6 text-[var(--gm-text-muted)] hover:text-red-400"
                         onClick={() => {
                           clientRepository.deleteMemory(m.id as MemoryId);
                           loadWork(work.id);
@@ -1780,14 +2237,14 @@ export function WorkDetail({
 
         {/* Activatable Notebook Tab (BACKLOG.md §4.3) */}
         <TabsContent value="notebook" className="mt-6">
-          <div className="rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-6 shadow-sm">
+          <div className="rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-6 shadow-sm">
             <WorkNotebookPanel workId={work.id} workTitle={work.title} />
           </div>
         </TabsContent>
 
         {/* Fandom & Community Links Tab (BACKLOG.md §4.5) */}
         <TabsContent value="fandom" className="mt-6">
-          <div className="rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-6 shadow-sm">
+          <div className="rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-6 shadow-sm">
             <WorkFandomLinksPanel workId={work.id} workTitle={work.title} />
           </div>
         </TabsContent>
@@ -1797,49 +2254,49 @@ export function WorkDetail({
           <div className="space-y-6">
 
             {/* ── Fanfiction ─────────────────────────────────── */}
-            <div className="rounded-none border-2 border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] shadow-[3px_3px_0px_var(--cv-border-strong)]">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--cv-border)] bg-[var(--cv-surface)]">
+            <div className="rounded-none border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] shadow-[3px_3px_0px_var(--gm-border-strong)]">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--gm-border)] bg-[var(--gm-surface)]">
                 <div className="flex items-center gap-2">
-                  <Heart className="h-4 w-4 text-[var(--cv-accent-strong)]" />
-                  <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--cv-text-subtle)]">
+                  <Heart className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+                  <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--gm-text-subtle)]">
                     [ FANFICTION ]
                   </span>
                 </div>
               </div>
               <div className="p-4 space-y-3">
                 {getFanfictionsForWork(work.id).length === 0 ? (
-                  <p className="text-cv-xs text-[var(--cv-text-subtle)] text-center py-4">
+                  <p className="text-gm-xs text-[var(--gm-text-subtle)] text-center py-4">
                     No fanfiction linked yet. Fanfictions can be promoted to full works once they grow.
                   </p>
                 ) : (
                   <div className="space-y-3">
                     {getFanfictionsForWork(work.id).map((fanfic) => (
-                      <div key={fanfic.id} className="rounded-none border border-[var(--cv-border)] bg-[var(--cv-surface)] p-3 flex items-start justify-between gap-3">
+                      <div key={fanfic.id} className="rounded-none border border-[var(--gm-border)] bg-[var(--gm-surface)] p-3 flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
-                          <p className="text-cv-sm font-semibold text-[var(--cv-text)] truncate">{fanfic.title}</p>
+                          <p className="text-gm-sm font-semibold text-[var(--gm-text)] truncate">{fanfic.title}</p>
                           {fanfic.author && (
-                            <p className="text-cv-xs text-[var(--cv-text-muted)] mt-0.5">by {fanfic.author}</p>
+                            <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5">by {fanfic.author}</p>
                           )}
                           {fanfic.sourceUrl && (
                             <a
                               href={fanfic.sourceUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-cv-xs text-[var(--cv-accent-strong)] hover:underline mt-1"
+                              className="inline-flex items-center gap-1 text-gm-xs text-[var(--gm-accent-strong)] hover:underline mt-1"
                             >
                               <ExternalLink className="h-3 w-3" />
                               Read online
                             </a>
                           )}
                           {fanfic.summary && (
-                            <p className="text-cv-xs text-[var(--cv-text-muted)] mt-1.5 line-clamp-2">{fanfic.summary}</p>
+                            <p className="text-gm-xs text-[var(--gm-text-muted)] mt-1.5 line-clamp-2">{fanfic.summary}</p>
                           )}
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           <button
                             type="button"
                             title="Promote to full work"
-                            className="inline-flex items-center gap-1 rounded-none border border-[var(--cv-border-strong)] bg-[var(--cv-surface)] px-2 py-1 text-[10px] font-mono shadow-[1px_1px_0px_var(--cv-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer text-[var(--cv-text-muted)] hover:text-[var(--cv-accent-strong)]"
+                            className="inline-flex items-center gap-1 rounded-none border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2 py-1 text-[10px] font-mono shadow-[1px_1px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer text-[var(--gm-text-muted)] hover:text-[var(--gm-accent-strong)]"
                             onClick={async () => {
                               const promoted = await promoteFanfictionToWork(fanfic.id);
                               if (promoted) {
@@ -1855,7 +2312,7 @@ export function WorkDetail({
                           <button
                             type="button"
                             title="Remove fanfiction"
-                            className="inline-flex items-center rounded-none border border-[var(--cv-border)] bg-[var(--cv-surface)] p-1 text-[var(--cv-text-subtle)] hover:text-red-500 hover:border-red-400 transition-colors cursor-pointer"
+                            className="inline-flex items-center rounded-none border border-[var(--gm-border)] bg-[var(--gm-surface)] p-1 text-[var(--gm-text-subtle)] hover:text-red-500 hover:border-red-400 transition-colors cursor-pointer"
                             onClick={() => removeFanfiction(fanfic.id)}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -1869,17 +2326,17 @@ export function WorkDetail({
             </div>
 
             {/* ── Video Edits ─────────────────────────────────── */}
-            <div className="rounded-none border-2 border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] shadow-[3px_3px_0px_var(--cv-border-strong)]">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--cv-border)] bg-[var(--cv-surface)]">
+            <div className="rounded-none border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] shadow-[3px_3px_0px_var(--gm-border-strong)]">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--gm-border)] bg-[var(--gm-surface)]">
                 <div className="flex items-center gap-2">
-                  <Film className="h-4 w-4 text-[var(--cv-accent-strong)]" />
-                  <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--cv-text-subtle)]">
+                  <Film className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+                  <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--gm-text-subtle)]">
                     [ VIDEO EDITS ]
                   </span>
                 </div>
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1 rounded-none border border-[var(--cv-border-strong)] bg-[var(--cv-surface)] px-2.5 py-1 text-[10px] font-mono shadow-[1px_1px_0px_var(--cv-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1 rounded-none border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-1 text-[10px] font-mono shadow-[1px_1px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
                   onClick={() => setShowAddVideoEdit(!showAddVideoEdit)}
                 >
                   <Plus className="h-3 w-3" />
@@ -1888,10 +2345,10 @@ export function WorkDetail({
               </div>
 
               {showAddVideoEdit && (
-                <div className="p-4 border-b border-[var(--cv-border)] grid gap-2 bg-[var(--cv-surface)]/50">
+                <div className="p-4 border-b border-[var(--gm-border)] grid gap-2 bg-[var(--gm-surface)]/50">
                   <div className="grid gap-2 sm:grid-cols-3">
                     <select
-                      className="font-mono text-[11px] border border-[var(--cv-border-strong)] bg-[var(--cv-surface)] px-2 py-1.5 rounded-none text-[var(--cv-text)] cursor-pointer focus:outline-none"
+                      className="font-mono text-[11px] border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2 py-1.5 rounded-none text-[var(--gm-text)] cursor-pointer focus:outline-none"
                       value={newVideoEditPlatform}
                       onChange={(e) => setNewVideoEditPlatform(e.target.value as "youtube" | "tiktok" | "instagram")}
                     >
@@ -1900,14 +2357,14 @@ export function WorkDetail({
                       <option value="instagram">Instagram</option>
                     </select>
                     <input
-                      className="w-full rounded-none border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-1.5 text-cv-xs text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent-muted)] sm:col-span-2"
+                      className="w-full rounded-none border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-1.5 text-gm-xs text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent-muted)] sm:col-span-2"
                       placeholder="Video URL"
                       value={newVideoEditUrl}
                       onChange={(e) => setNewVideoEditUrl(e.target.value)}
                     />
                   </div>
                   <input
-                    className="w-full rounded-none border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-1.5 text-cv-xs text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent-muted)]"
+                    className="w-full rounded-none border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-1.5 text-gm-xs text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent-muted)]"
                     placeholder="Title / description (optional)"
                     value={newVideoEditTitle}
                     onChange={(e) => setNewVideoEditTitle(e.target.value)}
@@ -1945,22 +2402,22 @@ export function WorkDetail({
 
               <div className="p-4 space-y-2">
                 {getVideoEditsForWork(work.id).length === 0 ? (
-                  <p className="text-cv-xs text-[var(--cv-text-subtle)] text-center py-4">
+                  <p className="text-gm-xs text-[var(--gm-text-subtle)] text-center py-4">
                     No video edits yet. Add YouTube, TikTok, or Instagram links.
                   </p>
                 ) : (
                   getVideoEditsForWork(work.id).map((vid) => (
-                    <div key={vid.id} className="flex items-center gap-3 rounded-none border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2">
+                    <div key={vid.id} className="flex items-center gap-3 rounded-none border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2">
                       {vid.platform === "youtube" && <Youtube className="h-4 w-4 text-red-500 shrink-0" />}
                       {vid.platform === "instagram" && <Instagram className="h-4 w-4 text-pink-500 shrink-0" />}
-                      {vid.platform === "tiktok" && <Music className="h-4 w-4 text-[var(--cv-text-muted)] shrink-0" />}
+                      {vid.platform === "tiktok" && <Music className="h-4 w-4 text-[var(--gm-text-muted)] shrink-0" />}
                       <div className="min-w-0 flex-1">
-                        {vid.title && <p className="text-cv-xs font-semibold text-[var(--cv-text)] truncate">{vid.title}</p>}
+                        {vid.title && <p className="text-gm-xs font-semibold text-[var(--gm-text)] truncate">{vid.title}</p>}
                         <a
                           href={vid.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[10px] text-[var(--cv-accent-strong)] hover:underline font-mono truncate block"
+                          className="text-[10px] text-[var(--gm-accent-strong)] hover:underline font-mono truncate block"
                         >
                           {vid.url}
                         </a>
@@ -1972,17 +2429,17 @@ export function WorkDetail({
             </div>
 
             {/* ── Fan Art Gallery ─────────────────────────────── */}
-            <div className="rounded-none border-2 border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] shadow-[3px_3px_0px_var(--cv-border-strong)]">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--cv-border)] bg-[var(--cv-surface)]">
+            <div className="rounded-none border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] shadow-[3px_3px_0px_var(--gm-border-strong)]">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--gm-border)] bg-[var(--gm-surface)]">
                 <div className="flex items-center gap-2">
-                  <ImageIcon className="h-4 w-4 text-[var(--cv-accent-strong)]" />
-                  <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--cv-text-subtle)]">
+                  <ImageIcon className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+                  <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--gm-text-subtle)]">
                     [ FAN ART GALLERY ]
                   </span>
                 </div>
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1 rounded-none border border-[var(--cv-border-strong)] bg-[var(--cv-surface)] px-2.5 py-1 text-[10px] font-mono shadow-[1px_1px_0px_var(--cv-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1 rounded-none border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-1 text-[10px] font-mono shadow-[1px_1px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
                   onClick={() => setShowAddFanArt(!showAddFanArt)}
                 >
                   <Plus className="h-3 w-3" />
@@ -1991,23 +2448,23 @@ export function WorkDetail({
               </div>
 
               {showAddFanArt && (
-                <div className="p-4 border-b border-[var(--cv-border)] grid gap-2 bg-[var(--cv-surface)]/50">
+                <div className="p-4 border-b border-[var(--gm-border)] grid gap-2 bg-[var(--gm-surface)]/50">
                   <div className="grid gap-2 sm:grid-cols-2">
                     <input
-                      className="w-full rounded-none border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-1.5 text-cv-xs text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent-muted)]"
+                      className="w-full rounded-none border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-1.5 text-gm-xs text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent-muted)]"
                       placeholder="Image URL (or upload below)"
                       value={newFanArtUrl}
                       onChange={(e) => setNewFanArtUrl(e.target.value)}
                     />
                     <input
-                      className="w-full rounded-none border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-1.5 text-cv-xs text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent-muted)]"
+                      className="w-full rounded-none border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-1.5 text-gm-xs text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent-muted)]"
                       placeholder="Artist name (optional)"
                       value={newFanArtArtist}
                       onChange={(e) => setNewFanArtArtist(e.target.value)}
                     />
                   </div>
                   <input
-                    className="w-full rounded-none border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-1.5 text-cv-xs text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent-muted)]"
+                    className="w-full rounded-none border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-1.5 text-gm-xs text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent-muted)]"
                     placeholder="Title / caption (optional)"
                     value={newFanArtTitle}
                     onChange={(e) => setNewFanArtTitle(e.target.value)}
@@ -2015,7 +2472,7 @@ export function WorkDetail({
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1.5 rounded-none border border-[var(--cv-border-strong)] bg-[var(--cv-surface)] px-2.5 py-1 text-[11px] font-mono shadow-[1px_1px_0px_var(--cv-border-strong)] cursor-pointer text-[var(--cv-text-muted)]"
+                      className="inline-flex items-center gap-1.5 rounded-none border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-1 text-[11px] font-mono shadow-[1px_1px_0px_var(--gm-border-strong)] cursor-pointer text-[var(--gm-text-muted)]"
                       onClick={() => fanArtFileInputRef.current?.click()}
                     >
                       <Upload className="h-3.5 w-3.5" />
@@ -2072,13 +2529,13 @@ export function WorkDetail({
 
               <div className="p-4">
                 {getFanArtForWork(work.id).length === 0 ? (
-                  <p className="text-cv-xs text-[var(--cv-text-subtle)] text-center py-4">
+                  <p className="text-gm-xs text-[var(--gm-text-subtle)] text-center py-4">
                     No fan art yet. Add image URLs or upload from your device.
                   </p>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {getFanArtForWork(work.id).map((art) => (
-                      <div key={art.id} className="group relative rounded-none border border-[var(--cv-border)] overflow-hidden aspect-square bg-[var(--cv-surface)]">
+                      <div key={art.id} className="group relative rounded-none border border-[var(--gm-border)] overflow-hidden aspect-square bg-[var(--gm-surface)]">
                         <img
                           src={art.imageUrl}
                           alt={art.title ?? "Fan art"}
@@ -2138,6 +2595,46 @@ export function WorkDetail({
           if (onBack) onBack();
         }}
       />
+
+      {/* Access Links Picker — shown when Resume is clicked and 2+ web access paths exist */}
+      {showAccessLinksModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={() => setShowAccessLinksModal(false)}
+        >
+          <div
+            className="bg-[var(--gm-bg-elevated)] border border-[var(--gm-border-strong)] rounded-gm-xl p-6 max-w-sm w-full shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-bold text-gm-base text-[var(--gm-text)]">Choose Source</h3>
+            <div className="space-y-2">
+              {accessPaths
+                .filter((p): p is typeof p & { url: string } => p.kind === "web" && typeof p.url === "string" && p.url.length > 0)
+                .map((path) => (
+                  <button
+                    key={path.id}
+                    onClick={() => {
+                      if (path.url) {
+                        window.open(path.url, "_blank");
+                        setShowAccessLinksModal(false);
+                      }
+                    }}
+                    className="w-full flex items-center justify-between p-3 rounded-cv border border-[var(--gm-border)] hover:border-[var(--gm-accent)] hover:bg-[var(--gm-surface)] text-left transition-all"
+                  >
+                    <span className="text-gm-sm text-[var(--gm-text)]">{path.label || path.url}</span>
+                    <ExternalLink className="h-4 w-4 text-[var(--gm-accent)]" />
+                  </button>
+                ))}
+            </div>
+            <button
+              onClick={() => setShowAccessLinksModal(false)}
+              className="text-gm-xs text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </PageContainer>
   );
 }

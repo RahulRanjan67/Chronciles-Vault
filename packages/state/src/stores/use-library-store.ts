@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { WorkId } from "@chronicles-vault/shared";
+import { WorkId } from "@grimoire/shared";
 import {
   Work,
   ContentType,
@@ -9,7 +9,7 @@ import {
   ProgressMethod,
   AccessPath,
   ReadingRelationship,
-} from "@chronicles-vault/domain";
+} from "@grimoire/domain";
 import { clientRepository, HydratedWorkItem } from "../client-repository";
 
 export type LibraryViewMode = "grid" | "compact" | "table" | "board";

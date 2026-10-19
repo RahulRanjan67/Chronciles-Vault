@@ -12,6 +12,7 @@ import {
   Palette,
   Shield,
   Sliders,
+  Trash2,
   User,
 } from 'lucide-react';
 import {
@@ -24,7 +25,8 @@ import {
   useTheme,
   PERFORMANCE_PROFILES,
   THEMES,
-} from '@chronicles-vault/ui';
+} from '@grimoire/ui';
+import { clientRepository, useLibraryStore } from '@grimoire/state';
 import { DataTransferPanel } from '../components/features/Settings/DataTransferPanel';
 
 export function Settings() {
@@ -43,10 +45,10 @@ export function Settings() {
   return (
     <PageContainer maxWidth="wide">
       <div className="mb-6">
-        <h1 className="text-cv-2xl sm:text-cv-3xl font-extrabold tracking-tight text-[var(--cv-text)]">
+        <h1 className="text-gm-2xl sm:text-gm-3xl font-extrabold tracking-tight text-[var(--gm-text)]">
           Settings
         </h1>
-        <p className="mt-1 text-cv-sm text-[var(--cv-text-muted)]">
+        <p className="mt-1 text-gm-sm text-[var(--gm-text-muted)]">
           Manage appearance, vault encryption, tracking sources, and data backups.
         </p>
       </div>
@@ -62,15 +64,15 @@ export function Settings() {
                 key={item.id}
                 type="button"
                 onClick={() => setActiveSection(item.id)}
-                className={`flex items-center gap-2.5 rounded-cv px-3 py-2 text-cv-sm font-medium transition-colors text-left whitespace-nowrap cursor-pointer ${
+                className={`flex items-center gap-2.5 rounded-cv px-3 py-2 text-gm-sm font-medium transition-colors text-left whitespace-nowrap cursor-pointer ${
                   active
-                    ? 'bg-[var(--cv-surface)] text-[var(--cv-text)] font-semibold shadow-xs'
-                    : 'text-[var(--cv-text-muted)] hover:bg-[var(--cv-surface)]/60 hover:text-[var(--cv-text)]'
+                    ? 'bg-[var(--gm-surface)] text-[var(--gm-text)] font-semibold shadow-xs'
+                    : 'text-[var(--gm-text-muted)] hover:bg-[var(--gm-surface)]/60 hover:text-[var(--gm-text)]'
                 }`}
               >
                 <Icon
                   className={`h-4 w-4 shrink-0 ${
-                    active ? 'text-[var(--cv-accent-strong)]' : 'text-[var(--cv-text-subtle)]'
+                    active ? 'text-[var(--gm-accent-strong)]' : 'text-[var(--gm-text-subtle)]'
                   }`}
                 />
                 <span>{item.label}</span>
@@ -80,13 +82,13 @@ export function Settings() {
         </aside>
 
         {/* Settings Content Area */}
-        <div className="flex-1 w-full rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-6 shadow-sm">
+        <div className="flex-1 w-full rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-6 shadow-sm">
           {activeSection === 'appearance' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-cv-lg font-bold text-[var(--cv-text)]">Appearance</h3>
-                <p className="text-cv-xs text-[var(--cv-text-muted)] mt-1">
-                  Customize the visual personality of Chronicles Vault.
+                <h3 className="text-gm-lg font-bold text-[var(--gm-text)]">Appearance</h3>
+                <p className="text-gm-xs text-[var(--gm-text-muted)] mt-1">
+                  Customize the visual personality of Grimoire.
                 </p>
               </div>
 
@@ -94,8 +96,8 @@ export function Settings() {
 
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-cv-sm font-semibold text-[var(--cv-text)]">Visual Themes (5 Atmospheres)</h4>
-                  <p className="text-cv-xs text-[var(--cv-text-muted)] mt-0.5">
+                  <h4 className="text-gm-sm font-semibold text-[var(--gm-text)]">Visual Themes (5 Atmospheres)</h4>
+                  <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5">
                     Select one of 5 distinct, finely calibrated atmospheres (with bespoke background artwork) for your reading sanctuary.
                   </p>
                 </div>
@@ -110,15 +112,15 @@ export function Settings() {
                           setTheme(item.id);
                           toast({ title: "Theme switched", description: `Active theme: ${item.name}` });
                         }}
-                        className={`group relative flex flex-col justify-between p-4 rounded-cv-xl border-2 transition-all cursor-pointer select-none ${
+                        className={`group relative flex flex-col justify-between p-4 rounded-gm-xl border-2 transition-all cursor-pointer select-none ${
                           isSelected
-                            ? "border-[var(--cv-accent)] bg-[var(--cv-surface)] shadow-md"
-                            : "border-[var(--cv-border)] bg-[var(--cv-surface)]/50 hover:border-[var(--cv-border-strong)] hover:bg-[var(--cv-surface)]"
+                            ? "border-[var(--gm-accent)] bg-[var(--gm-surface)] shadow-md"
+                            : "border-[var(--gm-border)] bg-[var(--gm-surface)]/50 hover:border-[var(--gm-border-strong)] hover:bg-[var(--gm-surface)]"
                         }`}
                       >
                         <div>
                           <div className="flex items-center justify-between gap-2 mb-2">
-                            <span className="font-bold text-cv-sm text-[var(--cv-text)]">
+                            <span className="font-bold text-gm-sm text-[var(--gm-text)]">
                               {item.name}
                             </span>
                             <div
@@ -127,17 +129,17 @@ export function Settings() {
                             />
                           </div>
 
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--cv-text-subtle)] block">
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--gm-text-subtle)] block">
                             {item.tagline}
                           </span>
                         </div>
 
-                        <div className="mt-4 pt-3 border-t border-[var(--cv-border)]/60 flex items-center justify-between text-cv-xs">
-                          <span className="text-[10px] text-[var(--cv-text-subtle)]">
+                        <div className="mt-4 pt-3 border-t border-[var(--gm-border)]/60 flex items-center justify-between text-gm-xs">
+                          <span className="text-[10px] text-[var(--gm-text-subtle)]">
                             {item.isDark ? "Dark Atmosphere" : "Light Atmosphere"}
                           </span>
                           {isSelected && (
-                            <span className="flex items-center gap-1 font-semibold text-[var(--cv-accent-strong)]">
+                            <span className="flex items-center gap-1 font-semibold text-[var(--gm-accent-strong)]">
                               <Check className="h-3.5 w-3.5" />
                               <span>Active</span>
                             </span>
@@ -154,14 +156,14 @@ export function Settings() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div>
-                    <h4 className="text-cv-sm font-semibold text-[var(--cv-text)]">
+                    <h4 className="text-gm-sm font-semibold text-[var(--gm-text)]">
                       Performance Profile
                     </h4>
-                    <p className="text-cv-xs text-[var(--cv-text-muted)] mt-0.5">
+                    <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5">
                       Control glass blur, virtualization buffer, and background sync intensity.
                     </p>
                   </div>
-                  <span className="rounded-cv-full border border-[var(--cv-border)] bg-[var(--cv-surface)] px-2.5 py-1 font-mono text-[11px] text-[var(--cv-accent-strong)]">
+                  <span className="rounded-gm-full border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2.5 py-1 font-mono text-[11px] text-[var(--gm-accent-strong)]">
                     Active: {perfProfile.label} ({perfProfile.virtualBufferItems}-item buffer)
                   </span>
                 </div>
@@ -180,25 +182,25 @@ export function Settings() {
                             description: `Mode: ${profile.name}`,
                           });
                         }}
-                        className={`flex flex-col justify-between p-4 rounded-cv-lg border text-left transition-all cursor-pointer ${
+                        className={`flex flex-col justify-between p-4 rounded-gm-lg border text-left transition-all cursor-pointer ${
                           isSelected
-                            ? 'border-[var(--cv-accent)] bg-[var(--cv-surface)] shadow-sm'
-                            : 'border-[var(--cv-border)] bg-[var(--cv-surface)]/40 hover:border-[var(--cv-border-strong)] hover:bg-[var(--cv-surface)]/70'
+                            ? 'border-[var(--gm-accent)] bg-[var(--gm-surface)] shadow-sm'
+                            : 'border-[var(--gm-border)] bg-[var(--gm-surface)]/40 hover:border-[var(--gm-border-strong)] hover:bg-[var(--gm-surface)]/70'
                         }`}
                       >
                         <div>
                           <div className="flex items-center justify-between gap-2 mb-1">
-                            <span className="font-bold text-cv-sm text-[var(--cv-text)]">
+                            <span className="font-bold text-gm-sm text-[var(--gm-text)]">
                               {profile.name}
                             </span>
                             {isSelected && (
-                              <Check className="h-4 w-4 text-[var(--cv-accent-strong)] shrink-0" />
+                              <Check className="h-4 w-4 text-[var(--gm-accent-strong)] shrink-0" />
                             )}
                           </div>
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--cv-text-subtle)] block mb-1.5">
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--gm-text-subtle)] block mb-1.5">
                             {profile.tagline}
                           </span>
-                          <p className="text-cv-xs text-[var(--cv-text-muted)] leading-relaxed">
+                          <p className="text-gm-xs text-[var(--gm-text-muted)] leading-relaxed">
                             {profile.description}
                           </p>
                         </div>
@@ -213,8 +215,8 @@ export function Settings() {
           {activeSection === 'vault' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-cv-lg font-bold text-[var(--cv-text)]">Vault & Privacy</h3>
-                <p className="text-cv-xs text-[var(--cv-text-muted)] mt-1">
+                <h3 className="text-gm-lg font-bold text-[var(--gm-text)]">Vault & Privacy</h3>
+                <p className="text-gm-xs text-[var(--gm-text-muted)] mt-1">
                   Configure zero-knowledge encryption for sensitive titles and private reading lists.
                 </p>
               </div>
@@ -222,13 +224,13 @@ export function Settings() {
               <Separator />
 
               <div className="space-y-4">
-                <div className="rounded-cv-lg bg-[var(--cv-surface)]/60 p-4 border border-[var(--cv-border)]">
-                  <div className="flex items-center gap-2 text-cv-sm font-semibold text-[var(--cv-text)]">
-                    <Lock className="h-4 w-4 text-[var(--cv-warning)]" />
+                <div className="rounded-gm-lg bg-[var(--gm-surface)]/60 p-4 border border-[var(--gm-border)]">
+                  <div className="flex items-center gap-2 text-gm-sm font-semibold text-[var(--gm-text)]">
+                    <Lock className="h-4 w-4 text-[var(--gm-warning)]" />
                     <span>Master Passphrase</span>
                   </div>
-                  <p className="mt-1 text-cv-xs text-[var(--cv-text-muted)]">
-                    AES-256-GCM encryption is applied locally in your browser/app. We never store or transmit your passphrase.
+                  <p className="mt-1 text-gm-xs text-[var(--gm-text-muted)]">
+                    Your vault is encrypted locally on your device. Your passphrase is never transmitted or stored on any server.
                   </p>
                   <Button
                     variant="outline"
@@ -246,13 +248,13 @@ export function Settings() {
           {activeSection === 'sources' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-cv-lg font-bold text-[var(--cv-text)]">Sources & Tracking</h3>
-                <p className="text-cv-xs text-[var(--cv-text-muted)] mt-1">
+                <h3 className="text-gm-lg font-bold text-[var(--gm-text)]">Sources & Tracking</h3>
+                <p className="text-gm-xs text-[var(--gm-text-muted)] mt-1">
                   Manage sync intervals and connected scrapers/extensions.
                 </p>
               </div>
               <Separator />
-              <p className="text-cv-sm text-[var(--cv-text-muted)]">
+              <p className="text-gm-sm text-[var(--gm-text-muted)]">
                 12 sources currently active.{' '}
                 {perfProfile.pollingIntervalMinutes === null
                   ? 'Background polling is paused in Lite mode (manual check only).'
@@ -264,8 +266,8 @@ export function Settings() {
           {activeSection === 'data' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-cv-lg font-bold text-[var(--cv-text)]">Data & Backup</h3>
-                <p className="text-cv-xs text-[var(--cv-text-muted)] mt-1">
+                <h3 className="text-gm-lg font-bold text-[var(--gm-text)]">Data & Backup</h3>
+                <p className="text-gm-xs text-[var(--gm-text-muted)] mt-1">
                   Export your library as JSON, CSV, Markdown, or a ZIP bundle, and import from a backup, a CSV, or browser bookmarks.
                 </p>
               </div>
@@ -277,36 +279,36 @@ export function Settings() {
           {activeSection === 'advanced' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-cv-lg font-bold text-[var(--cv-text)]">Advanced Options</h3>
-                <p className="text-cv-xs text-[var(--cv-text-muted)] mt-1">
+                <h3 className="text-gm-lg font-bold text-[var(--gm-text)]">Advanced Options</h3>
+                <p className="text-gm-xs text-[var(--gm-text-muted)] mt-1">
                   Diagnostics, runtime performance telemetry, cache purge, and developer tools.
                 </p>
               </div>
               <Separator />
-              <div className="rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-surface)]/50 p-4 space-y-2 text-cv-xs">
-                <div className="font-semibold text-[var(--cv-text)]">
+              <div className="rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-surface)]/50 p-4 space-y-2 text-gm-xs">
+                <div className="font-semibold text-[var(--gm-text)]">
                   Runtime Performance Telemetry
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1 font-mono text-[11px]">
                   <div>
-                    <span className="text-[var(--cv-text-subtle)] block">Resolved Profile</span>
-                    <span className="text-[var(--cv-text)] font-semibold">{perfProfile.label}</span>
+                    <span className="text-[var(--gm-text-subtle)] block">Resolved Profile</span>
+                    <span className="text-[var(--gm-text)] font-semibold">{perfProfile.label}</span>
                   </div>
                   <div>
-                    <span className="text-[var(--cv-text-subtle)] block">Virtual Buffer</span>
-                    <span className="text-[var(--cv-text)] font-semibold">
+                    <span className="text-[var(--gm-text-subtle)] block">Virtual Buffer</span>
+                    <span className="text-[var(--gm-text)] font-semibold">
                       {perfProfile.virtualBufferItems} items
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--cv-text-subtle)] block">Glass Blur</span>
-                    <span className="text-[var(--cv-text)] font-semibold">
+                    <span className="text-[var(--gm-text-subtle)] block">Glass Blur</span>
+                    <span className="text-[var(--gm-text)] font-semibold">
                       {perfProfile.backdropBlur ? 'Enabled' : 'Disabled (Flat)'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--cv-text-subtle)] block">Canvas Lookahead</span>
-                    <span className="text-[var(--cv-text)] font-semibold">
+                    <span className="text-[var(--gm-text-subtle)] block">Canvas Lookahead</span>
+                    <span className="text-[var(--gm-text)] font-semibold">
                       {perfProfile.webtoonCanvasBuffer} pages
                     </span>
                   </div>
@@ -319,6 +321,70 @@ export function Settings() {
               >
                 Purge Image Cache
               </Button>
+
+              {/* Danger Zone */}
+              <div className="rounded-gm-lg border border-[var(--gm-danger)]/40 bg-[var(--gm-danger-muted)]/10 p-4 space-y-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Trash2 className="h-4 w-4 text-[var(--gm-danger)]" />
+                    <span className="font-semibold text-gm-sm text-[var(--gm-danger)]">Danger Zone</span>
+                  </div>
+                  <p className="text-gm-xs text-[var(--gm-text-muted)]">
+                    These actions are irreversible. Proceed with caution.
+                  </p>
+                </div>
+                <Separator className="border-[var(--gm-danger)]/20" />
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-1 space-y-1">
+                    <p className="text-gm-xs font-semibold text-[var(--gm-text)]">Clean Up Soft-Deleted Works</p>
+                    <p className="text-[11px] text-[var(--gm-text-muted)]">
+                      Permanently removes all works you have soft-deleted. This frees database space and cannot be undone.
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 gap-1.5 text-gm-xs text-[var(--gm-danger)] hover:bg-[var(--gm-danger-muted)] border-[var(--gm-danger)]/40"
+                      onClick={() => {
+                        if (typeof window !== 'undefined' && !window.confirm('Permanently purge all soft-deleted works? This cannot be undone.')) return;
+                        try {
+                          const count = clientRepository.purgeAllDeletedWorks();
+                          useLibraryStore.getState().refresh();
+                          toast({ title: `Purged ${count} deleted work(s)`, description: 'Your database has been cleaned up.' });
+                        } catch (err) {
+                          toast({ title: 'Purge failed', description: err instanceof Error ? err.message : 'Unknown error', variant: 'destructive' });
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      <span>Purge Deleted Works</span>
+                    </Button>
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <p className="text-gm-xs font-semibold text-[var(--gm-text)]">Factory Reset Library</p>
+                    <p className="text-[11px] text-[var(--gm-text-muted)]">
+                      Wipes your entire local library and all custom works and memories permanently. This cannot be undone.
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 gap-1.5 text-gm-xs text-[var(--gm-danger)] hover:bg-[var(--gm-danger-muted)] border-[var(--gm-danger)]/40"
+                      onClick={() => {
+                        if (typeof window !== 'undefined' && !window.confirm('Factory Reset: Wipe entire local library? This cannot be undone.')) return;
+                        try {
+                          clientRepository.resetToDefaultSeed();
+                          useLibraryStore.getState().refresh();
+                          toast({ title: 'Library wiped & reset', description: 'All local data has been cleared.' });
+                        } catch (err) {
+                          toast({ title: 'Reset failed', description: err instanceof Error ? err.message : 'Unknown error', variant: 'destructive' });
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      <span>Factory Reset</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>

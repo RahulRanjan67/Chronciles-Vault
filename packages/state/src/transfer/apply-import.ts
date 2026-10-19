@@ -18,7 +18,7 @@ import {
   createWebAccessPath,
   type Work,
   type WorkId,
-} from "@chronicles-vault/domain";
+} from "@grimoire/domain";
 import { ClientRepository, clientRepository } from "../client-repository";
 import { useLibraryStore } from "../stores/use-library-store";
 import { useListsStore } from "../stores/use-lists-store";

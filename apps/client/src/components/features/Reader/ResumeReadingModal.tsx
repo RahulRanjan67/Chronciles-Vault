@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
   toast,
-} from "@chronicles-vault/ui";
+} from "@grimoire/ui";
 import {
   AccessCapability,
   AccessPath,
@@ -29,10 +29,9 @@ import {
   Work,
   createLocalFileAccessPath,
   formatProgressAnchor,
-} from "@chronicles-vault/domain";
-import { listLocalFiles, setLocalFileWork, type LocalFileMetadata } from "@chronicles-vault/reader";
-import { clientRepository } from "@chronicles-vault/state";
-import { seedDemoShelfFiles } from "../../../utils/demo-shelf-files";
+} from "@grimoire/domain";
+import { listLocalFiles, setLocalFileWork, type LocalFileMetadata } from "@grimoire/reader";
+import { clientRepository } from "@grimoire/state";
 import { openLocalDiskPath } from "../../../utils/local-media";
 
 export interface ResumeReadingModalProps {
@@ -56,7 +55,6 @@ export function ResumeReadingModal({
 }: ResumeReadingModalProps) {
   const [shelfFiles, setShelfFiles] = React.useState<LocalFileMetadata[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [isSeeding, setIsSeeding] = React.useState(false);
 
   const loadFiles = React.useCallback(async () => {
     setIsLoading(true);
@@ -86,7 +84,7 @@ export function ResumeReadingModal({
       p.kind === "local_file" &&
       "filePath" in p &&
       Boolean(p.filePath) &&
-      !String(p.filePath).startsWith("chronicles-vault://local-file/"),
+      !String(p.filePath).startsWith("grimoire://local-file/"),
   );
 
   const openAccessPath = React.useCallback(
@@ -126,13 +124,14 @@ export function ResumeReadingModal({
   );
 
   React.useEffect(() => {
-    if (!open) return;
-    if (accessPaths.length === 0) return;
+    if (!open) return undefined;
+    if (accessPaths.length === 0) return undefined;
     if (accessPaths.length === 1) {
       const only = accessPaths[0]!;
       const timer = window.setTimeout(() => openAccessPath(only), 80);
       return () => window.clearTimeout(timer);
     }
+    return undefined;
   }, [open, accessPaths, openAccessPath]);
 
   const handleOpenWeb = (url: string, label: string) => {
@@ -152,7 +151,7 @@ export function ResumeReadingModal({
           work.id,
           createLocalFileAccessPath({
             workId: work.id,
-            filePath: `chronicles-vault://local-file/${encodeURIComponent(file.id)}`,
+            filePath: `grimoire://local-file/${encodeURIComponent(file.id)}`,
             fileId: file.id,
             format: file.format,
             provider: "local-reader",
@@ -180,32 +179,6 @@ export function ResumeReadingModal({
     onOpenFile(file.id);
   };
 
-  const handleSeedAndRead = async () => {
-    setIsSeeding(true);
-    try {
-      await seedDemoShelfFiles();
-      const files = await listLocalFiles();
-      setShelfFiles(files);
-      const epub = files.find((f) => f.format === "epub") ?? files[0];
-      if (epub) {
-        await handleReadShelfFile(epub, true);
-      } else {
-        toast({
-          title: "Sample files generated",
-          description: "Sample books are now ready on Local Shelf.",
-        });
-      }
-    } catch (err) {
-      toast({
-        title: "Could not generate sample files",
-        description: err instanceof Error ? err.message : "Unknown error",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSeeding(false);
-    }
-  };
-
   const anchorLabel = relationship?.currentAnchor
     ? formatProgressAnchor(relationship.currentAnchor)
     : null;
@@ -215,10 +188,10 @@ export function ResumeReadingModal({
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">
-            <BookOpen className="h-5 w-5 text-[var(--cv-accent-strong)]" />
-            <DialogTitle className="text-cv-lg font-bold">Resume Reading</DialogTitle>
+            <BookOpen className="h-5 w-5 text-[var(--gm-accent-strong)]" />
+            <DialogTitle className="text-gm-lg font-bold">Resume Reading</DialogTitle>
           </div>
-          <DialogDescription className="text-cv-xs text-[var(--cv-text-muted)]">
+          <DialogDescription className="text-gm-xs text-[var(--gm-text-muted)]">
             {work.title}
             {anchorLabel ? ` · Last progress: ${anchorLabel}` : ""}
           </DialogDescription>
@@ -228,7 +201,7 @@ export function ResumeReadingModal({
           {/* Section 1: Web / Feed Sources */}
           {webPaths.length > 0 && (
             <div>
-              <h4 className="text-cv-xs font-semibold uppercase tracking-wider text-[var(--cv-text-subtle)] mb-2 flex items-center gap-1.5">
+              <h4 className="text-gm-xs font-semibold uppercase tracking-wider text-[var(--gm-text-subtle)] mb-2 flex items-center gap-1.5">
                 <ExternalLink className="h-3.5 w-3.5" />
                 <span>Web Reading Sources</span>
               </h4>
@@ -239,13 +212,13 @@ export function ResumeReadingModal({
                   return (
                     <div
                       key={path.id}
-                      className="flex items-center justify-between p-3 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)]/70 hover:border-[var(--cv-border-strong)] transition-colors"
+                      className="flex items-center justify-between p-3 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)]/70 hover:border-[var(--gm-border-strong)] transition-colors"
                     >
                       <div className="min-w-0 flex-1 mr-3">
-                        <p className="text-cv-sm font-medium text-[var(--cv-text)] truncate">
+                        <p className="text-gm-sm font-medium text-[var(--gm-text)] truncate">
                           {provider || "Official Source"}
                         </p>
-                        <p className="text-cv-xs text-[var(--cv-text-muted)] truncate">{url}</p>
+                        <p className="text-gm-xs text-[var(--gm-text-muted)] truncate">{url}</p>
                       </div>
                       <Button
                         size="sm"
@@ -266,7 +239,7 @@ export function ResumeReadingModal({
           {/* Section: Local Videos & Media Files */}
           {localVideoPaths.length > 0 && (
             <div>
-              <h4 className="text-cv-xs font-semibold uppercase tracking-wider text-[var(--cv-text-subtle)] mb-2 flex items-center gap-1.5">
+              <h4 className="text-gm-xs font-semibold uppercase tracking-wider text-[var(--gm-text-subtle)] mb-2 flex items-center gap-1.5">
                 <Film className="h-3.5 w-3.5 text-cyan-400" />
                 <span>Local Videos & Media (Default Video Player)</span>
               </h4>
@@ -277,18 +250,18 @@ export function ResumeReadingModal({
                   return (
                     <div
                       key={path.id}
-                      className="flex items-center justify-between p-3 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)]/70 hover:border-[var(--cv-border-strong)] transition-colors"
+                      className="flex items-center justify-between p-3 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)]/70 hover:border-[var(--gm-border-strong)] transition-colors"
                     >
                       <div className="min-w-0 flex-1 mr-3">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-[var(--cv-bg-elevated)] border border-[var(--cv-border)] text-cyan-400">
+                          <span className="font-mono text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-[var(--gm-bg-elevated)] border border-[var(--gm-border)] text-cyan-400">
                             VIDEO
                           </span>
-                          <p className="text-cv-sm font-medium text-[var(--cv-text)] truncate">
+                          <p className="text-gm-sm font-medium text-[var(--gm-text)] truncate">
                             {label}
                           </p>
                         </div>
-                        <p className="text-cv-xs font-mono text-[var(--cv-text-muted)] truncate mt-0.5">
+                        <p className="text-gm-xs font-mono text-[var(--gm-text-muted)] truncate mt-0.5">
                           {filePath}
                         </p>
                       </div>
@@ -313,13 +286,13 @@ export function ResumeReadingModal({
 
           {/* Section 2: Local Shelf Reader */}
           <div>
-            <h4 className="text-cv-xs font-semibold uppercase tracking-wider text-[var(--cv-text-subtle)] mb-2 flex items-center gap-1.5">
+            <h4 className="text-gm-xs font-semibold uppercase tracking-wider text-[var(--gm-text-subtle)] mb-2 flex items-center gap-1.5">
               <HardDrive className="h-3.5 w-3.5" />
               <span>Read via Sandboxed Local Reader</span>
             </h4>
 
             {isLoading ? (
-              <div className="flex items-center justify-center p-6 text-[var(--cv-text-muted)] text-cv-xs gap-2">
+              <div className="flex items-center justify-center p-6 text-[var(--gm-text-muted)] text-gm-xs gap-2">
                 <LoaderCircle className="h-4 w-4 animate-spin" />
                 Checking Local Shelf…
               </div>
@@ -330,19 +303,19 @@ export function ResumeReadingModal({
                   return (
                     <div
                       key={file.id}
-                      className="flex items-center justify-between p-3 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)]/70 hover:border-[var(--cv-accent-muted)] transition-colors"
+                      className="flex items-center justify-between p-3 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)]/70 hover:border-[var(--gm-accent-muted)] transition-colors"
                     >
                       <div className="min-w-0 flex-1 mr-3">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-[var(--cv-bg-elevated)] border border-[var(--cv-border)] text-[var(--cv-accent-strong)]">
+                          <span className="font-mono text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-[var(--gm-bg-elevated)] border border-[var(--gm-border)] text-[var(--gm-accent-strong)]">
                             {file.format}
                           </span>
-                          <p className="text-cv-sm font-medium text-[var(--cv-text)] truncate">
+                          <p className="text-gm-sm font-medium text-[var(--gm-text)] truncate">
                             {file.displayName}
                           </p>
                         </div>
                         {isLinked && (
-                          <p className="text-[11px] text-[var(--cv-accent-strong)] mt-0.5">
+                          <p className="text-[11px] text-[var(--gm-accent-strong)] mt-0.5">
                             ✓ Linked to this title
                           </p>
                         )}
@@ -350,7 +323,7 @@ export function ResumeReadingModal({
                       <Button
                         size="sm"
                         variant={isLinked ? "default" : "outline"}
-                        className="gap-1.5 shrink-0 text-cv-xs"
+                        className="gap-1.5 shrink-0 text-gm-xs"
                         onClick={() => handleReadShelfFile(file, !isLinked)}
                       >
                         <BookOpen className="h-3.5 w-3.5" />
@@ -361,35 +334,35 @@ export function ResumeReadingModal({
                 })}
               </div>
             ) : (
-              <div className="p-4 rounded-cv border border-dashed border-[var(--cv-border)] text-center space-y-3 bg-[var(--cv-surface)]/40">
-                <p className="text-cv-xs text-[var(--cv-text-muted)]">
-                  No local files found on your shelf yet.
+              <div className="p-4 rounded-cv border border-dashed border-[var(--gm-border)] text-center space-y-3 bg-[var(--gm-surface)]/40">
+                <p className="text-gm-xs text-[var(--gm-text-muted)]">
+                  No local files found on your shelf yet. Add EPUB, CBZ, PDF, or video files to Local Shelf to read offline.
                 </p>
-                <Button
-                  size="sm"
-                  variant="default"
-                  className="gap-2"
-                  onClick={handleSeedAndRead}
-                  disabled={isSeeding}
-                >
-                  {isSeeding ? (
-                    <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                  )}
-                  <span>Generate Sample EPUB & Read</span>
-                </Button>
+                {onNavigateShelf && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => {
+                      onOpenChange(false);
+                      onNavigateShelf();
+                    }}
+                  >
+                    <HardDrive className="h-3.5 w-3.5" />
+                    <span>Open Local Shelf</span>
+                  </Button>
+                )}
               </div>
             )}
           </div>
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-[var(--cv-border)] pt-3">
+        <DialogFooter className="flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-[var(--gm-border)] pt-3">
           {onNavigateShelf && (
             <Button
               variant="ghost"
               size="sm"
-              className="text-cv-xs text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+              className="text-gm-xs text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
               onClick={() => {
                 onOpenChange(false);
                 onNavigateShelf();

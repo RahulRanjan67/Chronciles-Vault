@@ -10,17 +10,17 @@ import {
   getCbzCacheWindow,
   toCbzPageAnchor,
   toCbzPageNumber,
-} from "@chronicles-vault/reader";
-import type { CbzArchive, CbzLoadedPage, LocalFileMetadata } from "@chronicles-vault/reader";
+} from "@grimoire/reader";
+import type { CbzArchive, CbzLoadedPage, LocalFileMetadata } from "@grimoire/reader";
 import {
   MemoryType,
   PrivacyState,
   SpoilerLevel,
   type ProgressAnchor,
   type Work,
-} from "@chronicles-vault/domain";
-import { clientRepository, useLibraryStore } from "@chronicles-vault/state";
-import { Button } from "@chronicles-vault/ui";
+} from "@grimoire/domain";
+import { clientRepository, useLibraryStore } from "@grimoire/state";
+import { Button } from "@grimoire/ui";
 
 const MAX_CACHED_BITMAP_BYTES = 64 * 1024 * 1024;
 
@@ -318,7 +318,7 @@ export function CbzReader({ fileId, onBack }: CbzReaderProps) {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-[32rem] items-center justify-center gap-2 text-[var(--cv-text-muted)]">
+      <main className="flex min-h-[32rem] items-center justify-center gap-2 text-[var(--gm-text-muted)]">
         <LoaderCircle className="h-4 w-4 animate-spin" />
         Scanning CBZ directory locally…
       </main>
@@ -327,7 +327,7 @@ export function CbzReader({ fileId, onBack }: CbzReaderProps) {
   if (error && !reader) {
     return (
       <main className="flex min-h-[32rem] flex-col items-center justify-center gap-4 p-8 text-center">
-        <p role="alert" className="max-w-xl text-cv-sm text-[var(--cv-danger)]">
+        <p role="alert" className="max-w-xl text-gm-sm text-[var(--gm-danger)]">
           {error}
         </p>
         <Button variant="outline" onClick={onBack}>
@@ -376,17 +376,17 @@ export function CbzReader({ fileId, onBack }: CbzReaderProps) {
   };
 
   return (
-    <main className="flex h-[calc(100vh-4rem)] min-h-[32rem] flex-col bg-[var(--cv-bg)]">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--cv-border)] bg-[var(--cv-surface)] px-4 py-3">
+    <main className="flex h-[calc(100vh-4rem)] min-h-[32rem] flex-col bg-[var(--gm-bg)]">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--gm-border)] bg-[var(--gm-surface)] px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
           <Button variant="ghost" size="icon" aria-label="Back to Local Shelf" onClick={onBack}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="min-w-0">
-            <h1 className="truncate font-semibold text-[var(--cv-text)]">
+            <h1 className="truncate font-semibold text-[var(--gm-text)]">
               {reader?.file.displayName ?? "CBZ Reader"}
             </h1>
-            <p className="text-cv-xs text-[var(--cv-text-muted)]">
+            <p className="text-gm-xs text-[var(--gm-text-muted)]">
               Page {currentPage + 1} of {totalPages} · Session {formatDuration(sessionElapsed)}
             </p>
           </div>
@@ -424,7 +424,7 @@ export function CbzReader({ fileId, onBack }: CbzReaderProps) {
       {warning && (
         <div
           role="status"
-          className="border-b border-[var(--cv-warning)]/40 bg-[var(--cv-warning-muted)] px-4 py-2 text-center text-cv-xs text-[var(--cv-warning)]"
+          className="border-b border-[var(--gm-warning)]/40 bg-[var(--gm-warning-muted)] px-4 py-2 text-center text-gm-xs text-[var(--gm-warning)]"
         >
           {warning}
         </div>
@@ -435,7 +435,7 @@ export function CbzReader({ fileId, onBack }: CbzReaderProps) {
             event.preventDefault();
             saveMemory();
           }}
-          className="flex flex-wrap items-center gap-2 border-b border-[var(--cv-border)] bg-[var(--cv-surface)] px-4 py-2"
+          className="flex flex-wrap items-center gap-2 border-b border-[var(--gm-border)] bg-[var(--gm-surface)] px-4 py-2"
         >
           <label htmlFor="cbz-memory" className="sr-only">
             Note for comic page {currentPage + 1}
@@ -446,7 +446,7 @@ export function CbzReader({ fileId, onBack }: CbzReaderProps) {
             onChange={(event) => setMemoryDraft(event.target.value)}
             maxLength={5000}
             placeholder={`Add a note for page ${currentPage + 1}`}
-            className="min-w-48 flex-1 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-3 py-2 text-cv-sm text-[var(--cv-text)]"
+            className="min-w-48 flex-1 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-3 py-2 text-gm-sm text-[var(--gm-text)]"
           />
           <Button type="submit" variant="outline" disabled={!memoryDraft.trim()}>
             Save panel note
@@ -481,13 +481,13 @@ export function CbzReader({ fileId, onBack }: CbzReaderProps) {
         }`}
       >
         {isPageLoading && (
-          <div className="flex items-center gap-2 text-[var(--cv-text-muted)]">
+          <div className="flex items-center gap-2 text-[var(--gm-text-muted)]">
             <LoaderCircle className="h-4 w-4 animate-spin" />
             Loading page…
           </div>
         )}
         {error && reader && (
-          <p role="alert" className="max-w-xl text-center text-cv-sm text-[var(--cv-danger)]">
+          <p role="alert" className="max-w-xl text-center text-gm-sm text-[var(--gm-danger)]">
             {error}
           </p>
         )}
@@ -497,7 +497,7 @@ export function CbzReader({ fileId, onBack }: CbzReaderProps) {
               key={`${page.index}-${page.url}-${pageTurnKey}`}
               src={page.url}
               alt={`Comic page ${page.index + 1}`}
-              className={`h-full min-h-0 min-w-0 flex-1 object-contain cv-page-turn-active ${
+              className={`h-full min-h-0 min-w-0 flex-1 object-contain gm-page-turn-active ${
                 displayPages.length > 1 ? "max-w-[50%]" : "max-w-full"
               }`}
               decoding="async"
@@ -511,7 +511,7 @@ export function CbzReader({ fileId, onBack }: CbzReaderProps) {
               aria-label="Previous pages"
               disabled={currentPage <= 0}
               onClick={() => navigatePage(currentPage - (spread ? 2 : 1))}
-              className="absolute inset-y-0 left-0 z-10 flex w-12 items-center justify-center rounded-r-cv bg-[var(--cv-surface)]/70 text-[var(--cv-text)] disabled:opacity-30 sm:hidden"
+              className="absolute inset-y-0 left-0 z-10 flex w-12 items-center justify-center rounded-r-cv bg-[var(--gm-surface)]/70 text-[var(--gm-text)] disabled:opacity-30 sm:hidden"
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
@@ -520,7 +520,7 @@ export function CbzReader({ fileId, onBack }: CbzReaderProps) {
               aria-label="Next pages"
               disabled={currentPage >= totalPages - 1}
               onClick={() => navigatePage(currentPage + (spread ? 2 : 1))}
-              className="absolute inset-y-0 right-0 z-10 flex w-12 items-center justify-center rounded-l-cv bg-[var(--cv-surface)]/70 text-[var(--cv-text)] disabled:opacity-30 sm:hidden"
+              className="absolute inset-y-0 right-0 z-10 flex w-12 items-center justify-center rounded-l-cv bg-[var(--gm-surface)]/70 text-[var(--gm-text)] disabled:opacity-30 sm:hidden"
             >
               <ChevronRight className="h-6 w-6" />
             </button>
@@ -528,8 +528,8 @@ export function CbzReader({ fileId, onBack }: CbzReaderProps) {
         )}
       </section>
 
-      <footer className="flex items-center gap-3 border-t border-[var(--cv-border)] bg-[var(--cv-surface)] px-4 py-3">
-        <span className="min-w-16 text-cv-xs text-[var(--cv-text-muted)]">{currentPage + 1}</span>
+      <footer className="flex items-center gap-3 border-t border-[var(--gm-border)] bg-[var(--gm-surface)] px-4 py-3">
+        <span className="min-w-16 text-gm-xs text-[var(--gm-text-muted)]">{currentPage + 1}</span>
         <label className="sr-only" htmlFor="cbz-page">
           Comic page
         </label>
@@ -540,9 +540,9 @@ export function CbzReader({ fileId, onBack }: CbzReaderProps) {
           max={Math.max(totalPages - 1, 0)}
           value={currentPage}
           onChange={(event) => navigatePage(Number(event.target.value))}
-          className="min-w-28 flex-1 accent-[var(--cv-accent-strong)]"
+          className="min-w-28 flex-1 accent-[var(--gm-accent-strong)]"
         />
-        <span className="min-w-16 text-right text-cv-xs text-[var(--cv-text-muted)]">
+        <span className="min-w-16 text-right text-gm-xs text-[var(--gm-text-muted)]">
           {totalPages > 0 ? `${Math.round(((currentPage + 1) / totalPages) * 100)}%` : "0%"}
         </span>
       </footer>

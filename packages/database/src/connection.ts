@@ -1,5 +1,5 @@
 /**
- * SQLite Connection Manager for Chronicles Vault.
+ * SQLite Connection Manager for Grimoire.
  *
  * Configures better-sqlite3 with WAL mode, foreign keys, busy timeout,
  * and provides safe transaction helpers.

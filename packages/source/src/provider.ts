@@ -1,6 +1,6 @@
-import type { AccessPath, AccessPathKind, SourceHealthState } from '@chronicles-vault/domain';
-import type { UpdateEntry } from '@chronicles-vault/domain';
-import type { Result } from '@chronicles-vault/shared';
+import type { AccessPath, AccessPathKind, SourceHealthState } from '@grimoire/domain';
+import type { UpdateEntry } from '@grimoire/domain';
+import type { Result } from '@grimoire/shared';
 
 export enum Capability {
   ReadInternal = 'read_internal',

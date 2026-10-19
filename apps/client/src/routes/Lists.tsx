@@ -37,14 +37,16 @@ import {
   TabsList,
   TabsTrigger,
   toast,
-} from "@chronicles-vault/ui";
+} from "@grimoire/ui";
 import {
   useListsStore,
   useLibraryStore,
   type CommunityList,
   type CommunityWorkEntry,
   type UserPersonalList,
-} from "@chronicles-vault/state";
+} from "@grimoire/state";
+import { useVaultStore } from "@grimoire/vault";
+import { PrivacyState } from "@grimoire/domain";
 import { PublicationPanel } from "../components/features/Lists/PublicationPanel";
 import { EditListDialog, ItemNoteDialog } from "../components/features/Lists/ListDialogs";
 
@@ -73,6 +75,9 @@ export function Lists({ onNavigateWork }: ListsProps) {
 
   const { items: libraryItems, refresh: loadLibrary } = useLibraryStore();
 
+  // Vault gating: hide vault-classified lists when vault is locked
+  const isVaultUnlocked = useVaultStore((s) => s.status === "unlocked");
+
   const [activeTab, setActiveTab] = React.useState<"my-lists" | "explore">("explore");
   const [editListOpen, setEditListOpen] = React.useState(false);
   const [noteEntryId, setNoteEntryId] = React.useState<string | null>(null);
@@ -95,6 +100,10 @@ export function Lists({ onNavigateWork }: ListsProps) {
   // Filtered Community Lists
   const filteredCommunityLists = React.useMemo(() => {
     return communityLists.filter((list) => {
+      // Vault gating: hide lists with 'vault' in name when vault is locked
+      const isVaultList = list.title.toLowerCase().includes("vault");
+      if (isVaultList && !isVaultUnlocked) return false;
+
       const matchesQuery =
         !communitySearchQuery.trim() ||
         list.title.toLowerCase().includes(communitySearchQuery.toLowerCase()) ||
@@ -111,7 +120,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
 
       return matchesQuery && matchesGenre;
     });
-  }, [communityLists, communitySearchQuery, communityGenreFilter]);
+  }, [communityLists, communitySearchQuery, communityGenreFilter, isVaultUnlocked]);
 
   const allCommunityGenres = React.useMemo(() => {
     const genres = new Set<string>();
@@ -162,11 +171,11 @@ export function Lists({ onNavigateWork }: ListsProps) {
       {/* Top Heading */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-cv-2xl sm:text-cv-3xl font-extrabold tracking-tight text-[var(--cv-text)] flex items-center gap-3">
-            <ListFilter className="h-7 w-7 text-[var(--cv-accent-strong)]" />
+          <h1 className="text-gm-2xl sm:text-gm-3xl font-extrabold tracking-tight text-[var(--gm-text)] flex items-center gap-3">
+            <ListFilter className="h-7 w-7 text-[var(--gm-accent-strong)]" />
             <span>Curated Lists</span>
           </h1>
-          <p className="mt-1 text-cv-sm text-[var(--cv-text-muted)]">
+          <p className="mt-1 text-gm-sm text-[var(--gm-text-muted)]">
             Explore reading lists curated by fellow readers, or organize your own personal fiction collections.
           </p>
         </div>
@@ -179,18 +188,18 @@ export function Lists({ onNavigateWork }: ListsProps) {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "my-lists" | "explore")} className="space-y-6">
-        <TabsList className="bg-[var(--cv-surface)] border border-[var(--cv-border)]">
+        <TabsList className="bg-[var(--gm-surface)] border border-[var(--gm-border)]">
           <TabsTrigger value="explore" className="gap-2">
             <Users className="h-4 w-4" />
             <span>Explore Community Lists</span>
-            <Badge variant="default" className="ml-1.5 text-[10px] bg-[var(--cv-accent)]/20 text-[var(--cv-accent-strong)]">
+            <Badge variant="default" className="ml-1.5 text-[10px] bg-[var(--gm-accent)]/20 text-[var(--gm-accent-strong)]">
               {communityLists.length}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="my-lists" className="gap-2">
             <BookOpen className="h-4 w-4" />
             <span>My Lists</span>
-            <span className="text-[10px] font-mono text-[var(--cv-text-subtle)]">
+            <span className="text-[10px] font-mono text-[var(--gm-text-subtle)]">
               ({myLists.length})
             </span>
           </TabsTrigger>
@@ -199,14 +208,14 @@ export function Lists({ onNavigateWork }: ListsProps) {
         {/* ─── TAB 1: EXPLORE COMMUNITY LISTS ─── */}
         <TabsContent value="explore" className="space-y-6">
           {/* Search & Genre Filters */}
-          <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between p-4 rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)]">
+          <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between p-4 rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)]">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--cv-text-subtle)]" />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--gm-text-subtle)]" />
               <Input
                 value={communitySearchQuery}
                 onChange={(e) => setCommunitySearchQuery(e.target.value)}
                 placeholder="Search community lists by title, curator, work name, or theme…"
-                className="pl-9 text-cv-xs bg-[var(--cv-surface)]"
+                className="pl-9 text-gm-xs bg-[var(--gm-surface)]"
               />
             </div>
 
@@ -216,10 +225,10 @@ export function Lists({ onNavigateWork }: ListsProps) {
                   key={g}
                   type="button"
                   onClick={() => setCommunityGenreFilter(g)}
-                  className={`rounded-cv-full px-3 py-1 text-[11px] font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                  className={`rounded-gm-full px-3 py-1 text-[11px] font-medium transition-colors whitespace-nowrap cursor-pointer ${
                     communityGenreFilter === g
-                      ? "bg-[var(--cv-accent)] text-white"
-                      : "bg-[var(--cv-surface)] text-[var(--cv-text-muted)] hover:text-[var(--cv-text)] border border-[var(--cv-border)]"
+                      ? "bg-[var(--gm-accent)] text-white"
+                      : "bg-[var(--gm-surface)] text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] border border-[var(--gm-border)]"
                   }`}
                 >
                   {g}
@@ -233,16 +242,16 @@ export function Lists({ onNavigateWork }: ListsProps) {
             {filteredCommunityLists.map((list) => (
               <div
                 key={list.id}
-                className="flex flex-col justify-between overflow-hidden rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] hover:border-[var(--cv-border-strong)] transition-all shadow-sm group"
+                className="flex flex-col justify-between overflow-hidden rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] hover:border-[var(--gm-border-strong)] transition-all shadow-sm group"
               >
                 <div className="p-5">
                   {/* Curator Bar */}
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full bg-[var(--cv-accent)]/20 border border-[var(--cv-accent)]/30 flex items-center justify-center text-[10px] font-bold text-[var(--cv-accent-strong)]">
+                      <div className="h-6 w-6 rounded-full bg-[var(--gm-accent)]/20 border border-[var(--gm-accent)]/30 flex items-center justify-center text-[10px] font-bold text-[var(--gm-accent-strong)]">
                         {list.curator.name[0]}
                       </div>
-                      <span className="text-cv-xs font-medium text-[var(--cv-text)]">
+                      <span className="text-gm-xs font-medium text-[var(--gm-text)]">
                         {list.curator.name}
                       </span>
                       {list.curator.verified && (
@@ -250,7 +259,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-3 text-[11px] text-[var(--cv-text-subtle)] font-mono">
+                    <div className="flex items-center gap-3 text-[11px] text-[var(--gm-text-subtle)] font-mono">
                       <span className="flex items-center gap-1">
                         <Heart className="h-3 w-3 text-rose-400/80" /> {list.likesCount}
                       </span>
@@ -261,10 +270,10 @@ export function Lists({ onNavigateWork }: ListsProps) {
                   </div>
 
                   {/* Title & Desc */}
-                  <h3 className="text-cv-base font-bold text-[var(--cv-text)] group-hover:text-[var(--cv-accent-strong)] transition-colors">
+                  <h3 className="text-gm-base font-bold text-[var(--gm-text)] group-hover:text-[var(--gm-accent-strong)] transition-colors">
                     {list.title}
                   </h3>
-                  <p className="mt-1 text-cv-xs text-[var(--cv-text-muted)] line-clamp-2 leading-relaxed">
+                  <p className="mt-1 text-gm-xs text-[var(--gm-text-muted)] line-clamp-2 leading-relaxed">
                     {list.description}
                   </p>
 
@@ -273,7 +282,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
                     {list.genres.slice(0, 3).map((g) => (
                       <span
                         key={g}
-                        className="rounded-cv-full bg-[var(--cv-surface)] px-2 py-0.5 text-[10px] text-[var(--cv-text-muted)] border border-[var(--cv-border)]"
+                        className="rounded-gm-full bg-[var(--gm-surface)] px-2 py-0.5 text-[10px] text-[var(--gm-text-muted)] border border-[var(--gm-border)]"
                       >
                         {g}
                       </span>
@@ -281,11 +290,11 @@ export function Lists({ onNavigateWork }: ListsProps) {
                   </div>
 
                   {/* Preview Coers Carousel */}
-                  <div className="mt-4 flex items-center gap-2 overflow-x-hidden pt-2 border-t border-[var(--cv-border)]/50">
+                  <div className="mt-4 flex items-center gap-2 overflow-x-hidden pt-2 border-t border-[var(--gm-border)]/50">
                     {list.items.slice(0, 4).map((entry) => (
                       <div
                         key={entry.id}
-                        className="h-20 w-14 shrink-0 rounded-xs overflow-hidden border border-[var(--cv-border)] bg-[var(--cv-surface)] relative group/cover"
+                        className="h-20 w-14 shrink-0 rounded-xs overflow-hidden border border-[var(--gm-border)] bg-[var(--gm-surface)] relative group/cover"
                         title={entry.title}
                       >
                         <Cover
@@ -297,7 +306,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
                       </div>
                     ))}
                     {list.items.length > 4 && (
-                      <div className="h-20 w-10 shrink-0 rounded-xs border border-dashed border-[var(--cv-border)] flex items-center justify-center text-[10px] font-mono text-[var(--cv-text-subtle)] bg-[var(--cv-surface)]/30">
+                      <div className="h-20 w-10 shrink-0 rounded-xs border border-dashed border-[var(--gm-border)] flex items-center justify-center text-[10px] font-mono text-[var(--gm-text-subtle)] bg-[var(--gm-surface)]/30">
                         +{list.items.length - 4}
                       </div>
                     )}
@@ -305,8 +314,8 @@ export function Lists({ onNavigateWork }: ListsProps) {
                 </div>
 
                 {/* Card Footer Actions */}
-                <div className="p-3 bg-[var(--cv-surface)]/60 border-t border-[var(--cv-border)] flex items-center justify-between">
-                  <span className="text-[11px] font-mono text-[var(--cv-text-subtle)]">
+                <div className="p-3 bg-[var(--gm-surface)]/60 border-t border-[var(--gm-border)] flex items-center justify-between">
+                  <span className="text-[11px] font-mono text-[var(--gm-text-subtle)]">
                     {list.items.length} works curated
                   </span>
 
@@ -315,14 +324,14 @@ export function Lists({ onNavigateWork }: ListsProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => setSelectedCommunityList(list)}
-                      className="text-cv-xs"
+                      className="text-gm-xs"
                     >
                       View Details
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => handleCloneList(list)}
-                      className="gap-1.5 text-cv-xs"
+                      className="gap-1.5 text-gm-xs"
                     >
                       <Copy className="h-3 w-3" />
                       <span>Clone</span>
@@ -334,8 +343,8 @@ export function Lists({ onNavigateWork }: ListsProps) {
 
             {filteredCommunityLists.length === 0 && (
               <div className="col-span-full py-16 text-center">
-                <Search className="h-8 w-8 text-[var(--cv-text-subtle)] mx-auto mb-2" />
-                <p className="text-cv-sm text-[var(--cv-text-muted)]">
+                <Search className="h-8 w-8 text-[var(--gm-text-subtle)] mx-auto mb-2" />
+                <p className="text-gm-sm text-[var(--gm-text-muted)]">
                   No community lists found matching &quot;{communitySearchQuery}&quot;.
                 </p>
                 <Button
@@ -358,34 +367,34 @@ export function Lists({ onNavigateWork }: ListsProps) {
         <TabsContent value="my-lists">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left 4 cols: list selector */}
-            <div className="lg:col-span-4 rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-4 shadow-sm space-y-2">
-              <div className="flex items-center justify-between pb-2 border-b border-[var(--cv-border)]">
-                <span className="text-cv-xs font-bold uppercase tracking-wider text-[var(--cv-text-subtle)]">
+            <div className="lg:col-span-4 rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 shadow-sm space-y-2">
+              <div className="flex items-center justify-between pb-2 border-b border-[var(--gm-border)]">
+                <span className="text-gm-xs font-bold uppercase tracking-wider text-[var(--gm-text-subtle)]">
                   Your Collections
                 </span>
-                <span className="text-[11px] font-mono text-[var(--cv-text-subtle)]">
-                  {myLists.length} lists
+                <span className="text-[11px] font-mono text-[var(--gm-text-subtle)]">
+                  {myLists.filter((l) => isVaultUnlocked || (l.privacyState !== PrivacyState.Vault && !l.title.toLowerCase().includes("vault"))).length} lists
                 </span>
               </div>
 
               <div className="space-y-1.5">
-                {myLists.map((list) => {
+                {myLists.filter((list) => isVaultUnlocked || (list.privacyState !== PrivacyState.Vault && !list.title.toLowerCase().includes("vault"))).map((list) => {
                   const isSelected = activePersonalList?.id === list.id;
                   return (
                     <div
                       key={list.id}
                       onClick={() => setSelectedListId(list.id)}
-                      className={`group flex items-start justify-between p-3 rounded-cv-lg border transition-all cursor-pointer ${
+                      className={`group flex items-start justify-between p-3 rounded-gm-lg border transition-all cursor-pointer ${
                         isSelected
-                          ? "border-[var(--cv-accent)] bg-[var(--cv-surface)] shadow-xs"
-                          : "border-[var(--cv-border)] bg-[var(--cv-surface)]/30 hover:bg-[var(--cv-surface)]"
+                          ? "border-[var(--gm-accent)] bg-[var(--gm-surface)] shadow-xs"
+                          : "border-[var(--gm-border)] bg-[var(--gm-surface)]/30 hover:bg-[var(--gm-surface)]"
                       }`}
                     >
                       <div className="min-w-0 flex-1 pr-2">
-                        <h4 className="font-semibold text-cv-sm text-[var(--cv-text)] truncate">
+                        <h4 className="font-semibold text-gm-sm text-[var(--gm-text)] truncate">
                           {list.title}
                         </h4>
-                        <p className="text-[11px] text-[var(--cv-text-muted)] mt-0.5">
+                        <p className="text-[11px] text-[var(--gm-text-muted)] mt-0.5">
                           {list.items.length} works · {list.privacyState}
                         </p>
                       </div>
@@ -397,7 +406,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
                           deleteList(list.id);
                           toast({ title: "List deleted" });
                         }}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded text-[var(--cv-text-subtle)] hover:text-[var(--cv-danger)]"
+                        className="opacity-0 group-hover:opacity-100 p-1 rounded text-[var(--gm-text-subtle)] hover:text-[var(--gm-danger)]"
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>
@@ -406,7 +415,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
                 })}
 
                 {myLists.length === 0 && (
-                  <div className="p-8 text-center text-cv-xs text-[var(--cv-text-muted)]">
+                  <div className="p-8 text-center text-gm-xs text-[var(--gm-text-muted)]">
                     No lists created yet.
                   </div>
                 )}
@@ -414,16 +423,16 @@ export function Lists({ onNavigateWork }: ListsProps) {
             </div>
 
             {/* Right 8 cols: list items */}
-            <div className="lg:col-span-8 rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-6 shadow-sm">
+            <div className="lg:col-span-8 rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-6 shadow-sm">
               {activePersonalList ? (
                 <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-5 border-b border-[var(--cv-border)]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-5 border-b border-[var(--gm-border)]">
                     <div>
-                      <h2 className="text-cv-xl font-bold text-[var(--cv-text)]">
+                      <h2 className="text-gm-xl font-bold text-[var(--gm-text)]">
                         {activePersonalList.title}
                       </h2>
                       {activePersonalList.description && (
-                        <p className="mt-1 text-cv-xs text-[var(--cv-text-muted)]">
+                        <p className="mt-1 text-gm-xs text-[var(--gm-text-muted)]">
                           {activePersonalList.description}
                         </p>
                       )}
@@ -448,10 +457,10 @@ export function Lists({ onNavigateWork }: ListsProps) {
                         return (
                           <div
                             key={item.id}
-                            className="flex items-center justify-between p-3 rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-surface)] hover:border-[var(--cv-border-strong)] transition-all"
+                            className="flex items-center justify-between p-3 rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-surface)] hover:border-[var(--gm-border-strong)] transition-all"
                           >
                             <div className="flex items-center gap-3 min-w-0">
-                              <span className="font-mono text-cv-xs text-[var(--cv-text-subtle)] w-5 text-right">
+                              <span className="font-mono text-gm-xs text-[var(--gm-text-subtle)] w-5 text-right">
                                 #{index + 1}
                               </span>
                               {work ? (
@@ -462,17 +471,17 @@ export function Lists({ onNavigateWork }: ListsProps) {
                                   className="h-12 w-9 rounded-xs object-cover shrink-0"
                                 />
                               ) : (
-                                <div className="h-12 w-9 rounded-xs bg-[var(--cv-surface-raised)] shrink-0" />
+                                <div className="h-12 w-9 rounded-xs bg-[var(--gm-surface-raised)] shrink-0" />
                               )}
                               <div className="min-w-0">
                                 <h4
                                   onClick={() => work && onNavigateWork?.(work.id)}
-                                  className="font-semibold text-cv-sm text-[var(--cv-text)] hover:text-[var(--cv-accent-strong)] transition-colors cursor-pointer truncate"
+                                  className="font-semibold text-gm-sm text-[var(--gm-text)] hover:text-[var(--gm-accent-strong)] transition-colors cursor-pointer truncate"
                                 >
                                   {work?.title ?? item.workId}
                                 </h4>
                                 {item.personalNote && (
-                                  <p className="text-[11px] text-[var(--cv-text-muted)] italic line-clamp-1">
+                                  <p className="text-[11px] text-[var(--gm-text-muted)] italic line-clamp-1">
                                     &ldquo;{item.personalNote}&rdquo;
                                   </p>
                                 )}
@@ -485,7 +494,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => onNavigateWork?.(work.id)}
-                                  className="text-cv-xs gap-1"
+                                  className="text-gm-xs gap-1"
                                 >
                                   <span>View</span>
                                   <ArrowRight className="h-3 w-3" />
@@ -495,7 +504,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
                                 type="button"
                                 onClick={() => moveListItem(activePersonalList.id, item.id, "up")}
                                 disabled={index === 0}
-                                className="p-1.5 rounded text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)] disabled:opacity-30"
+                                className="p-1.5 rounded text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)] disabled:opacity-30"
                                 title="Move up"
                                 aria-label={`Move ${work?.title ?? item.workId} up`}
                               >
@@ -505,7 +514,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
                                 type="button"
                                 onClick={() => moveListItem(activePersonalList.id, item.id, "down")}
                                 disabled={index === activePersonalList.items.length - 1}
-                                className="p-1.5 rounded text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)] disabled:opacity-30"
+                                className="p-1.5 rounded text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)] disabled:opacity-30"
                                 title="Move down"
                                 aria-label={`Move ${work?.title ?? item.workId} down`}
                               >
@@ -514,7 +523,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
                               <button
                                 type="button"
                                 onClick={() => setNoteEntryId(item.id)}
-                                className="p-1.5 rounded text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)]"
+                                className="p-1.5 rounded text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)]"
                                 title="Edit note"
                                 aria-label={`Edit note for ${work?.title ?? item.workId}`}
                               >
@@ -523,7 +532,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
                               <button
                                 type="button"
                                 onClick={() => removeWorkFromList(activePersonalList.id, item.workId)}
-                                className="p-1.5 rounded text-[var(--cv-text-subtle)] hover:text-[var(--cv-danger)]"
+                                className="p-1.5 rounded text-[var(--gm-text-subtle)] hover:text-[var(--gm-danger)]"
                                 title="Remove from list"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
@@ -563,7 +572,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
                   />
                 </div>
               ) : (
-                <div className="p-12 text-center text-[var(--cv-text-muted)]">
+                <div className="p-12 text-center text-[var(--gm-text-muted)]">
                   Select a list to view its works.
                 </div>
               )}
@@ -581,13 +590,13 @@ export function Lists({ onNavigateWork }: ListsProps) {
           {selectedCommunityList && (
             <>
               <DialogHeader>
-                <div className="flex items-center gap-2 text-[11px] text-[var(--cv-text-subtle)] font-mono">
+                <div className="flex items-center gap-2 text-[11px] text-[var(--gm-text-subtle)] font-mono">
                   <span>Curated by {selectedCommunityList.curator.name}</span>
                   <span>·</span>
                   <span>{selectedCommunityList.items.length} works</span>
                 </div>
-                <DialogTitle className="text-cv-xl">{selectedCommunityList.title}</DialogTitle>
-                <DialogDescription className="text-cv-xs">
+                <DialogTitle className="text-gm-xl">{selectedCommunityList.title}</DialogTitle>
+                <DialogDescription className="text-gm-xs">
                   {selectedCommunityList.description}
                 </DialogDescription>
               </DialogHeader>
@@ -596,10 +605,10 @@ export function Lists({ onNavigateWork }: ListsProps) {
                 {selectedCommunityList.items.map((entry, idx) => (
                   <div
                     key={entry.id}
-                    className="flex items-start justify-between gap-3 p-3 rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-surface)]"
+                    className="flex items-start justify-between gap-3 p-3 rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-surface)]"
                   >
                     <div className="flex items-start gap-3 min-w-0">
-                      <span className="font-mono text-cv-xs text-[var(--cv-text-subtle)] mt-1">
+                      <span className="font-mono text-gm-xs text-[var(--gm-text-subtle)] mt-1">
                         #{idx + 1}
                       </span>
                       <Cover
@@ -609,14 +618,14 @@ export function Lists({ onNavigateWork }: ListsProps) {
                         className="h-14 w-10 shrink-0 rounded-xs object-cover"
                       />
                       <div className="min-w-0">
-                        <h4 className="font-semibold text-cv-sm text-[var(--cv-text)]">
+                        <h4 className="font-semibold text-gm-sm text-[var(--gm-text)]">
                           {entry.title}
                         </h4>
-                        <p className="text-[10px] text-[var(--cv-text-muted)]">
+                        <p className="text-[10px] text-[var(--gm-text-muted)]">
                           {entry.contentType} · {entry.genres.slice(0, 3).join(", ")}
                         </p>
                         {entry.curatorNote && (
-                          <p className="mt-1 text-[11px] text-[var(--cv-accent-strong)] italic">
+                          <p className="mt-1 text-[11px] text-[var(--gm-accent-strong)] italic">
                             &ldquo;{entry.curatorNote}&rdquo;
                           </p>
                         )}
@@ -627,7 +636,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => handleAddEntryToLibrary(entry)}
-                      className="gap-1.5 shrink-0 text-cv-xs"
+                      className="gap-1.5 shrink-0 text-gm-xs"
                     >
                       <BookmarkPlus className="h-3.5 w-3.5" />
                       <span>Add to Vault</span>
@@ -636,8 +645,8 @@ export function Lists({ onNavigateWork }: ListsProps) {
                 ))}
               </div>
 
-              <DialogFooter className="border-t border-[var(--cv-border)] pt-3 flex items-center justify-between sm:justify-between w-full">
-                <span className="text-[11px] text-[var(--cv-text-subtle)]">
+              <DialogFooter className="border-t border-[var(--gm-border)] pt-3 flex items-center justify-between sm:justify-between w-full">
+                <span className="text-[11px] text-[var(--gm-text-subtle)]">
                   {selectedCommunityList.likesCount} readers saved this list
                 </span>
                 <div className="flex items-center gap-2">
@@ -673,7 +682,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
 
           <form onSubmit={handleCreateList} className="space-y-4 py-2">
             <div>
-              <label className="block text-cv-xs font-semibold text-[var(--cv-text)] mb-1">
+              <label className="block text-gm-xs font-semibold text-[var(--gm-text)] mb-1">
                 List Title *
               </label>
               <Input
@@ -685,7 +694,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
             </div>
 
             <div>
-              <label className="block text-cv-xs font-semibold text-[var(--cv-text)] mb-1">
+              <label className="block text-gm-xs font-semibold text-[var(--gm-text)] mb-1">
                 Description
               </label>
               <textarea
@@ -693,7 +702,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
                 onChange={(e) => setNewListDesc(e.target.value)}
                 placeholder="What is this list about?"
                 rows={3}
-                className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-xs text-[var(--cv-text)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--cv-border-focus)]"
+                className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-xs text-[var(--gm-text)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gm-border-focus)]"
               />
             </div>
 

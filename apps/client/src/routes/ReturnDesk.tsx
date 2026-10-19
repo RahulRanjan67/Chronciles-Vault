@@ -18,12 +18,12 @@ import {
   PageContainer,
   SectionHeader,
   toast,
-} from "@chronicles-vault/ui";
+} from "@grimoire/ui";
 import {
   useLibraryStore,
   useReadingQueueStore,
   useReturnDeskStore,
-} from "@chronicles-vault/state";
+} from "@grimoire/state";
 import {
   formatProgressAnchor,
   MemoryType,
@@ -31,7 +31,7 @@ import {
   ReturnSignalType,
   SourceHealth,
   SpoilerLevel,
-} from "@chronicles-vault/domain";
+} from "@grimoire/domain";
 import {
   MemoryRefresherData,
   MemoryRefresherDrawer,
@@ -40,8 +40,8 @@ import { ReturnCard, ReturnCardData } from "../components/features/ReturnDesk/Re
 import { ResumeReadingModal } from "../components/features/Reader/ResumeReadingModal";
 import { toUIHealth, toUIAnchor, toUIMemoryType } from "../utils/display-adapters";
 import { openLocalDiskPath } from "../utils/local-media";
-import type { HydratedWorkItem } from "@chronicles-vault/state";
-import type { ReturnSignal } from "@chronicles-vault/domain";
+import type { HydratedWorkItem } from "@grimoire/state";
+import type { ReturnSignal } from "@grimoire/domain";
 
 export interface ReturnDeskProps {
   onNavigateWork?: (id: string) => void;
@@ -275,10 +275,10 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
     <PageContainer maxWidth="wide">
       {/* Editorial Page Header */}
       <div className="mb-8">
-        <h1 className="text-cv-2xl sm:text-cv-3xl font-extrabold tracking-tight text-[var(--cv-text)]">
+        <h1 className="text-gm-2xl sm:text-gm-3xl font-extrabold tracking-tight text-[var(--gm-text)]">
           Return Desk
         </h1>
-        <p className="mt-1.5 text-cv-sm text-[var(--cv-text-muted)] max-w-xl">
+        <p className="mt-1.5 text-gm-sm text-[var(--gm-text-muted)] max-w-xl">
           Pick up exactly where you left off. Review updates and memory briefings before continuing.
         </p>
       </div>
@@ -295,10 +295,10 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                 <section>
                   <SectionHeader title="Return Now" description={heroSignal.explanation} />
                   <div
-                    className="relative rounded-cv-xl border border-[var(--cv-accent-muted)] bg-gradient-to-br from-[var(--cv-bg-elevated)] to-[var(--cv-surface)]/60 p-5 sm:p-6 flex flex-col sm:flex-row gap-5 cursor-pointer hover:border-[var(--cv-accent-strong)] transition-colors"
+                    className="relative rounded-gm-xl border border-[var(--gm-accent-muted)] bg-gradient-to-br from-[var(--gm-bg-elevated)] to-[var(--gm-surface)]/60 p-5 sm:p-6 flex flex-col sm:flex-row gap-5 cursor-pointer hover:border-[var(--gm-accent-strong)] transition-colors"
                     onClick={() => onNavigateWork?.(heroWork.work.id)}
                   >
-                    <div className="flex-shrink-0 w-20 sm:w-24 aspect-[3/4] rounded-cv overflow-hidden bg-[var(--cv-surface)] border border-[var(--cv-border)]">
+                    <div className="flex-shrink-0 w-20 sm:w-24 aspect-[3/4] rounded-cv overflow-hidden bg-[var(--gm-surface)] border border-[var(--gm-border)]">
                       {heroWork.work.coverRef ? (
                         <img
                           src={heroWork.work.coverRef}
@@ -306,19 +306,19 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[var(--cv-text-subtle)] text-cv-xs text-center p-1 leading-tight">
+                        <div className="w-full h-full flex items-center justify-center text-[var(--gm-text-subtle)] text-gm-xs text-center p-1 leading-tight">
                           {heroWork.work.title.slice(0, 20)}
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-cv-xs font-semibold uppercase tracking-wider text-[var(--cv-accent-strong)] mb-1">
+                      <p className="text-gm-xs font-semibold uppercase tracking-wider text-[var(--gm-accent-strong)] mb-1">
                         {returnSignalLabel(heroSignal.type)}
                       </p>
-                      <h2 className="text-cv-xl sm:text-cv-2xl font-bold text-[var(--cv-text)] mb-2 line-clamp-2">
+                      <h2 className="text-gm-xl sm:text-gm-2xl font-bold text-[var(--gm-text)] mb-2 line-clamp-2">
                         {heroWork.work.title}
                       </h2>
-                      <p className="text-cv-sm text-[var(--cv-text-muted)] mb-4 line-clamp-2">
+                      <p className="text-gm-sm text-[var(--gm-text-muted)] mb-4 line-clamp-2">
                         {heroSignal.explanation}
                       </p>
                       <div className="flex gap-3">
@@ -328,7 +328,7 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                             e.stopPropagation();
                             handleContinue(heroWork.work.id);
                           }}
-                          className="px-4 py-2 rounded-cv text-cv-sm font-semibold bg-[var(--cv-accent-strong)] text-white hover:opacity-90 transition-opacity cursor-pointer"
+                          className="px-4 py-2 rounded-cv text-gm-sm font-semibold bg-[var(--gm-accent-strong)] text-white hover:opacity-90 transition-opacity cursor-pointer"
                         >
                           Continue Reading →
                         </button>
@@ -338,7 +338,7 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                             e.stopPropagation();
                             handleOpenRefresher(heroWork.work.id);
                           }}
-                          className="px-4 py-2 rounded-cv text-cv-sm font-semibold border border-[var(--cv-border)] text-[var(--cv-text-muted)] hover:text-[var(--cv-text)] hover:border-[var(--cv-accent-muted)] transition-colors cursor-pointer"
+                          className="px-4 py-2 rounded-cv text-gm-sm font-semibold border border-[var(--gm-border)] text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:border-[var(--gm-accent-muted)] transition-colors cursor-pointer"
                         >
                           Memory Briefing
                         </button>
@@ -350,19 +350,19 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
             })()}
 
           {/* Next Up Reading Queue */}
-          <section className="rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-5 shadow-xs">
+          <section className="rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-5 shadow-xs">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
               <div>
                 <div className="flex items-center gap-2.5">
-                  <h2 className="text-cv-lg font-bold text-[var(--cv-text)]">
+                  <h2 className="text-gm-lg font-bold text-[var(--gm-text)]">
                     Next Up Queue
                   </h2>
                   <Badge variant="default" className="font-mono text-[11px]">
                     {queueItems.length} queued
                   </Badge>
                   {totalQueueMinutes > 0 && (
-                    <span className="inline-flex items-center gap-1 text-cv-xs font-mono text-[var(--cv-text-muted)]">
-                      <Clock className="h-3.5 w-3.5 text-[var(--cv-accent-strong)]" />~
+                    <span className="inline-flex items-center gap-1 text-gm-xs font-mono text-[var(--gm-text-muted)]">
+                      <Clock className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />~
                       {totalQueueMinutes} min total
                     </span>
                   )}
@@ -372,7 +372,7 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                     </Badge>
                   )}
                 </div>
-                <p className="mt-0.5 text-cv-xs text-[var(--cv-text-muted)]">
+                <p className="mt-0.5 text-gm-xs text-[var(--gm-text-muted)]">
                   Curate your immediate reading order, pin priority titles, and set session time budgets.
                 </p>
               </div>
@@ -381,7 +381,7 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                 variant="outline"
                 size="sm"
                 onClick={toggleQueuePaused}
-                className="gap-1.5 text-cv-xs self-start sm:self-auto"
+                className="gap-1.5 text-gm-xs self-start sm:self-auto"
               >
                 {isQueuePaused ? (
                   <>
@@ -398,12 +398,12 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
             </div>
 
             {queueItems.length === 0 ? (
-              <div className="rounded-cv border border-dashed border-[var(--cv-border)] p-4 text-center text-cv-xs text-[var(--cv-text-muted)]">
+              <div className="rounded-cv border border-dashed border-[var(--gm-border)] p-4 text-center text-gm-xs text-[var(--gm-text-muted)]">
                 Your Next Up queue is empty. Add works from suggestions below to plan your upcoming reading sessions.
               </div>
             ) : (
               <div
-                className={`divide-y divide-[var(--cv-border)] rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] ${
+                className={`divide-y divide-[var(--gm-border)] rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] ${
                   isQueuePaused ? "opacity-60" : ""
                 }`}
               >
@@ -420,7 +420,7 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                       className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="flex min-w-0 items-center gap-3">
-                        <span className="w-5 text-right font-mono text-cv-xs text-[var(--cv-text-subtle)]">
+                        <span className="w-5 text-right font-mono text-gm-xs text-[var(--gm-text-subtle)]">
                           #{idx + 1}
                         </span>
                         <Cover
@@ -433,14 +433,14 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                             <button
                               type="button"
                               onClick={() => onNavigateWork?.(entry.workId)}
-                              className="truncate text-cv-sm font-semibold text-[var(--cv-text)] hover:text-[var(--cv-accent-strong)] transition-colors cursor-pointer text-left"
+                              className="truncate text-gm-sm font-semibold text-[var(--gm-text)] hover:text-[var(--gm-accent-strong)] transition-colors cursor-pointer text-left"
                             >
                               {title}
                             </button>
                             {entry.pinned && (
                               <Badge
                                 variant="default"
-                                className="bg-[var(--cv-accent)]/20 text-[var(--cv-accent-strong)] text-[10px] px-1.5 py-0"
+                                className="bg-[var(--gm-accent)]/20 text-[var(--gm-accent-strong)] text-[10px] px-1.5 py-0"
                               >
                                 Pinned
                               </Badge>
@@ -452,15 +452,15 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                                 </Badge>
                               )}
                           </div>
-                          <p className="mt-0.5 font-mono text-cv-xs text-[var(--cv-text-muted)]">
+                          <p className="mt-0.5 font-mono text-gm-xs text-[var(--gm-text-muted)]">
                             {anchorLabel}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-                        <label className="inline-flex items-center gap-1 rounded-cv-sm border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] px-2 py-1 text-[11px] text-[var(--cv-text-muted)]">
-                          <Clock className="h-3 w-3 text-[var(--cv-accent-strong)]" />
+                        <label className="inline-flex items-center gap-1 rounded-gm-sm border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] px-2 py-1 text-[11px] text-[var(--gm-text-muted)]">
+                          <Clock className="h-3 w-3 text-[var(--gm-accent-strong)]" />
                           <input
                             type="number"
                             min={5}
@@ -475,13 +475,13 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                               );
                             }}
                             aria-label={`Estimated reading minutes for ${title}`}
-                            className="w-11 bg-transparent font-mono text-[11px] text-[var(--cv-text)] focus:outline-none"
+                            className="w-11 bg-transparent font-mono text-[11px] text-[var(--gm-text)] focus:outline-none"
                           />
                           <span>m</span>
                         </label>
 
-                        <label className="inline-flex items-center gap-1 rounded-cv-sm border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] px-2 py-1 text-[11px] text-[var(--cv-text-muted)]">
-                          <Calendar className="h-3 w-3 text-[var(--cv-accent-strong)]" />
+                        <label className="inline-flex items-center gap-1 rounded-gm-sm border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] px-2 py-1 text-[11px] text-[var(--gm-text-muted)]">
+                          <Calendar className="h-3 w-3 text-[var(--gm-accent-strong)]" />
                           <input
                             type="date"
                             value={entry.targetDate ?? ""}
@@ -492,7 +492,7 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                               )
                             }
                             aria-label={`Target reading date for ${title}`}
-                            className="bg-transparent font-mono text-[11px] text-[var(--cv-text)] focus:outline-none"
+                            className="bg-transparent font-mono text-[11px] text-[var(--gm-text)] focus:outline-none"
                           />
                         </label>
 
@@ -500,10 +500,10 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                           <button
                             type="button"
                             onClick={() => togglePinQueueItem(entry.workId)}
-                            className={`p-1.5 rounded text-cv-xs cursor-pointer ${
+                            className={`p-1.5 rounded text-gm-xs cursor-pointer ${
                               entry.pinned
-                                ? "text-[var(--cv-accent-strong)] bg-[var(--cv-accent)]/15"
-                                : "text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)]"
+                                ? "text-[var(--gm-accent-strong)] bg-[var(--gm-accent)]/15"
+                                : "text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)]"
                             }`}
                             title={entry.pinned ? "Unpin from top" : "Pin to top of queue"}
                             aria-label={entry.pinned ? `Unpin ${title}` : `Pin ${title}`}
@@ -514,7 +514,7 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                             type="button"
                             onClick={() => moveQueueItem(entry.workId, "up")}
                             disabled={idx === 0}
-                            className="p-1.5 rounded text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)] disabled:opacity-30 cursor-pointer"
+                            className="p-1.5 rounded text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)] disabled:opacity-30 cursor-pointer"
                             title="Move up"
                             aria-label={`Move ${title} up`}
                           >
@@ -524,7 +524,7 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                             type="button"
                             onClick={() => moveQueueItem(entry.workId, "down")}
                             disabled={idx === queueItems.length - 1}
-                            className="p-1.5 rounded text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)] disabled:opacity-30 cursor-pointer"
+                            className="p-1.5 rounded text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)] disabled:opacity-30 cursor-pointer"
                             title="Move down"
                             aria-label={`Move ${title} down`}
                           >
@@ -534,14 +534,14 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                             size="sm"
                             variant="outline"
                             onClick={() => handleContinue(entry.workId)}
-                            className="h-7 px-2.5 text-cv-xs"
+                            className="h-7 px-2.5 text-gm-xs"
                           >
                             Read
                           </Button>
                           <button
                             type="button"
                             onClick={() => removeFromQueue(entry.workId)}
-                            className="p-1.5 rounded text-[var(--cv-text-subtle)] hover:text-[var(--cv-danger)] cursor-pointer"
+                            className="p-1.5 rounded text-[var(--gm-text-subtle)] hover:text-[var(--gm-danger)] cursor-pointer"
                             title="Remove from queue"
                             aria-label={`Remove ${title} from queue`}
                           >
@@ -556,8 +556,8 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
             )}
 
             {suggestedQueueWorks.length > 0 && (
-              <div className="mt-4 pt-3 border-t border-[var(--cv-border)]">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--cv-text-subtle)] mb-2">
+              <div className="mt-4 pt-3 border-t border-[var(--gm-border)]">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--gm-text-subtle)] mb-2">
                   Suggested for Queue
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -572,9 +572,9 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                           description: candidate.work.title,
                         });
                       }}
-                      className="inline-flex items-center gap-1.5 rounded-cv-full border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-1 text-cv-xs text-[var(--cv-text-muted)] hover:border-[var(--cv-accent-muted)] hover:text-[var(--cv-text)] transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 rounded-gm-full border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-1 text-gm-xs text-[var(--gm-text-muted)] hover:border-[var(--gm-accent-muted)] hover:text-[var(--gm-text)] transition-colors cursor-pointer"
                     >
-                      <Plus className="h-3 w-3 text-[var(--cv-accent-strong)]" />
+                      <Plus className="h-3 w-3 text-[var(--gm-accent-strong)]" />
                       <span className="truncate max-w-[180px]">{candidate.work.title}</span>
                     </button>
                   ))}
@@ -701,7 +701,7 @@ export function ReturnDesk({ onNavigateWork, onResumeReader }: ReturnDeskProps) 
                     key={workItem.work.id}
                     type="button"
                     onClick={() => onNavigateWork?.(workItem.work.id)}
-                    className="px-4 py-2 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] text-cv-sm font-medium text-[var(--cv-text-muted)] hover:text-[var(--cv-text)] hover:border-[var(--cv-accent-muted)] transition-colors cursor-pointer"
+                    className="px-4 py-2 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] text-gm-sm font-medium text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:border-[var(--gm-accent-muted)] transition-colors cursor-pointer"
                   >
                     {workItem.work.title}
                   </button>

@@ -20,7 +20,7 @@ import {
   Input,
   PageContainer,
   toast,
-} from "@chronicles-vault/ui";
+} from "@grimoire/ui";
 import {
   ContentOrigin,
   ContentType,
@@ -28,15 +28,15 @@ import {
   PrivacyState,
   PublicationState,
   type WorkCreator,
-} from "@chronicles-vault/domain";
-import type { WorkId } from "@chronicles-vault/shared";
+} from "@grimoire/domain";
+import type { WorkId } from "@grimoire/shared";
 import {
   clientRepository,
   generateLocalRecommendations,
   useLibraryStore,
   useRecommendationsStore,
   type HydratedWorkItem,
-} from "@chronicles-vault/state";
+} from "@grimoire/state";
 
 export interface DiscoverProps {
   onNavigateWork?: (workId: string) => void;
@@ -419,12 +419,12 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2.5">
-            <Compass className="h-6 w-6 text-[var(--cv-accent-strong)]" />
-            <h1 className="text-cv-2xl sm:text-cv-3xl font-extrabold tracking-tight text-[var(--cv-text)]">
+            <Compass className="h-6 w-6 text-[var(--gm-accent-strong)]" />
+            <h1 className="text-gm-2xl sm:text-gm-3xl font-extrabold tracking-tight text-[var(--gm-text)]">
               Discover & Recommendations
             </h1>
           </div>
-          <p className="mt-1 text-cv-sm text-[var(--cv-text-muted)]">
+          <p className="mt-1 text-gm-sm text-[var(--gm-text-muted)]">
             Search your library first, query official metadata catalogs (AniList & Open Library), or explore local explainable recommendations.
           </p>
         </div>
@@ -433,11 +433,11 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
       {/* Search Bar & Provider Selector */}
       <form
         onSubmit={handleCatalogSearch}
-        className="rounded-cv-xl border border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] p-4 mb-8 shadow-sm space-y-3"
+        className="rounded-gm-xl border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-4 mb-8 shadow-sm space-y-3"
       >
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--cv-text-subtle)]" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--gm-text-subtle)]" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -447,14 +447,14 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="inline-flex rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] p-0.5">
+            <div className="inline-flex rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] p-0.5">
               <button
                 type="button"
                 onClick={() => setProvider("anilist")}
-                className={`px-3 py-1.5 rounded-cv-sm text-cv-xs font-medium transition-colors cursor-pointer ${
+                className={`px-3 py-1.5 rounded-gm-sm text-gm-xs font-medium transition-colors cursor-pointer ${
                   provider === "anilist"
-                    ? "bg-[var(--cv-accent)] text-white"
-                    : "text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+                    ? "bg-[var(--gm-accent)] text-white"
+                    : "text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
                 }`}
               >
                 AniList (Manga / LN / Anime)
@@ -462,10 +462,10 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
               <button
                 type="button"
                 onClick={() => setProvider("openlibrary")}
-                className={`px-3 py-1.5 rounded-cv-sm text-cv-xs font-medium transition-colors cursor-pointer ${
+                className={`px-3 py-1.5 rounded-gm-sm text-gm-xs font-medium transition-colors cursor-pointer ${
                   provider === "openlibrary"
-                    ? "bg-[var(--cv-accent)] text-white"
-                    : "text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+                    ? "bg-[var(--gm-accent)] text-white"
+                    : "text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
                 }`}
               >
                 Open Library (Books)
@@ -478,7 +478,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
             </Button>
           </div>
         </div>
-        <p className="text-[11px] text-[var(--cv-text-subtle)]">
+        <p className="text-[11px] text-[var(--gm-text-subtle)]">
           Privacy & Legality Guardrail: No background requests are made until you click Search Catalog. Covers and metadata come strictly from official public APIs.
         </p>
       </form>
@@ -487,14 +487,14 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
       {query.trim().length > 0 && (
         <section className="mb-8">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-cv-sm font-bold uppercase tracking-wider text-[var(--cv-text-muted)] flex items-center gap-2">
-              <LibraryIcon className="h-4 w-4 text-[var(--cv-accent-strong)]" />
+            <h2 className="text-gm-sm font-bold uppercase tracking-wider text-[var(--gm-text-muted)] flex items-center gap-2">
+              <LibraryIcon className="h-4 w-4 text-[var(--gm-accent-strong)]" />
               <span>In Your Library ({localMatches.length})</span>
             </h2>
           </div>
 
           {localMatches.length === 0 ? (
-            <div className="rounded-cv-lg border border-dashed border-[var(--cv-border)] bg-[var(--cv-surface)]/40 p-4 text-cv-xs text-[var(--cv-text-muted)]">
+            <div className="rounded-gm-lg border border-dashed border-[var(--gm-border)] bg-[var(--gm-surface)]/40 p-4 text-gm-xs text-[var(--gm-text-muted)]">
               No exact or partial matches found in your local Library for &ldquo;{query.trim()}&rdquo;. Click <strong>Search Catalog</strong> above to query {provider === "anilist" ? "AniList" : "Open Library"}.
             </div>
           ) : (
@@ -502,7 +502,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
               {localMatches.map((item) => (
                 <div
                   key={item.work.id}
-                  className="flex items-center justify-between gap-3 rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-3"
+                  className="flex items-center justify-between gap-3 rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-3"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-11 shrink-0">
@@ -518,10 +518,10 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
                           Already in Library
                         </Badge>
                       </div>
-                      <p className="mt-1 truncate text-cv-sm font-semibold text-[var(--cv-text)]">
+                      <p className="mt-1 truncate text-gm-sm font-semibold text-[var(--gm-text)]">
                         {item.work.title}
                       </p>
-                      <p className="text-cv-xs text-[var(--cv-text-muted)]">
+                      <p className="text-gm-xs text-[var(--gm-text-muted)]">
                         {item.work.contentType} · {item.relationship?.personalState ?? "planned"}
                       </p>
                     </div>
@@ -544,8 +544,8 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
       {hasSearchedCatalog && (
         <section className="mb-10">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-cv-sm font-bold uppercase tracking-wider text-[var(--cv-text-muted)] flex items-center gap-2">
-              <Globe className="h-4 w-4 text-[var(--cv-accent-strong)]" />
+            <h2 className="text-gm-sm font-bold uppercase tracking-wider text-[var(--gm-text-muted)] flex items-center gap-2">
+              <Globe className="h-4 w-4 text-[var(--gm-accent-strong)]" />
               <span>
                 {provider === "anilist" ? "AniList" : "Open Library"} Catalog Results (
                 {catalogResults.length})
@@ -558,18 +558,18 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
                 setHasSearchedCatalog(false);
                 setCatalogResults([]);
               }}
-              className="text-cv-xs text-[var(--cv-text-muted)]"
+              className="text-gm-xs text-[var(--gm-text-muted)]"
             >
               Clear Results
             </Button>
           </div>
 
           {searchError ? (
-            <div className="rounded-cv-lg border border-red-500/40 bg-red-500/10 p-4 text-cv-xs text-red-300">
+            <div className="rounded-gm-lg border border-red-500/40 bg-red-500/10 p-4 text-gm-xs text-red-300">
               {searchError}
             </div>
           ) : catalogResults.length === 0 && !searching ? (
-            <div className="rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-6 text-center text-cv-sm text-[var(--cv-text-muted)]">
+            <div className="rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-6 text-center text-gm-sm text-[var(--gm-text-muted)]">
               No catalog results found.
             </div>
           ) : (
@@ -579,7 +579,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
                 return (
                   <div
                     key={cand.externalKey}
-                    className="flex gap-4 rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-4 shadow-xs"
+                    className="flex gap-4 rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 shadow-xs"
                   >
                     <div className="w-20 shrink-0">
                       <Cover
@@ -591,7 +591,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
                     <div className="flex-1 min-w-0 flex flex-col justify-between">
                       <div>
                         <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                          <span className="rounded-cv-sm bg-[var(--cv-surface)] px-1.5 py-0.5 font-mono text-[10px] uppercase text-[var(--cv-text-muted)] border border-[var(--cv-border)]">
+                          <span className="rounded-gm-sm bg-[var(--gm-surface)] px-1.5 py-0.5 font-mono text-[10px] uppercase text-[var(--gm-text-muted)] border border-[var(--gm-border)]">
                             {cand.contentType}
                           </span>
                           {matchState.kind === "already_in_library" && (
@@ -611,16 +611,16 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
                           )}
                         </div>
 
-                        <h3 className="text-cv-sm font-bold text-[var(--cv-text)] line-clamp-1">
+                        <h3 className="text-gm-sm font-bold text-[var(--gm-text)] line-clamp-1">
                           {cand.title}
                         </h3>
                         {cand.creators.length > 0 && (
-                          <p className="text-cv-xs text-[var(--cv-text-muted)] mt-0.5">
+                          <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5">
                             {cand.creators.map((c) => c.name).join(" · ")}
                           </p>
                         )}
                         {cand.description && (
-                          <p className="mt-1.5 text-cv-xs text-[var(--cv-text-subtle)] line-clamp-2">
+                          <p className="mt-1.5 text-gm-xs text-[var(--gm-text-subtle)] line-clamp-2">
                             {cand.description}
                           </p>
                         )}
@@ -631,7 +631,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="gap-1.5 text-cv-xs"
+                            className="gap-1.5 text-gm-xs"
                             onClick={() => onNavigateWork?.(matchState.item.work.id)}
                           >
                             <Check className="h-3.5 w-3.5 text-emerald-400" />
@@ -642,7 +642,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="gap-1.5 text-cv-xs"
+                              className="gap-1.5 text-gm-xs"
                               onClick={() => onNavigateWork?.(matchState.item.work.id)}
                             >
                               <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
@@ -651,7 +651,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
                             <Button
                               variant="secondary"
                               size="sm"
-                              className="gap-1.5 text-cv-xs"
+                              className="gap-1.5 text-gm-xs"
                               onClick={() => handleAddCandidateToLibrary(cand)}
                             >
                               <Plus className="h-3.5 w-3.5" />
@@ -662,7 +662,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
                           <Button
                             variant="default"
                             size="sm"
-                            className="gap-1.5 text-cv-xs"
+                            className="gap-1.5 text-gm-xs"
                             onClick={() => handleAddCandidateToLibrary(cand)}
                           >
                             <Plus className="h-3.5 w-3.5" />
@@ -683,11 +683,11 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
       <section>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div>
-            <h2 className="text-cv-base font-bold text-[var(--cv-text)] flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-[var(--cv-accent-strong)]" />
+            <h2 className="text-gm-base font-bold text-[var(--gm-text)] flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-[var(--gm-accent-strong)]" />
               <span>Local Explainable Recommendations</span>
             </h2>
-            <p className="text-cv-xs text-[var(--cv-text-muted)]">
+            <p className="text-gm-xs text-[var(--gm-text-muted)]">
               Computed 100% locally from your adaptation graph, favorite creators, and top genres — with an explicit reason for every suggestion.
             </p>
           </div>
@@ -696,7 +696,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
               variant="ghost"
               size="sm"
               onClick={restoreAllDismissed}
-              className="gap-1.5 text-cv-xs text-[var(--cv-text-muted)]"
+              className="gap-1.5 text-gm-xs text-[var(--gm-text-muted)]"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               <span>Restore Dismissed ({dismissedWorkIds.length})</span>
@@ -705,7 +705,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
         </div>
 
         {recommendations.length === 0 ? (
-          <div className="rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-6">
+          <div className="rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-6">
             <EmptyState
               variant="custom"
               icon={Sparkles}
@@ -718,7 +718,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
             {recommendations.map((rec) => (
               <div
                 key={rec.id}
-                className="flex flex-col justify-between rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-4 shadow-xs hover:border-[var(--cv-border-strong)] transition-colors"
+                className="flex flex-col justify-between rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 shadow-xs hover:border-[var(--gm-border-strong)] transition-colors"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-3">
@@ -733,29 +733,29 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
                       type="button"
                       onClick={() => dismissRecommendation(rec.workId as WorkId)}
                       title="Dismiss this recommendation"
-                      className="rounded-cv-sm p-1 text-[var(--cv-text-subtle)] hover:bg-[var(--cv-surface)] hover:text-[var(--cv-text)] cursor-pointer"
+                      className="rounded-gm-sm p-1 text-[var(--gm-text-subtle)] hover:bg-[var(--gm-surface)] hover:text-[var(--gm-text)] cursor-pointer"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
 
-                  <h3 className="text-cv-sm font-bold text-[var(--cv-text)] line-clamp-1">
+                  <h3 className="text-gm-sm font-bold text-[var(--gm-text)] line-clamp-1">
                     {rec.title}
                   </h3>
-                  <p className="mt-1.5 rounded-cv bg-[var(--cv-surface)] px-2.5 py-1.5 text-[11px] leading-snug text-[var(--cv-accent-strong)] border border-[var(--cv-border)]">
+                  <p className="mt-1.5 rounded-cv bg-[var(--gm-surface)] px-2.5 py-1.5 text-[11px] leading-snug text-[var(--gm-accent-strong)] border border-[var(--gm-border)]">
                     {rec.reasonLabel}
                   </p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-[var(--cv-border)] flex items-center justify-between">
-                  <span className="font-mono text-[10px] uppercase text-[var(--cv-text-subtle)]">
+                <div className="mt-4 pt-3 border-t border-[var(--gm-border)] flex items-center justify-between">
+                  <span className="font-mono text-[10px] uppercase text-[var(--gm-text-subtle)]">
                     {rec.contentType}
                   </span>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => onNavigateWork?.(rec.workId)}
-                    className="h-7 px-2 text-cv-xs gap-1 text-[var(--cv-text)]"
+                    className="h-7 px-2 text-gm-xs gap-1 text-[var(--gm-text)]"
                   >
                     <BookOpen className="h-3 w-3" />
                     <span>View Work</span>

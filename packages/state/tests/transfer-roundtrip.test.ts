@@ -52,7 +52,7 @@ import {
 } from "../src/transfer/zip-store";
 
 import { ClientRepository } from "../src/client-repository";
-import { ContentType, PersonalState, PrivacyState } from "@chronicles-vault/domain";
+import { ContentType, PersonalState, PrivacyState } from "@grimoire/domain";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Test helpers
@@ -298,7 +298,7 @@ describe("JSON backup roundtrip", () => {
     expect(result.ok).toBe(false);
   });
 
-  it("rejects a file that is not a Chronicles Vault backup", () => {
+  it("rejects a file that is not a Grimoire backup", () => {
     const result = parseBackup(JSON.stringify({ format: "not-cv", version: 1, exportedAt: "x", works: [], memories: [], lists: [], relations: [] }));
     expect(result.ok).toBe(false);
   });
@@ -464,7 +464,7 @@ describe("memoriesToMarkdown", () => {
       { exportedAt: new Date().toISOString() },
     );
     const md = memoriesToMarkdown(snapshot.works, snapshot.memories);
-    expect(md).toContain("# Chronicles Vault notes");
+    expect(md).toContain("# Grimoire notes");
     expect(md).toContain("## Frieren");
     expect(md).toContain("### First Memory");
     expect(md).toContain("Great chapter.");
@@ -564,7 +564,7 @@ describe("ZIP engine", () => {
 
   it("crc32 is deterministic", () => {
     const enc = new TextEncoder();
-    const data = enc.encode("Chronicles Vault");
+    const data = enc.encode("Grimoire");
     expect(crc32(data)).toBe(crc32(data));
     expect(crc32(data)).not.toBe(crc32(enc.encode("Different text")));
   });
@@ -572,12 +572,12 @@ describe("ZIP engine", () => {
   it("round-trips a single text entry through create → read", () => {
     const enc = new TextEncoder();
     const dec = new TextDecoder();
-    const entries = [{ name: "hello.txt", data: enc.encode("Hello, Chronicles Vault!") }];
+    const entries = [{ name: "hello.txt", data: enc.encode("Hello, Grimoire!") }];
     const zip = createStoredZip(entries);
     const read = readStoredZip(zip);
     expect(read.length).toBe(1);
     expect(read[0]!.name).toBe("hello.txt");
-    expect(dec.decode(read[0]!.data)).toBe("Hello, Chronicles Vault!");
+    expect(dec.decode(read[0]!.data)).toBe("Hello, Grimoire!");
   });
 
   it("round-trips multiple entries including JSON", () => {

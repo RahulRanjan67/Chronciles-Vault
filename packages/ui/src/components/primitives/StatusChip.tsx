@@ -3,38 +3,38 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 const statusChipVariants = cva(
-  'inline-flex items-center gap-1.5 rounded-cv-full px-2 py-0.5 text-cv-xs font-medium border transition-colors select-none whitespace-nowrap',
+  'inline-flex items-center gap-1.5 rounded-gm-full px-2 py-0.5 text-gm-xs font-medium border transition-colors select-none whitespace-nowrap',
   {
     variants: {
       status: {
         healthy:
-          'border-[var(--cv-health-healthy)]/25 bg-[var(--cv-success-muted)] text-[var(--cv-health-healthy)]',
+          'border-[var(--gm-health-healthy)]/25 bg-[var(--gm-success-muted)] text-[var(--gm-health-healthy)]',
         degraded:
-          'border-[var(--cv-health-degraded)]/25 bg-[var(--cv-warning-muted)] text-[var(--cv-health-degraded)]',
+          'border-[var(--gm-health-degraded)]/25 bg-[var(--gm-warning-muted)] text-[var(--gm-health-degraded)]',
         unavailable:
-          'border-[var(--cv-health-unavailable)]/25 bg-[var(--cv-danger-muted)] text-[var(--cv-health-unavailable)]',
+          'border-[var(--gm-health-unavailable)]/25 bg-[var(--gm-danger-muted)] text-[var(--gm-health-unavailable)]',
         stale:
-          'border-[var(--cv-health-stale)]/25 bg-[var(--cv-surface)] text-[var(--cv-health-stale)]',
+          'border-[var(--gm-health-stale)]/25 bg-[var(--gm-surface)] text-[var(--gm-health-stale)]',
         unknown:
-          'border-[var(--cv-health-unknown)]/25 bg-[var(--cv-surface)] text-[var(--cv-health-unknown)]',
+          'border-[var(--gm-health-unknown)]/25 bg-[var(--gm-surface)] text-[var(--gm-health-unknown)]',
         local:
-          'border-[var(--cv-health-local)]/25 bg-[var(--cv-accent-muted)] text-[var(--cv-health-local)]',
+          'border-[var(--gm-health-local)]/25 bg-[var(--gm-accent-muted)] text-[var(--gm-health-local)]',
         reading:
-          'border-[var(--cv-accent)]/30 bg-[var(--cv-accent-muted)] text-[var(--cv-accent-strong)]',
+          'border-[var(--gm-accent)]/30 bg-[var(--gm-accent-muted)] text-[var(--gm-accent-strong)]',
         completed:
-          'border-[var(--cv-success)]/30 bg-[var(--cv-success-muted)] text-[var(--cv-success)]',
+          'border-[var(--gm-success)]/30 bg-[var(--gm-success-muted)] text-[var(--gm-success)]',
         stalled:
-          'border-[var(--cv-warning)]/30 bg-[var(--cv-warning-muted)] text-[var(--cv-warning)]',
+          'border-[var(--gm-warning)]/30 bg-[var(--gm-warning-muted)] text-[var(--gm-warning)]',
         waiting:
-          'border-[var(--cv-border-strong)] bg-[var(--cv-info-muted)] text-[var(--cv-info)]',
+          'border-[var(--gm-border-strong)] bg-[var(--gm-info-muted)] text-[var(--gm-info)]',
         dropped:
-          'border-[var(--cv-border)] bg-[var(--cv-surface)] text-[var(--cv-text-subtle)]',
+          'border-[var(--gm-border)] bg-[var(--gm-surface)] text-[var(--gm-text-subtle)]',
         neutral:
-          'border-[var(--cv-border)] bg-[var(--cv-surface)] text-[var(--cv-text-muted)]',
+          'border-[var(--gm-border)] bg-[var(--gm-surface)] text-[var(--gm-text-muted)]',
       },
       size: {
         sm: 'px-1.5 py-0.2 text-[10px]',
-        default: 'px-2 py-0.5 text-cv-xs',
+        default: 'px-2 py-0.5 text-gm-xs',
       },
     },
     defaultVariants: {
@@ -59,18 +59,18 @@ export function StatusChip({
   ...props
 }: StatusChipProps) {
   const dotColorClass = {
-    healthy: 'bg-[var(--cv-health-healthy)]',
-    degraded: 'bg-[var(--cv-health-degraded)]',
-    unavailable: 'bg-[var(--cv-health-unavailable)]',
-    stale: 'bg-[var(--cv-health-stale)]',
-    unknown: 'bg-[var(--cv-health-unknown)]',
-    local: 'bg-[var(--cv-health-local)]',
-    reading: 'bg-[var(--cv-accent)]',
-    completed: 'bg-[var(--cv-success)]',
-    stalled: 'bg-[var(--cv-warning)]',
-    waiting: 'bg-[var(--cv-info)]',
-    dropped: 'bg-[var(--cv-text-subtle)]',
-    neutral: 'bg-[var(--cv-text-subtle)]',
+    healthy: 'bg-[var(--gm-health-healthy)]',
+    degraded: 'bg-[var(--gm-health-degraded)]',
+    unavailable: 'bg-[var(--gm-health-unavailable)]',
+    stale: 'bg-[var(--gm-health-stale)]',
+    unknown: 'bg-[var(--gm-health-unknown)]',
+    local: 'bg-[var(--gm-health-local)]',
+    reading: 'bg-[var(--gm-accent)]',
+    completed: 'bg-[var(--gm-success)]',
+    stalled: 'bg-[var(--gm-warning)]',
+    waiting: 'bg-[var(--gm-info)]',
+    dropped: 'bg-[var(--gm-text-subtle)]',
+    neutral: 'bg-[var(--gm-text-subtle)]',
   }[status ?? 'neutral'];
 
   return (
@@ -171,7 +171,7 @@ export function ContentTypeBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-cv-sm px-1.5 py-0.5 text-[10px] font-mono font-medium tracking-wide uppercase bg-[var(--cv-surface)] text-[var(--cv-text-muted)] border border-[var(--cv-border)] select-none',
+        'inline-flex items-center rounded-gm-sm px-1.5 py-0.5 text-[10px] font-mono font-medium tracking-wide uppercase bg-[var(--gm-surface)] text-[var(--gm-text-muted)] border border-[var(--gm-border)] select-none',
         className,
       )}
     >

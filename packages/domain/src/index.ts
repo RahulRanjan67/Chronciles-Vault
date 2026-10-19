@@ -1,5 +1,5 @@
 // Shared primitives
-export * from "@chronicles-vault/shared";
+export * from "@grimoire/shared";
 
 // Entities
 export * from "./entities/work.js";

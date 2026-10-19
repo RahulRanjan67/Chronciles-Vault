@@ -1,4 +1,4 @@
-import { CaptureId, WorkId } from '@chronicles-vault/shared';
+import { CaptureId, WorkId } from '@grimoire/shared';
 import { Capture } from '../entities/capture.js';
 import { Work } from '../entities/work.js';
 import { normalizeUrl } from './url-normalizer.js';

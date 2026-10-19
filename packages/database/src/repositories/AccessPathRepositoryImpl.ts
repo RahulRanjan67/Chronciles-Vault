@@ -21,7 +21,7 @@ import {
   SourceCapabilityStatus,
   type SourceHealthEvent,
   type AccessPathRepository,
-} from '@chronicles-vault/domain';
+} from '@grimoire/domain';
 import { runInTransaction } from '../connection.js';
 
 interface AccessPathRow {

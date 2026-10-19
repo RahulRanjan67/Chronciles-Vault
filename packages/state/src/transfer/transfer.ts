@@ -10,7 +10,7 @@
  *  - Only http and https URLs are accepted from imported files.
  */
 
-export const BACKUP_FORMAT = "chronicles-vault-backup";
+export const BACKUP_FORMAT = "grimoire-backup";
 export const BACKUP_VERSION = 1;
 export const VAULT_EXPORT_CONFIRMATION = "INCLUDE VAULT";
 export const MAX_IMPORT_CHARACTERS = 25_000_000;
@@ -163,7 +163,7 @@ export function parseBackup(text: string): ParseResult<BackupSnapshot> {
     return { ok: false, errors: ["File is not valid JSON."] };
   }
   if (!isRecord(raw)) return { ok: false, errors: ["Backup root must be an object."] };
-  if (raw["format"] !== BACKUP_FORMAT) errors.push("File is not a Chronicles Vault backup.");
+  if (raw["format"] !== BACKUP_FORMAT && raw["format"] !== "chronicles-vault-backup") errors.push("File is not a valid Grimoire or Chronicles backup.");
   if (raw["version"] !== BACKUP_VERSION) errors.push(`Unsupported backup version: ${String(raw["version"])}.`);
   if (typeof raw["exportedAt"] !== "string") errors.push("exportedAt is missing.");
   if (raw["includesVault"] === true) errors.push("Backups that include the vault are not accepted for import.");
@@ -416,7 +416,7 @@ export function memoriesToMarkdown(works: readonly BackupWork[], memories: reado
     byWork.set(memory.workId, bucket);
   }
 
-  const sections: string[] = ["# Chronicles Vault notes", ""];
+  const sections: string[] = ["# Grimoire notes", ""];
   for (const [workId, items] of byWork) {
     sections.push(`## ${titles.get(workId) ?? workId}`, "");
     for (const memory of items) {

@@ -1,5 +1,5 @@
 {
-  "name": "@chronicles-vault/client",
+  "name": "@grimoire/client",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,12 +11,12 @@
     "lint": "eslint src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@chronicles-vault/domain": "workspace:*",
-    "@chronicles-vault/reader": "workspace:*",
-    "@chronicles-vault/shared": "workspace:*",
-    "@chronicles-vault/state": "workspace:*",
-    "@chronicles-vault/ui": "workspace:*",
-    "@chronicles-vault/vault": "workspace:*",
+    "@grimoire/domain": "workspace:*",
+    "@grimoire/reader": "workspace:*",
+    "@grimoire/shared": "workspace:*",
+    "@grimoire/state": "workspace:*",
+    "@grimoire/ui": "workspace:*",
+    "@grimoire/vault": "workspace:*",
     "@fontsource/inter": "^5.1.0",
     "@fontsource/jetbrains-mono": "^5.1.0",
     "@radix-ui/react-dialog": "^1.1.2",

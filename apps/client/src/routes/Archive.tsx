@@ -6,6 +6,7 @@ import {
   Calendar,
   ExternalLink,
   Filter,
+  Trash2,
 } from 'lucide-react';
 import {
   Button,
@@ -14,16 +15,16 @@ import {
   PageContainer,
   relativeTime,
   toast,
-} from '@chronicles-vault/ui';
+} from '@grimoire/ui';
 import {
   ArchiveReason,
   ArchiveRecord,
   formatProgressAnchor,
   ReadingRelationship,
   Work,
-} from '@chronicles-vault/domain';
-import { WorkId } from '@chronicles-vault/shared';
-import { clientRepository, useLibraryStore } from '@chronicles-vault/state';
+} from '@grimoire/domain';
+import { WorkId } from '@grimoire/shared';
+import { clientRepository, useLibraryStore } from '@grimoire/state';
 
 export interface ArchiveProps {
   onNavigateWork?: (workId: string) => void;
@@ -75,7 +76,7 @@ function getReasonBadge(reason?: ArchiveReason) {
     default:
       return {
         label: 'Archived',
-        className: 'bg-[var(--cv-surface)] text-[var(--cv-text-muted)] border-[var(--cv-border)]',
+        className: 'bg-[var(--gm-surface)] text-[var(--gm-text-muted)] border-[var(--gm-border)]',
       };
   }
 }
@@ -111,6 +112,47 @@ export function Archive({ onNavigateWork }: ArchiveProps) {
     }
   };
 
+  const handlePurge = (workId: string, title: string) => {
+    if (typeof window !== "undefined" && !window.confirm(`Permanently purge "${title}" from the archive? All records and memories for this work will be erased.`)) return;
+    try {
+      clientRepository.purgeWork(workId as WorkId);
+      useLibraryStore.getState().refresh();
+      toast({
+        title: 'Work purged',
+        description: `"${title}" was permanently removed.`,
+      });
+      refreshList();
+    } catch (err) {
+      toast({
+        title: 'Purge failed',
+        description: err instanceof Error ? err.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleFlushArchive = () => {
+    if (archivedWorks.length === 0) return;
+    if (typeof window !== "undefined" && !window.confirm(`Flush entire archive (${archivedWorks.length} works)? All archived works and memories will be permanently purged from database.`)) return;
+    try {
+      for (const entry of archivedWorks) {
+        clientRepository.purgeWork(entry.work.id as WorkId);
+      }
+      useLibraryStore.getState().refresh();
+      toast({
+        title: 'Archive flushed',
+        description: `Permanently removed ${archivedWorks.length} archived works.`,
+      });
+      refreshList();
+    } catch (err) {
+      toast({
+        title: 'Flush failed',
+        description: err instanceof Error ? err.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const filtered = React.useMemo(() => {
     if (selectedFilter === 'all') return archivedWorks;
     return archivedWorks.filter((item) => item.record?.reason === selectedFilter);
@@ -122,27 +164,27 @@ export function Archive({ onNavigateWork }: ArchiveProps) {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <ArchiveIcon className="h-6 w-6 text-[var(--cv-accent-strong)]" />
-            <h1 className="text-cv-2xl sm:text-cv-3xl font-extrabold tracking-tight text-[var(--cv-text)]">
+            <ArchiveIcon className="h-6 w-6 text-[var(--gm-accent-strong)]" />
+            <h1 className="text-gm-2xl sm:text-gm-3xl font-extrabold tracking-tight text-[var(--gm-text)]">
               Archive
             </h1>
-            <span className="rounded-cv-full bg-[var(--cv-surface)] px-2.5 py-0.5 font-mono text-cv-xs text-[var(--cv-text-muted)] border border-[var(--cv-border)]">
+            <span className="rounded-gm-full bg-[var(--gm-surface)] px-2.5 py-0.5 font-mono text-gm-xs text-[var(--gm-text-muted)] border border-[var(--gm-border)]">
               {archivedWorks.length}
             </span>
           </div>
-          <p className="mt-1 text-cv-sm text-[var(--cv-text-muted)]">
+          <p className="mt-1 text-gm-sm text-[var(--gm-text-muted)]">
             Completed journeys and retired series preserved out of your active daily view.
           </p>
         </div>
 
-        {/* Filter by reason */}
+        {/* Filter by reason + Flush Archive */}
         {archivedWorks.length > 0 && (
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-[var(--cv-text-subtle)]" />
+          <div className="flex items-center gap-2 flex-wrap">
+            <Filter className="h-4 w-4 text-[var(--gm-text-subtle)]" />
             <select
               value={selectedFilter}
               onChange={(e) => setSelectedFilter(e.target.value)}
-              className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-1.5 text-cv-xs text-[var(--cv-text)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent)]"
+              className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-1.5 text-gm-xs text-[var(--gm-text)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent)]"
             >
               <option value="all">All Archive Reasons</option>
               <option value={ArchiveReason.Completed}>Completed</option>
@@ -153,6 +195,15 @@ export function Archive({ onNavigateWork }: ArchiveProps) {
               <option value={ArchiveReason.SourceUnavailable}>Source Dead</option>
               <option value={ArchiveReason.Duplicate}>Duplicate Merged</option>
             </select>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleFlushArchive}
+              className="gap-1.5 text-gm-xs text-[var(--gm-danger)] hover:bg-[var(--gm-danger-muted)] border-[var(--gm-danger)]/40"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span>Flush Archive ({archivedWorks.length})</span>
+            </Button>
           </div>
         )}
       </div>
@@ -161,10 +212,10 @@ export function Archive({ onNavigateWork }: ArchiveProps) {
         <EmptyState
           variant="custom"
           icon={ArchiveIcon}
-          title={archivedWorks.length === 0 ? "Archive is empty" : "No matching archived works"}
+          title={archivedWorks.length === 0 ? "No archives yet" : "No matching archived works"}
           description={
             archivedWorks.length === 0
-              ? "Works marked as completed, dropped, or archived will be safely preserved here."
+              ? "No archives yet. Start by archiving a completed work."
               : "No archived works match the selected reason filter."
           }
         />
@@ -177,19 +228,19 @@ export function Archive({ onNavigateWork }: ArchiveProps) {
             return (
               <div
                 key={work.id}
-                className="group rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-4 flex flex-col justify-between hover:border-[var(--cv-border-strong)] transition-all shadow-sm"
+                className="group rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 flex flex-col justify-between hover:border-[var(--gm-border-strong)] transition-all shadow-sm"
               >
                 <div>
                   {/* Top Bar */}
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <span
-                      className={`inline-flex items-center rounded-cv-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase font-mono ${badge.className}`}
+                      className={`inline-flex items-center rounded-gm-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase font-mono ${badge.className}`}
                     >
                       {badge.label}
                     </span>
 
                     {record?.archivedAt && (
-                      <span className="flex items-center gap-1 text-[11px] text-[var(--cv-text-subtle)] font-mono">
+                      <span className="flex items-center gap-1 text-[11px] text-[var(--gm-text-subtle)] font-mono">
                         <Calendar className="h-3 w-3" />
                         <span>{relativeTime(record.archivedAt)}</span>
                       </span>
@@ -208,13 +259,13 @@ export function Archive({ onNavigateWork }: ArchiveProps) {
                     <div className="flex-1 min-w-0">
                       <h3
                         onClick={() => onNavigateWork?.(work.id)}
-                        className="font-bold text-cv-sm text-[var(--cv-text)] hover:text-[var(--cv-accent-strong)] cursor-pointer truncate transition-colors"
+                        className="font-bold text-gm-sm text-[var(--gm-text)] hover:text-[var(--gm-accent-strong)] cursor-pointer truncate transition-colors"
                       >
                         {work.title}
                       </h3>
 
-                      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-[var(--cv-text-muted)]">
-                        <span className="rounded-cv-sm bg-[var(--cv-surface)] px-1.5 py-0.2 border border-[var(--cv-border)] font-mono text-[10px]">
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-[var(--gm-text-muted)]">
+                        <span className="rounded-gm-sm bg-[var(--gm-surface)] px-1.5 py-0.2 border border-[var(--gm-border)] font-mono text-[10px]">
                           {work.contentType}
                         </span>
                         <span>·</span>
@@ -222,7 +273,7 @@ export function Archive({ onNavigateWork }: ArchiveProps) {
                       </div>
 
                       {anchor && (
-                        <div className="mt-2 flex items-center gap-1.5 text-cv-xs text-[var(--cv-accent-strong)] font-mono font-medium">
+                        <div className="mt-2 flex items-center gap-1.5 text-gm-xs text-[var(--gm-accent-strong)] font-mono font-medium">
                           <BookOpen className="h-3 w-3" />
                           <span>Snapshot: {formatProgressAnchor(anchor)}</span>
                         </div>
@@ -232,8 +283,8 @@ export function Archive({ onNavigateWork }: ArchiveProps) {
 
                   {/* Why Stopped Note */}
                   {record?.note && (
-                    <div className="mt-3 pt-2.5 border-t border-[var(--cv-border)]">
-                      <p className="text-cv-xs text-[var(--cv-text-muted)] italic leading-relaxed">
+                    <div className="mt-3 pt-2.5 border-t border-[var(--gm-border)]">
+                      <p className="text-gm-xs text-[var(--gm-text-muted)] italic leading-relaxed">
                         "{record.note}"
                       </p>
                     </div>
@@ -241,26 +292,37 @@ export function Archive({ onNavigateWork }: ArchiveProps) {
                 </div>
 
                 {/* Footer Actions */}
-                <div className="mt-4 pt-3 border-t border-[var(--cv-border)] flex items-center justify-between gap-2">
+                <div className="mt-4 pt-3 border-t border-[var(--gm-border)] flex items-center justify-between gap-2">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => onNavigateWork?.(work.id)}
-                    className="gap-1.5 text-cv-xs"
+                    className="gap-1.5 text-gm-xs"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
                     <span>View Record</span>
                   </Button>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleRestore(work.id, work.title)}
-                    className="gap-1.5 text-cv-xs"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    <span>Restore to Library</span>
-                  </Button>
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleRestore(work.id, work.title)}
+                      className="gap-1.5 text-gm-xs"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      <span>Restore</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handlePurge(work.id, work.title)}
+                      className="gap-1.5 text-gm-xs text-[var(--gm-danger)] hover:bg-[var(--gm-danger-muted)]"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      <span>Purge</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             );

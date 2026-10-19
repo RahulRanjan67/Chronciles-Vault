@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
   cn,
-} from '@chronicles-vault/ui';
+} from '@grimoire/ui';
 import { LibraryViewMode, LibraryViewToggle } from './LibraryViewToggle';
 
 export interface LibraryFilterState {
@@ -74,9 +74,9 @@ export function LibraryFilters({
             variant="outline"
             size="sm"
             onClick={() => setMobileSheetOpen(true)}
-            className="sm:hidden gap-1.5 text-cv-xs"
+            className="sm:hidden gap-1.5 text-gm-xs"
           >
-            <SlidersHorizontal className="h-3.5 w-3.5 text-[var(--cv-accent-strong)]" />
+            <SlidersHorizontal className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
             <span>Filters & Sort</span>
             {activeFilterCount > 0 && (
               <Badge variant="default" className="ml-1 px-1.5 py-0 text-[10px] font-mono">
@@ -90,7 +90,7 @@ export function LibraryFilters({
               variant="ghost"
               size="sm"
               onClick={onReset}
-              className="text-cv-xs text-[var(--cv-text-muted)] hover:text-[var(--cv-text)] gap-1"
+              className="text-gm-xs text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] gap-1"
             >
               <RotateCcw className="h-3 w-3" />
               <span>Reset</span>
@@ -105,14 +105,14 @@ export function LibraryFilters({
       </div>
 
       {/* Desktop Second row: Type, Status, Sort selects */}
-      <div className="hidden sm:flex flex-wrap items-center gap-2 text-cv-xs">
+      <div className="hidden sm:flex flex-wrap items-center gap-2 text-gm-xs">
         {/* Content Type Filter */}
         <div className="w-36">
           <Select
             value={filters.contentType}
             onValueChange={(contentType) => update({ contentType })}
           >
-            <SelectTrigger className="h-8 text-cv-xs">
+            <SelectTrigger className="h-8 text-gm-xs">
               <SelectValue placeholder="Format" />
             </SelectTrigger>
             <SelectContent>
@@ -138,7 +138,7 @@ export function LibraryFilters({
             value={filters.status}
             onValueChange={(status) => update({ status })}
           >
-            <SelectTrigger className="h-8 text-cv-xs">
+            <SelectTrigger className="h-8 text-gm-xs">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -160,7 +160,7 @@ export function LibraryFilters({
             value={filters.sortBy}
             onValueChange={(sortBy) => update({ sortBy })}
           >
-            <SelectTrigger className="h-8 text-cv-xs">
+            <SelectTrigger className="h-8 text-gm-xs">
               <div className="flex items-center gap-1.5 truncate">
                 <ArrowUpDown className="h-3 w-3 opacity-60 shrink-0" />
                 <SelectValue placeholder="Sort by" />
@@ -187,14 +187,14 @@ export function LibraryFilters({
             </DrawerDescription>
           </DrawerHeader>
 
-          <div className="space-y-4 text-cv-xs">
+          <div className="space-y-4 text-gm-xs">
             <div className="space-y-1.5">
-              <label className="font-semibold text-[var(--cv-text)]">Format</label>
+              <label className="font-semibold text-[var(--gm-text)]">Format</label>
               <Select
                 value={filters.contentType}
                 onValueChange={(contentType) => update({ contentType })}
               >
-                <SelectTrigger className="h-9 text-cv-xs w-full">
+                <SelectTrigger className="h-9 text-gm-xs w-full">
                   <SelectValue placeholder="Format" />
                 </SelectTrigger>
                 <SelectContent>
@@ -215,12 +215,12 @@ export function LibraryFilters({
             </div>
 
             <div className="space-y-1.5">
-              <label className="font-semibold text-[var(--cv-text)]">Reading Status</label>
+              <label className="font-semibold text-[var(--gm-text)]">Reading Status</label>
               <Select
                 value={filters.status}
                 onValueChange={(status) => update({ status })}
               >
-                <SelectTrigger className="h-9 text-cv-xs w-full">
+                <SelectTrigger className="h-9 text-gm-xs w-full">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -237,12 +237,12 @@ export function LibraryFilters({
             </div>
 
             <div className="space-y-1.5">
-              <label className="font-semibold text-[var(--cv-text)]">Sort Order</label>
+              <label className="font-semibold text-[var(--gm-text)]">Sort Order</label>
               <Select
                 value={filters.sortBy}
                 onValueChange={(sortBy) => update({ sortBy })}
               >
-                <SelectTrigger className="h-9 text-cv-xs w-full">
+                <SelectTrigger className="h-9 text-gm-xs w-full">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -256,7 +256,7 @@ export function LibraryFilters({
             </div>
           </div>
 
-          <DrawerFooter className="mt-6 pt-3 border-t border-[var(--cv-border)]">
+          <DrawerFooter className="mt-6 pt-3 border-t border-[var(--gm-border)]">
             {hasActiveFilters && onReset && (
               <Button
                 variant="outline"

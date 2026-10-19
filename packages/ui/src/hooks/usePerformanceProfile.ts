@@ -56,7 +56,7 @@ export const PERFORMANCE_PROFILES: readonly PerformanceProfileOption[] = [
 ] as const;
 
 const STORAGE_KEY = 'cv:perf-profile';
-const CHANGE_EVENT = 'cv-perf-profile-change';
+const CHANGE_EVENT = 'gm-perf-profile-change';
 
 export function detectHardwareProfile(): ResolvedPerformanceProfile {
   if (typeof window === 'undefined') {

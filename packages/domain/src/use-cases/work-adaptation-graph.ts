@@ -1,7 +1,7 @@
 import {
   WorkId,
   WorkRelationId,
-} from '@chronicles-vault/shared';
+} from '@grimoire/shared';
 import {
   ContentType,
   ContentOrigin,

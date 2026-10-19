@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import type { WorkId } from "@chronicles-vault/shared";
+import type { WorkId } from "@grimoire/shared";
 
 import {
   // Work
@@ -89,7 +89,7 @@ import {
   normalizeUrl,
 } from "../dist/index.js";
 
-describe("Chronicles Vault Domain Model Tests", () => {
+describe("Grimoire Domain Model Tests", () => {
   describe("Work Entity", () => {
     it("creates an immutable work with valid invariants", () => {
       const work = createWork({

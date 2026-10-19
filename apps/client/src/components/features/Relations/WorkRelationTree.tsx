@@ -14,18 +14,18 @@ import {
   Button,
   Cover,
   toast,
-} from '@chronicles-vault/ui';
+} from '@grimoire/ui';
 import {
   formatProgressAnchor,
   getInverseRelationType,
   WorkRelation,
   WorkRelationType,
-} from '@chronicles-vault/domain';
-import { WorkId, WorkRelationId } from '@chronicles-vault/shared';
+} from '@grimoire/domain';
+import { WorkId, WorkRelationId } from '@grimoire/shared';
 import {
   clientRepository,
   useWorkDetailStore,
-} from '@chronicles-vault/state';
+} from '@grimoire/state';
 
 export interface WorkRelationTreeProps {
   workId: string;
@@ -88,7 +88,7 @@ function getRelationDisplay(
     default:
       return {
         label: 'Related to',
-        badgeClass: 'bg-[var(--cv-surface)] text-[var(--cv-text-muted)] border-[var(--cv-border)]',
+        badgeClass: 'bg-[var(--gm-surface)] text-[var(--gm-text-muted)] border-[var(--gm-border)]',
         group: 'related',
       };
   }
@@ -169,11 +169,11 @@ export function WorkRelationTree({ workId, onNavigateWork }: WorkRelationTreePro
       {/* Header & Link Action */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-cv-sm font-semibold text-[var(--cv-text)] flex items-center gap-2">
-            <Network className="h-4 w-4 text-[var(--cv-accent-strong)]" />
+          <h3 className="text-gm-sm font-semibold text-[var(--gm-text)] flex items-center gap-2">
+            <Network className="h-4 w-4 text-[var(--gm-accent-strong)]" />
             <span>Adaptation Graph & Work Relations</span>
           </h3>
-          <p className="text-cv-xs text-[var(--cv-text-muted)] mt-0.5">
+          <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5">
             Explicit connections to original novels, anime/manga adaptations, prequels, sequels, and spin-offs.
           </p>
         </div>
@@ -190,22 +190,22 @@ export function WorkRelationTree({ workId, onNavigateWork }: WorkRelationTreePro
 
       {/* Add Relation Form */}
       {isAdding && (
-        <div className="rounded-cv-xl border border-[var(--cv-accent-muted)] bg-[var(--cv-bg-elevated)] p-4 shadow-sm space-y-3">
-          <div className="font-semibold text-cv-xs text-[var(--cv-text)] flex items-center gap-1.5">
-            <Link2 className="h-3.5 w-3.5 text-[var(--cv-accent-strong)]" />
+        <div className="rounded-gm-xl border border-[var(--gm-accent-muted)] bg-[var(--gm-bg-elevated)] p-4 shadow-sm space-y-3">
+          <div className="font-semibold text-gm-xs text-[var(--gm-text)] flex items-center gap-1.5">
+            <Link2 className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
             <span>Connect a Related Work</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-cv-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-gm-xs">
             {/* Target work */}
             <div>
-              <label className="block text-[var(--cv-text-muted)] mb-1 font-medium">
+              <label className="block text-[var(--gm-text-muted)] mb-1 font-medium">
                 Related Work in Library:
               </label>
               <select
                 value={targetId}
                 onChange={(e) => setTargetId(e.target.value)}
-                className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-xs text-[var(--cv-text)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent)]"
+                className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-xs text-[var(--gm-text)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent)]"
               >
                 <option value="">-- Choose work --</option>
                 {availableWorks.map((item) => (
@@ -218,13 +218,13 @@ export function WorkRelationTree({ workId, onNavigateWork }: WorkRelationTreePro
 
             {/* Relation Type */}
             <div>
-              <label className="block text-[var(--cv-text-muted)] mb-1 font-medium">
+              <label className="block text-[var(--gm-text-muted)] mb-1 font-medium">
                 Relationship Type:
               </label>
               <select
                 value={relationType}
                 onChange={(e) => setRelationType(e.target.value as WorkRelationType)}
-                className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-xs text-[var(--cv-text)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent)]"
+                className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-xs text-[var(--gm-text)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent)]"
               >
                 <option value={WorkRelationType.AdaptationOf}>Adaptation of (e.g. Manga adapting Novel)</option>
                 <option value={WorkRelationType.OriginalWorkOf}>Original Work of (e.g. Source Novel for Anime)</option>
@@ -238,7 +238,7 @@ export function WorkRelationTree({ workId, onNavigateWork }: WorkRelationTreePro
           </div>
 
           <div>
-            <label className="block text-[var(--cv-text-muted)] mb-1 text-cv-xs font-medium">
+            <label className="block text-[var(--gm-text-muted)] mb-1 text-gm-xs font-medium">
               Notes or Context (optional):
             </label>
             <input
@@ -246,7 +246,7 @@ export function WorkRelationTree({ workId, onNavigateWork }: WorkRelationTreePro
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. Official manga adaptation covering LN Volumes 1-4"
-              className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-xs text-[var(--cv-text)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent)]"
+              className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-xs text-[var(--gm-text)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent)]"
             />
           </div>
 
@@ -263,10 +263,10 @@ export function WorkRelationTree({ workId, onNavigateWork }: WorkRelationTreePro
 
       {/* Relations Tree / Cards List */}
       {relationCards.length === 0 ? (
-        <div className="rounded-cv-xl border border-dashed border-[var(--cv-border)] bg-[var(--cv-surface)]/30 p-8 text-center">
-          <GitFork className="h-8 w-8 mx-auto mb-2 text-[var(--cv-text-subtle)] opacity-40" />
-          <p className="text-cv-sm font-semibold text-[var(--cv-text)]">No explicit relationships recorded</p>
-          <p className="text-cv-xs text-[var(--cv-text-muted)] max-w-md mx-auto mt-1">
+        <div className="rounded-gm-xl border border-dashed border-[var(--gm-border)] bg-[var(--gm-surface)]/30 p-8 text-center">
+          <GitFork className="h-8 w-8 mx-auto mb-2 text-[var(--gm-text-subtle)] opacity-40" />
+          <p className="text-gm-sm font-semibold text-[var(--gm-text)]">No explicit relationships recorded</p>
+          <p className="text-gm-xs text-[var(--gm-text-muted)] max-w-md mx-auto mt-1">
             Link adaptations (e.g. Light Novel → Manga), prequels, sequels, or franchise spin-offs to navigate
             seamlessly across related fiction.
           </p>
@@ -290,13 +290,13 @@ export function WorkRelationTree({ workId, onNavigateWork }: WorkRelationTreePro
             return (
               <div
                 key={relation.id}
-                className="group rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-4 flex flex-col justify-between hover:border-[var(--cv-border-strong)] transition-all shadow-sm"
+                className="group rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 flex flex-col justify-between hover:border-[var(--gm-border-strong)] transition-all shadow-sm"
               >
                 <div>
                   {/* Top Bar with Badge and Unlink button */}
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <span
-                      className={`inline-flex items-center gap-1 rounded-cv-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase font-mono ${display.badgeClass}`}
+                      className={`inline-flex items-center gap-1 rounded-gm-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase font-mono ${display.badgeClass}`}
                     >
                       <ArrowRight className="h-3 w-3" />
                       {display.label}
@@ -306,7 +306,7 @@ export function WorkRelationTree({ workId, onNavigateWork }: WorkRelationTreePro
                       type="button"
                       onClick={() => handleRemove(relation.id, otherTitle)}
                       title="Unlink relationship"
-                      className="p-1 rounded-cv-sm text-[var(--cv-text-subtle)] hover:text-red-400 hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100"
+                      className="p-1 rounded-gm-sm text-[var(--gm-text-subtle)] hover:text-red-400 hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -315,7 +315,7 @@ export function WorkRelationTree({ workId, onNavigateWork }: WorkRelationTreePro
                   {/* Work Card with Quick-navigation */}
                   <div
                     onClick={() => onNavigateWork?.(otherId)}
-                    className="flex gap-3 cursor-pointer p-1 rounded-cv-lg hover:bg-[var(--cv-surface)]/50 transition-colors"
+                    className="flex gap-3 cursor-pointer p-1 rounded-gm-lg hover:bg-[var(--gm-surface)]/50 transition-colors"
                   >
                     <Cover
                       title={otherTitle}
@@ -325,16 +325,16 @@ export function WorkRelationTree({ workId, onNavigateWork }: WorkRelationTreePro
                     />
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1 text-[var(--cv-accent-strong)] font-medium text-cv-xs group-hover:underline">
-                        <span className="truncate font-bold text-cv-sm text-[var(--cv-text)]">
+                      <div className="flex items-center gap-1 text-[var(--gm-accent-strong)] font-medium text-gm-xs group-hover:underline">
+                        <span className="truncate font-bold text-gm-sm text-[var(--gm-text)]">
                           {otherTitle}
                         </span>
                         <ExternalLink className="h-3 w-3 shrink-0 opacity-70" />
                       </div>
 
                       {otherWork && (
-                        <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-[var(--cv-text-muted)]">
-                          <span className="rounded-cv-sm bg-[var(--cv-surface)] px-1.5 py-0.2 border border-[var(--cv-border)] font-mono text-[10px]">
+                        <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-[var(--gm-text-muted)]">
+                          <span className="rounded-gm-sm bg-[var(--gm-surface)] px-1.5 py-0.2 border border-[var(--gm-border)] font-mono text-[10px]">
                             {otherWork.contentType}
                           </span>
                           <span>·</span>
@@ -343,8 +343,8 @@ export function WorkRelationTree({ workId, onNavigateWork }: WorkRelationTreePro
                       )}
 
                       {anchor && (
-                        <div className="mt-2 flex items-center gap-1 text-[11px] text-[var(--cv-text-subtle)] font-mono">
-                          <BookOpen className="h-3 w-3 text-[var(--cv-accent-strong)]" />
+                        <div className="mt-2 flex items-center gap-1 text-[11px] text-[var(--gm-text-subtle)] font-mono">
+                          <BookOpen className="h-3 w-3 text-[var(--gm-accent-strong)]" />
                           <span>{formatProgressAnchor(anchor)}</span>
                         </div>
                       )}
@@ -354,7 +354,7 @@ export function WorkRelationTree({ workId, onNavigateWork }: WorkRelationTreePro
 
                 {/* Optional Note / Context */}
                 {(relation.notes || relation.description) && (
-                  <p className="mt-3 pt-2.5 border-t border-[var(--cv-border)] text-cv-xs text-[var(--cv-text-subtle)] italic leading-relaxed">
+                  <p className="mt-3 pt-2.5 border-t border-[var(--gm-border)] text-gm-xs text-[var(--gm-text-subtle)] italic leading-relaxed">
                     "{relation.notes || relation.description}"
                   </p>
                 )}

@@ -1,4 +1,4 @@
-import type { ProgressAnchor } from "@chronicles-vault/domain";
+import type { ProgressAnchor } from "@grimoire/domain";
 
 export interface PdfPageLocator {
   readonly format: "pdf";

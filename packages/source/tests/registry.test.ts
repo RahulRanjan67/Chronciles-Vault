@@ -6,8 +6,8 @@ import {
   ReadingState,
   SourceHealthState,
   Work,
-} from '@chronicles-vault/domain';
-import type { AccessPath, WebAccessPath } from '@chronicles-vault/domain';
+} from '@grimoire/domain';
+import type { AccessPath, WebAccessPath } from '@grimoire/domain';
 import { describe, expect, it, vi } from 'vitest';
 import {
   ManualWebAdapter,

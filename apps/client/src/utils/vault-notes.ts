@@ -1,4 +1,4 @@
-import { IndexedDbVaultRepository, vaultSession } from "@chronicles-vault/vault";
+import { IndexedDbVaultRepository, vaultSession } from "@grimoire/vault";
 
 /**
  * Shared access to unlocked Private Vault notes for client features that need

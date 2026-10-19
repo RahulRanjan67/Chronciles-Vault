@@ -1,11 +1,11 @@
 /**
- * Chronicles Vault — Cross-Platform Synchronization Client
+ * Grimoire — Cross-Platform Synchronization Client
  * Connects `web/`, `pc app/`, and `mobile app/` via the shared CRDT/HLC Sync Hub
  * running in `venv/sync_hub_server.py` (or embedded inside `pc app/pc_workstation_app.py`)
  * on `http://127.0.0.1:47920`.
  */
 
-import { clientRepository, useLibraryStore } from "@chronicles-vault/state";
+import { clientRepository, useLibraryStore } from "@grimoire/state";
 
 export interface SyncStatusResponse {
   ok: boolean;

@@ -3,7 +3,7 @@ import type Database from 'better-sqlite3';
 export interface VaultExportDataV1 {
   version: 1;
   exportedAt: string;
-  source: 'chronicles-vault';
+  source: 'grimoire';
   counts: {
     works: number;
     readingRelationships: number;
@@ -131,7 +131,7 @@ export async function exportVaultToJson(
   return {
     version: 1,
     exportedAt: new Date().toISOString(),
-    source: 'chronicles-vault',
+    source: 'grimoire',
     counts: {
       works: works.length,
       readingRelationships: readingRelationships.length,

@@ -39,7 +39,7 @@ export function OfflineStatusBadge() {
         role="status"
         aria-live="polite"
         title="You are offline. Local shelf files, reading progress, memories, and vault remain 100% available."
-        className="inline-flex items-center gap-1.5 rounded-cv-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300"
+        className="inline-flex items-center gap-1.5 rounded-gm-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300"
       >
         <WifiOff className="h-3 w-3 shrink-0 text-amber-400" />
         <span>Offline Mode</span>
@@ -52,9 +52,9 @@ export function OfflineStatusBadge() {
       <div
         role="status"
         title={`Running inside Capacitor (${platform}) native shell — Curated Mobile Mode (ADR-009)`}
-        className="hidden sm:inline-flex items-center gap-1.5 rounded-cv-full border border-[var(--cv-border)] bg-[var(--cv-surface)] px-2.5 py-1 text-[11px] font-mono text-[var(--cv-text-muted)]"
+        className="hidden sm:inline-flex items-center gap-1.5 rounded-gm-full border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2.5 py-1 text-[11px] font-mono text-[var(--gm-text-muted)]"
       >
-        <Smartphone className="h-3 w-3 shrink-0 text-[var(--cv-accent-strong)]" />
+        <Smartphone className="h-3 w-3 shrink-0 text-[var(--gm-accent-strong)]" />
         <span className="uppercase">{platform}</span>
       </div>
     );
@@ -68,10 +68,10 @@ export function OfflineStatusBadge() {
           ? "Local-first storage & Service Worker active — ready for offline reading"
           : "Local-first storage active"
       }
-      className="hidden lg:inline-flex items-center gap-1.5 rounded-cv-full border border-[var(--cv-border)] bg-[var(--cv-surface)]/70 px-2.5 py-1 text-[11px] text-[var(--cv-text-muted)]"
+      className="hidden lg:inline-flex items-center gap-1.5 rounded-gm-full border border-[var(--gm-border)] bg-[var(--gm-surface)]/70 px-2.5 py-1 text-[11px] text-[var(--gm-text-muted)]"
     >
       <CheckCircle2 className="h-3 w-3 shrink-0 text-emerald-400" />
-      <span>{swReady ? "Offline Ready" : "Local Vault"}</span>
+      <span>Local Vault</span>
     </div>
   );
 }

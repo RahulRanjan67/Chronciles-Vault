@@ -1,9 +1,9 @@
 {
-  "name": "@chronicles-vault/state",
+  "name": "@grimoire/state",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Zustand state stores and repository client for Chronicles Vault",
+  "description": "Zustand state stores and repository client for Grimoire",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,8 +21,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@chronicles-vault/domain": "workspace:*",
-    "@chronicles-vault/shared": "workspace:*",
+    "@grimoire/domain": "workspace:*",
+    "@grimoire/shared": "workspace:*",
+    "@grimoire/database": "workspace:*",
     "zustand": "^4.5.2"
   },
   "peerDependencies": {

@@ -14,7 +14,7 @@ import { mediumSeedConfig } from './medium.js';
 function parseArgs(): { configName: 'small' | 'medium'; dbPath: string } {
   const args = process.argv.slice(2);
   let configName: 'small' | 'medium' = 'medium';
-  let dbPath = process.env.CHRONICLES_DB_PATH || path.resolve(process.cwd(), 'chronicles-vault.db');
+  let dbPath = process.env.CHRONICLES_DB_PATH || path.resolve(process.cwd(), 'grimoire.db');
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--config' && args[i + 1]) {

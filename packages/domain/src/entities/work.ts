@@ -1,4 +1,4 @@
-import { WorkId, newId } from '@chronicles-vault/shared';
+import { WorkId, newId } from '@grimoire/shared';
 import { ExternalIdentifier } from '../value-objects/external-identifier.js';
 
 // ---------------------------------------------------------------------------
@@ -53,7 +53,7 @@ export enum PublicationState {
 }
 
 /**
- * Who can see this Work within Chronicles Vault.
+ * Who can see this Work within Grimoire.
  *
  * - Public  — visible in all views
  * - Private — visible only within the app, excluded from sync/export
@@ -89,7 +89,7 @@ export interface WorkCreator {
 export type ContentRating = 'everyone' | 'teen' | 'mature' | 'explicit';
 
 /**
- * Core aggregate root of Chronicles Vault.
+ * Core aggregate root of Grimoire.
  *
  * Represents a trackable piece of media — manga, webtoon, novel, anime, etc.
  * All fields are readonly to enforce immutability.  To update, use

@@ -7,12 +7,12 @@ import {
   Check,
   Users,
 } from "lucide-react";
-import { Badge, Button, Input, toast } from "@chronicles-vault/ui";
-import type { WorkId } from "@chronicles-vault/shared";
+import { Badge, Button, Input, toast } from "@grimoire/ui";
+import type { WorkId } from "@grimoire/shared";
 import {
   useFandomLinksStore,
   type FandomLinkProvider,
-} from "@chronicles-vault/state";
+} from "@grimoire/state";
 
 export interface WorkFandomLinksPanelProps {
   workId: WorkId;
@@ -73,11 +73,11 @@ export function WorkFandomLinksPanel({ workId, workTitle }: WorkFandomLinksPanel
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-cv-sm font-semibold text-[var(--cv-text)] flex items-center gap-2">
-            <Users className="h-4 w-4 text-[var(--cv-accent-strong)]" />
+          <h3 className="text-gm-sm font-semibold text-[var(--gm-text)] flex items-center gap-2">
+            <Users className="h-4 w-4 text-[var(--gm-accent-strong)]" />
             <span>Fandom & Community Links ({workLinks.length})</span>
           </h3>
-          <p className="text-cv-xs text-[var(--cv-text-muted)]">
+          <p className="text-gm-xs text-[var(--gm-text-muted)]">
             First-class wiki and community links (`fandom_links`), kept separate from reading Access Paths so lore wikis never pollute reading sources or leak into publications.
           </p>
         </div>
@@ -85,7 +85,7 @@ export function WorkFandomLinksPanel({ workId, workTitle }: WorkFandomLinksPanel
           variant="secondary"
           size="sm"
           onClick={() => setShowAdd(!showAdd)}
-          className="gap-1.5 text-cv-xs"
+          className="gap-1.5 text-gm-xs"
         >
           <Plus className="h-3.5 w-3.5" />
           <span>Add Fandom / Wiki</span>
@@ -95,7 +95,7 @@ export function WorkFandomLinksPanel({ workId, workTitle }: WorkFandomLinksPanel
       {showAdd && (
         <form
           onSubmit={handleAdd}
-          className="rounded-cv-xl border border-[var(--cv-accent-muted)] bg-[var(--cv-bg-elevated)] p-4 space-y-3"
+          className="rounded-gm-xl border border-[var(--gm-accent-muted)] bg-[var(--gm-bg-elevated)] p-4 space-y-3"
         >
           <div className="grid gap-3 sm:grid-cols-3">
             <Input
@@ -106,7 +106,7 @@ export function WorkFandomLinksPanel({ workId, workTitle }: WorkFandomLinksPanel
             <select
               value={provider}
               onChange={(e) => setProvider(e.target.value as FandomLinkProvider)}
-              className="h-9 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-2.5 text-cv-xs text-[var(--cv-text)]"
+              className="h-9 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2.5 text-gm-xs text-[var(--gm-text)]"
             >
               <option value="fandom">Fandom Wiki</option>
               <option value="wiki">Independent Wiki</option>
@@ -137,7 +137,7 @@ export function WorkFandomLinksPanel({ workId, workTitle }: WorkFandomLinksPanel
       )}
 
       {workLinks.length === 0 ? (
-        <div className="rounded-cv-lg border border-dashed border-[var(--cv-border)] bg-[var(--cv-surface)]/40 p-6 text-center text-cv-xs text-[var(--cv-text-muted)]">
+        <div className="rounded-gm-lg border border-dashed border-[var(--gm-border)] bg-[var(--gm-surface)]/40 p-6 text-center text-gm-xs text-[var(--gm-text-muted)]">
           No fandom wikis or community hubs linked to this work yet.
         </div>
       ) : (
@@ -145,14 +145,14 @@ export function WorkFandomLinksPanel({ workId, workTitle }: WorkFandomLinksPanel
           {workLinks.map((link) => (
             <div
               key={link.id}
-              className="flex items-start justify-between gap-3 rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-4"
+              className="flex items-start justify-between gap-3 rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4"
             >
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-1.5 mb-1">
                   <Badge variant="muted" className="text-[10px] px-1.5 py-0 uppercase font-mono">
                     {link.provider}
                   </Badge>
-                  <span className="rounded-cv-sm bg-[var(--cv-surface)] px-1.5 py-0.5 font-mono text-[10px] uppercase text-[var(--cv-text-muted)] border border-[var(--cv-border)]">
+                  <span className="rounded-gm-sm bg-[var(--gm-surface)] px-1.5 py-0.5 font-mono text-[10px] uppercase text-[var(--gm-text-muted)] border border-[var(--gm-border)]">
                     {link.language}
                   </span>
                   {link.isPreferred && (
@@ -161,10 +161,10 @@ export function WorkFandomLinksPanel({ workId, workTitle }: WorkFandomLinksPanel
                     </Badge>
                   )}
                 </div>
-                <h4 className="text-cv-sm font-semibold text-[var(--cv-text)] truncate">
+                <h4 className="text-gm-sm font-semibold text-[var(--gm-text)] truncate">
                   {link.communityName}
                 </h4>
-                <p className="text-cv-xs text-[var(--cv-text-subtle)] truncate mt-0.5">
+                <p className="text-gm-xs text-[var(--gm-text-subtle)] truncate mt-0.5">
                   {link.url}
                 </p>
               </div>
@@ -178,7 +178,7 @@ export function WorkFandomLinksPanel({ workId, workTitle }: WorkFandomLinksPanel
                       setPreferredFandomLink(workId, link.id);
                       toast({ title: "Preferred community link updated" });
                     }}
-                    className="h-7 px-2 text-[11px] text-[var(--cv-text-muted)]"
+                    className="h-7 px-2 text-[11px] text-[var(--gm-text-muted)]"
                     title="Set as preferred community link"
                   >
                     <Check className="h-3 w-3 mr-1" />
@@ -188,7 +188,7 @@ export function WorkFandomLinksPanel({ workId, workTitle }: WorkFandomLinksPanel
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-[var(--cv-text-muted)] hover:text-[var(--cv-text)]"
+                  className="h-7 w-7 text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
                   onClick={() => window.open(link.url, "_blank", "noopener,noreferrer")}
                   title="Open community externally"
                 >
@@ -197,7 +197,7 @@ export function WorkFandomLinksPanel({ workId, workTitle }: WorkFandomLinksPanel
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-[var(--cv-text-muted)] hover:text-red-400"
+                  className="h-7 w-7 text-[var(--gm-text-muted)] hover:text-red-400"
                   onClick={() => {
                     removeFandomLink(link.id);
                     toast({ title: "Community link removed" });

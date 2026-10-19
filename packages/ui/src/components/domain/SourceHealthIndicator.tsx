@@ -23,33 +23,33 @@ const HEALTH_CONFIG: Record<
 > = {
   healthy: {
     label: 'Healthy',
-    dotClass: 'bg-[var(--cv-health-healthy)]',
-    textClass: 'text-[var(--cv-health-healthy)]',
+    dotClass: 'bg-[var(--gm-health-healthy)]',
+    textClass: 'text-[var(--gm-health-healthy)]',
   },
   degraded: {
     label: 'Degraded',
-    dotClass: 'bg-[var(--cv-health-degraded)]',
-    textClass: 'text-[var(--cv-health-degraded)]',
+    dotClass: 'bg-[var(--gm-health-degraded)]',
+    textClass: 'text-[var(--gm-health-degraded)]',
   },
   unavailable: {
     label: 'Unavailable',
-    dotClass: 'bg-[var(--cv-health-unavailable)]',
-    textClass: 'text-[var(--cv-health-unavailable)]',
+    dotClass: 'bg-[var(--gm-health-unavailable)]',
+    textClass: 'text-[var(--gm-health-unavailable)]',
   },
   stale: {
     label: 'Stale',
-    dotClass: 'bg-[var(--cv-health-stale)]',
-    textClass: 'text-[var(--cv-health-stale)]',
+    dotClass: 'bg-[var(--gm-health-stale)]',
+    textClass: 'text-[var(--gm-health-stale)]',
   },
   unknown: {
     label: 'Unknown',
-    dotClass: 'bg-[var(--cv-health-unknown)]',
-    textClass: 'text-[var(--cv-health-unknown)]',
+    dotClass: 'bg-[var(--gm-health-unknown)]',
+    textClass: 'text-[var(--gm-health-unknown)]',
   },
   local: {
     label: 'Local file',
-    dotClass: 'bg-[var(--cv-health-local)]',
-    textClass: 'text-[var(--cv-health-local)]',
+    dotClass: 'bg-[var(--gm-health-local)]',
+    textClass: 'text-[var(--gm-health-local)]',
   },
 };
 
@@ -72,8 +72,8 @@ export function SourceHealthIndicator({
 
   const textSizeClass = {
     sm: 'text-[11px]',
-    default: 'text-cv-xs',
-    lg: 'text-cv-sm',
+    default: 'text-gm-xs',
+    lg: 'text-gm-sm',
   }[size];
 
   return (
@@ -94,7 +94,7 @@ export function SourceHealthIndicator({
         <span className={cn('relative inline-flex rounded-full', dotSizeClass, config.dotClass)} />
       </span>
       {showLabel && (
-        <span className={cn('font-medium leading-none text-[var(--cv-text-muted)]', textSizeClass)}>
+        <span className={cn('font-medium leading-none text-[var(--gm-text-muted)]', textSizeClass)}>
           {displayLabel}
         </span>
       )}

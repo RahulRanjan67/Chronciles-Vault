@@ -2,9 +2,9 @@ import {
   AccessPathKind,
   SourceHealthState,
   UpdateCertainty,
-} from '@chronicles-vault/domain';
-import { err, ok } from '@chronicles-vault/shared';
-import type { AccessPath } from '@chronicles-vault/domain';
+} from '@grimoire/domain';
+import { err, ok } from '@grimoire/shared';
+import type { AccessPath } from '@grimoire/domain';
 import type {
   MetadataQuery,
   ProviderAdapter,

@@ -1,4 +1,4 @@
-export type LocalFileFormat = "epub" | "pdf" | "cbz";
+export type LocalFileFormat = "epub" | "pdf" | "cbz" | "txt";
 
 export interface LocalFileMetadata {
   readonly id: string;
@@ -17,7 +17,7 @@ export interface StoredLocalFile extends LocalFileMetadata {
 }
 
 const MAX_LOCAL_FILE_BYTES = 128 * 1024 * 1024;
-const DATABASE_NAME = "chronicles-vault-reader";
+const DATABASE_NAME = "grimoire-reader";
 const DATABASE_VERSION = 4;
 const STORE_NAME = "local-files";
 const SESSION_STORE_NAME = "reading-sessions";
@@ -28,12 +28,13 @@ const FORMAT_MIME: Record<LocalFileFormat, string> = {
   epub: "application/epub+zip",
   pdf: "application/pdf",
   cbz: "application/vnd.comicbook+zip",
+  txt: "text/plain",
 };
 
 function getFormat(fileName: string): LocalFileFormat {
   const extension = fileName.split(".").pop()?.toLowerCase();
-  if (extension === "epub" || extension === "pdf" || extension === "cbz") return extension;
-  throw new Error("Choose an EPUB, PDF, or CBZ file.");
+  if (extension === "epub" || extension === "pdf" || extension === "cbz" || extension === "txt") return extension;
+  throw new Error("Choose an EPUB, PDF, CBZ, or TXT file.");
 }
 
 function hasZipSignature(bytes: Uint8Array): boolean {
@@ -69,6 +70,9 @@ function isEpub(bytes: Uint8Array): boolean {
 }
 
 async function inspectFileSignature(file: File, format: LocalFileFormat): Promise<string> {
+  if (format === "txt") {
+    return FORMAT_MIME.txt;
+  }
   const bytes = new Uint8Array(await file.slice(0, 128).arrayBuffer());
   if (format === "pdf") {
     if (new TextDecoder().decode(bytes.subarray(0, 5)) !== "%PDF-") {
@@ -273,3 +277,41 @@ export async function setLocalFileWork(
     database.close();
   }
 }
+
+export async function deleteLocalFile(fileId: string): Promise<void> {
+  const database = await openDatabase();
+  try {
+    return await new Promise((resolve, reject) => {
+      const transaction = database.transaction(STORE_NAME, "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.delete(fileId);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error ?? new Error("Unable to delete local file."));
+      transaction.onerror = () => reject(transaction.error ?? new Error("Unable to delete local file."));
+    });
+  } finally {
+    database.close();
+  }
+}
+
+export async function flushLocalFiles(): Promise<number> {
+  const database = await openDatabase();
+  try {
+    return await new Promise((resolve, reject) => {
+      const transaction = database.transaction(STORE_NAME, "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+      const countRequest = store.count();
+      let totalCount = 0;
+      countRequest.onsuccess = () => {
+        totalCount = countRequest.result;
+      };
+      const clearRequest = store.clear();
+      clearRequest.onsuccess = () => resolve(totalCount);
+      clearRequest.onerror = () => reject(clearRequest.error ?? new Error("Unable to flush local files."));
+      transaction.onerror = () => reject(transaction.error ?? new Error("Unable to flush local files."));
+    });
+  } finally {
+    database.close();
+  }
+}
+

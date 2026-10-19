@@ -41,7 +41,7 @@ export function WorkRow({
     <div
       onClick={onRowClick}
       className={cn(
-        'group flex items-center justify-between gap-4 rounded-cv border-b border-[var(--cv-border)] bg-transparent px-3 py-2.5 transition-colors hover:bg-[var(--cv-surface)]/60 cursor-pointer',
+        'group flex items-center justify-between gap-4 rounded-cv border-b border-[var(--gm-border)] bg-transparent px-3 py-2.5 transition-colors hover:bg-[var(--gm-surface)]/60 cursor-pointer',
         className,
       )}
       {...props}
@@ -51,7 +51,7 @@ export function WorkRow({
         <Cover title={title} src={coverSrc} size="xs" className="shrink-0" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="truncate text-cv-sm font-medium text-[var(--cv-text)] group-hover:text-[var(--cv-accent-strong)] transition-colors">
+            <span className="truncate text-gm-sm font-medium text-[var(--gm-text)] group-hover:text-[var(--gm-accent-strong)] transition-colors">
               {title}
             </span>
             {contentType && <ContentTypeBadge type={contentType} className="hidden sm:inline-flex" />}
@@ -79,7 +79,7 @@ export function WorkRow({
 
       {/* Updated time */}
       {updatedAt && (
-        <div className="hidden xl:flex items-center w-24 shrink-0 text-cv-xs text-[var(--cv-text-subtle)] font-mono">
+        <div className="hidden xl:flex items-center w-24 shrink-0 text-gm-xs text-[var(--gm-text-subtle)] font-mono">
           {relativeTime(updatedAt)}
         </div>
       )}
@@ -90,7 +90,7 @@ export function WorkRow({
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 px-2 text-cv-xs gap-1 opacity-80 group-hover:opacity-100 hover:text-[var(--cv-accent-strong)]"
+            className="h-7 px-2 text-gm-xs gap-1 opacity-80 group-hover:opacity-100 hover:text-[var(--gm-accent-strong)]"
             onClick={(e) => {
               e.stopPropagation();
               onContinue();
@@ -104,7 +104,7 @@ export function WorkRow({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)]"
+            className="h-7 w-7 text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)]"
             onClick={(e) => {
               e.stopPropagation();
               onMoreActions();

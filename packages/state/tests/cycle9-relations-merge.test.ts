@@ -12,8 +12,8 @@ import {
   PersonalState,
   RelationType,
   WorkRelationType,
-} from '@chronicles-vault/domain';
-import { WorkId } from '@chronicles-vault/shared';
+} from '@grimoire/domain';
+import { WorkId } from '@grimoire/shared';
 
 describe('Cycle 9: Archive, Duplicate Merging & Work Relations', () => {
   beforeEach(() => {

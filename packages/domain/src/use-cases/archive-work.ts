@@ -1,7 +1,7 @@
 /**
  * Archive Work Use Case
  *
- * Implements the Cycle 9 Archive System logic for Chronicles Vault.
+ * Implements the Cycle 9 Archive System logic for Grimoire.
  *
  * Invariants:
  * 1. Archiving NEVER destroys reading progress (`currentAnchor`), access paths, or memories.
@@ -9,7 +9,7 @@
  * 3. Preserves a complete historical snapshot in an immutable `ArchiveRecord`.
  */
 
-import { WorkId, newId, ArchiveRecordId } from '@chronicles-vault/shared';
+import { WorkId, newId, ArchiveRecordId } from '@grimoire/shared';
 import { Work, applyWorkPatch } from '../entities/work.js';
 import {
   ArchiveReason,

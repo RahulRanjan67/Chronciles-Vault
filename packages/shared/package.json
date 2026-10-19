@@ -1,9 +1,9 @@
 {
-  "name": "@chronicles-vault/shared",
+  "name": "@grimoire/shared",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Shared primitive types and utilities for Chronicles Vault",
+  "description": "Shared primitive types and utilities for Grimoire",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

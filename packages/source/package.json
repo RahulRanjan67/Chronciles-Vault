@@ -1,5 +1,5 @@
 {
-  "name": "@chronicles-vault/source",
+  "name": "@grimoire/source",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -19,8 +19,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@chronicles-vault/domain": "workspace:*",
-    "@chronicles-vault/shared": "workspace:*"
+    "@grimoire/domain": "workspace:*",
+    "@grimoire/shared": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

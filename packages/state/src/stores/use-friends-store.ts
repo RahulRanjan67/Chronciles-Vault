@@ -55,6 +55,7 @@ export interface SharedShelf {
   readonly isPublicList: boolean;
   readonly publicShareCode: string;
   readonly updatedAt: string;
+  readonly isVaultGated?: boolean;
 }
 
 const STORAGE_KEY = "cv:friends_and_shared_shelves:v1";
@@ -207,7 +208,7 @@ const DEFAULT_SHARED_SHELVES: readonly SharedShelf[] = [
     description: "Curated circle of the highest-rated progression fantasy, web novels, and LitRPG.",
     iconEmoji: "⚔️",
     createdByHandle: "@CaelumReader",
-    memberHandles: ["@DemoUser1", "@CaelumReader", "@MurimWanderer"],
+    memberHandles: ["@Archivist", "@CaelumReader", "@MurimWanderer"],
     isPublicList: true,
     publicShareCode: "PROG-2026-FANTASY",
     updatedAt: new Date().toISOString(),
@@ -218,7 +219,7 @@ const DEFAULT_SHARED_SHELVES: readonly SharedShelf[] = [
         title: "Omniscient Reader's Viewpoint",
         contentType: "web_novel",
         coverRef: "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx119257-Pi21aq3ey9GG.jpg",
-        addedByHandle: "@DemoUser1",
+        addedByHandle: "@Archivist",
         recommenderNote: "The foundational Korean meta-fiction masterpiece. Must read before the epilogue.",
         upvotesCount: 14,
         addedAt: "2026-10-01T12:00:00Z",
@@ -252,9 +253,10 @@ const DEFAULT_SHARED_SHELVES: readonly SharedShelf[] = [
     title: "Guilty Pleasures & Dark Seinen Vault Guild",
     description: "Private collaborative shelf for dark fantasy, psychological thrillers, and uncut cinema.",
     iconEmoji: "🗝️",
-    createdByHandle: "@DemoUser1",
-    memberHandles: ["@DemoUser1", "@VellumArchivist"],
+    createdByHandle: "@Archivist",
+    memberHandles: ["@Archivist", "@VellumArchivist"],
     isPublicList: false,
+    isVaultGated: true,
     publicShareCode: "DARK-VAULT-UNCUT",
     updatedAt: new Date().toISOString(),
     works: [
@@ -264,7 +266,7 @@ const DEFAULT_SHARED_SHELVES: readonly SharedShelf[] = [
         title: "[VAULT] Berserk: The Golden Age (Uncut)",
         contentType: "anime",
         coverRef: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx33-jK2aXoO81jfe.jpg",
-        addedByHandle: "@DemoUser1",
+        addedByHandle: "@Archivist",
         recommenderNote: "Keep sealed in Vault until ready. The 1997 uncut remaster is sublime.",
         upvotesCount: 9,
         addedAt: "2026-10-06T18:00:00Z",
@@ -276,7 +278,7 @@ const DEFAULT_SHARED_SHELVES: readonly SharedShelf[] = [
         contentType: "anime",
         coverRef: "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx142600-7d7rV5p5m4c8.jpg",
         addedByHandle: "@VellumArchivist",
-        recommenderNote: "Emotional gut punch. Local dual audio archive in C:\\Users\\67rah\\Downloads\\watch.",
+        recommenderNote: "Emotional gut punch. Local dual audio archive.",
         upvotesCount: 11,
         addedAt: "2026-10-08T11:20:00Z",
       },
@@ -288,7 +290,7 @@ const DEFAULT_SHARED_SHELVES: readonly SharedShelf[] = [
     description: "Community curated public list connecting high-tier animation scenes, reels, and sound design.",
     iconEmoji: "🎬",
     createdByHandle: "@MangaNomad",
-    memberHandles: ["@MangaNomad", "@DemoUser1", "@CaelumReader", "@JinSoWol"],
+    memberHandles: ["@MangaNomad", "@Archivist", "@CaelumReader", "@JinSoWol"],
     isPublicList: true,
     publicShareCode: "EDITS-2026-PUBLIC",
     updatedAt: new Date().toISOString(),
@@ -310,7 +312,7 @@ const DEFAULT_SHARED_SHELVES: readonly SharedShelf[] = [
         title: "Frieren: Beyond Journey's End (Anime TV BD)",
         contentType: "anime",
         coverRef: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx154587-n1fmjRv4Jlt5.jpg",
-        addedByHandle: "@DemoUser1",
+        addedByHandle: "@Archivist",
         recommenderNote: "Zoltraak first-class mage exam battle edit.",
         upvotesCount: 27,
         addedAt: "2026-10-10T16:00:00Z",
@@ -324,7 +326,11 @@ export interface FriendsState {
   readonly activityFeed: readonly FriendActivityItem[];
   readonly sharedShelves: readonly SharedShelf[];
   readonly toggleFollow: (friendId: string) => void;
+  readonly removeFriend: (friendId: string) => void;
   readonly addWorkToSharedShelf: (shelfId: string, work: { id: string; title: string; contentType: string; coverRef?: string; note?: string }) => void;
+  readonly removeWorkFromSharedShelf: (shelfId: string, entryId: string) => void;
+  readonly deleteSharedShelf: (shelfId: string) => void;
+  readonly flushActivityFeed: () => void;
   readonly upvoteShelfWork: (shelfId: string, entryId: string) => void;
   readonly createSharedShelf: (title: string, description: string, iconEmoji?: string, isPublic?: boolean) => SharedShelf;
 }
@@ -347,7 +353,22 @@ export const useFriendsStore = create<FriendsState>((set, get) => {
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed && Array.isArray(parsed.friends) && Array.isArray(parsed.shelves)) {
-          return parsed;
+          const sanitizedShelves = parsed.shelves.map((shelf: SharedShelf) => {
+            const isVault = shelf.id === "shelf-dark-vault-guild" || shelf.title.toLowerCase().includes("vault");
+            return {
+              ...shelf,
+              isVaultGated: isVault || shelf.isVaultGated,
+              works: shelf.works.map((w: SharedShelfWorkEntry) => ({
+                ...w,
+                recommenderNote: (w.recommenderNote || "").replace(/in C:\\Users\\[^\s.]+/gi, "").trim(),
+              })),
+            };
+          });
+          return {
+            friends: parsed.friends,
+            activity: Array.isArray(parsed.activity) ? parsed.activity : [...DEFAULT_ACTIVITY],
+            shelves: sanitizedShelves,
+          };
         }
       }
     } catch {
@@ -390,6 +411,14 @@ export const useFriendsStore = create<FriendsState>((set, get) => {
       });
     },
 
+    removeFriend: (friendId: string) => {
+      set((state) => {
+        const nextFriends = state.friends.filter((f) => f.id !== friendId);
+        persist(nextFriends, state.sharedShelves, state.activityFeed);
+        return { friends: nextFriends };
+      });
+    },
+
     addWorkToSharedShelf: (shelfId, work) => {
       set((state) => {
         const nextShelves = state.sharedShelves.map((shelf) => {
@@ -400,8 +429,8 @@ export const useFriendsStore = create<FriendsState>((set, get) => {
             title: work.title,
             contentType: work.contentType,
             coverRef: work.coverRef,
-            addedByHandle: "@DemoUser1",
-            recommenderNote: work.note?.trim() || "Recommended by DemoUser1",
+            addedByHandle: "@Archivist",
+            recommenderNote: work.note?.trim() || "Recommended by Archivist",
             upvotesCount: 1,
             addedAt: new Date().toISOString(),
           };
@@ -413,6 +442,36 @@ export const useFriendsStore = create<FriendsState>((set, get) => {
         });
         persist(state.friends, nextShelves, state.activityFeed);
         return { sharedShelves: nextShelves };
+      });
+    },
+
+    removeWorkFromSharedShelf: (shelfId, entryId) => {
+      set((state) => {
+        const nextShelves = state.sharedShelves.map((shelf) => {
+          if (shelf.id !== shelfId) return shelf;
+          return {
+            ...shelf,
+            works: shelf.works.filter((w) => w.id !== entryId),
+            updatedAt: new Date().toISOString(),
+          };
+        });
+        persist(state.friends, nextShelves, state.activityFeed);
+        return { sharedShelves: nextShelves };
+      });
+    },
+
+    deleteSharedShelf: (shelfId) => {
+      set((state) => {
+        const nextShelves = state.sharedShelves.filter((shelf) => shelf.id !== shelfId);
+        persist(state.friends, nextShelves, state.activityFeed);
+        return { sharedShelves: nextShelves };
+      });
+    },
+
+    flushActivityFeed: () => {
+      set((state) => {
+        persist(state.friends, state.sharedShelves, []);
+        return { activityFeed: [] };
       });
     },
 
@@ -438,8 +497,8 @@ export const useFriendsStore = create<FriendsState>((set, get) => {
         title: title.trim(),
         description: description.trim(),
         iconEmoji,
-        createdByHandle: "@DemoUser1",
-        memberHandles: ["@DemoUser1"],
+        createdByHandle: "@Archivist",
+        memberHandles: ["@Archivist"],
         isPublicList: isPublic,
         publicShareCode: `${title.slice(0, 4).toUpperCase()}-${Date.now().toString().slice(-4)}`,
         updatedAt: new Date().toISOString(),

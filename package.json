@@ -1,8 +1,8 @@
 {
-  "name": "chronicles-vault",
+  "name": "grimoire",
   "version": "0.1.0",
   "private": true,
-  "description": "Chronicles Vault — Your personal reading intelligence system",
+  "description": "Grimoire — Your personal fiction sanctum",
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"

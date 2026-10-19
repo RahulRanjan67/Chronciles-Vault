@@ -1,15 +1,15 @@
 {
   "manifest_version": 2,
-  "name": "Chronicles Vault Radar",
+  "name": "Grimoire Radar",
   "version": "0.1.0",
-  "description": "Stage reading tabs and bookmark folders for Chronicles Vault review.",
+  "description": "Stage reading tabs and bookmark folders for Grimoire review.",
   "permissions": ["activeTab", "tabs", "bookmarks", "downloads"],
   "background": {
     "scripts": ["capture-utils.js", "background.js"],
     "persistent": false
   },
   "browser_action": {
-    "default_title": "Capture with Chronicles Vault Radar",
+    "default_title": "Capture with Grimoire Radar",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",

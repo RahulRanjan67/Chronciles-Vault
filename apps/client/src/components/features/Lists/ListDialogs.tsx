@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input } from "@chronicles-vault/ui";
-import { useListsStore, type UserPersonalList, type UserPersonalListItem } from "@chronicles-vault/state";
-import { PrivacyState } from "@chronicles-vault/domain";
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input } from "@grimoire/ui";
+import { useListsStore, type UserPersonalList, type UserPersonalListItem } from "@grimoire/state";
+import { PrivacyState } from "@grimoire/domain";
 
 const NOTE_LIMIT = 500;
 
@@ -46,21 +46,21 @@ export function EditListDialog({ open, onOpenChange, list }: EditListDialogProps
         </DialogHeader>
         <form onSubmit={save} className="space-y-4">
           <label className="block space-y-1.5">
-            <span className="text-cv-xs font-medium text-[var(--cv-text-muted)]">Title</span>
+            <span className="text-gm-xs font-medium text-[var(--gm-text-muted)]">Title</span>
             <Input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={120} required />
           </label>
           <label className="block space-y-1.5">
-            <span className="text-cv-xs font-medium text-[var(--cv-text-muted)]">Description</span>
+            <span className="text-gm-xs font-medium text-[var(--gm-text-muted)]">Description</span>
             <textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               maxLength={600}
               rows={3}
-              className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-sm text-[var(--cv-text)] focus:outline-none focus:ring-2 focus:ring-[var(--cv-border-focus)]"
+              className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-sm text-[var(--gm-text)] focus:outline-none focus:ring-2 focus:ring-[var(--gm-border-focus)]"
             />
           </label>
           <div className="space-y-1.5">
-            <span className="text-cv-xs font-medium text-[var(--cv-text-muted)]">Visibility</span>
+            <span className="text-gm-xs font-medium text-[var(--gm-text-muted)]">Visibility</span>
             <div className="flex gap-2" role="radiogroup" aria-label="Visibility">
               <Button type="button" size="sm" variant={isPublic ? "default" : "outline"} aria-pressed={isPublic} onClick={() => setIsPublic(true)}>
                 Public
@@ -119,9 +119,9 @@ export function ItemNoteDialog({ open, onOpenChange, listId, item, workTitle }: 
             onChange={(event) => setNote(event.target.value.slice(0, NOTE_LIMIT))}
             rows={4}
             placeholder="Why this entry belongs here…"
-            className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-sm text-[var(--cv-text)] focus:outline-none focus:ring-2 focus:ring-[var(--cv-border-focus)]"
+            className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-sm text-[var(--gm-text)] focus:outline-none focus:ring-2 focus:ring-[var(--gm-border-focus)]"
           />
-          <p className="text-right text-[11px] text-[var(--cv-text-subtle)]">
+          <p className="text-right text-[11px] text-[var(--gm-text-subtle)]">
             {note.length}/{NOTE_LIMIT}
           </p>
           <DialogFooter className="pt-2">

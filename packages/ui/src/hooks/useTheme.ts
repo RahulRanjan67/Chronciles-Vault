@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export type ThemeId = 'prism-arcana' | 'parchment-ink' | 'xianxia-realm' | 'ink' | 'midnight-arcana';
+export type ThemeId = 'parchment-ink' | 'midnight-arcana' | 'xianxia-realm' | 'ink';
 
 export interface ThemeConfig {
   id: ThemeId;
@@ -16,69 +16,59 @@ export interface ThemeConfig {
 
 export const THEMES: ThemeConfig[] = [
   {
-    id: 'prism-arcana',
-    name: 'Prism Arcana',
-    tagline: 'Prism White & Royal Indigo',
-    previewBg: '#f4f7ff',
-    previewAccent: '#4f46e5',
-    previewSecondary: '#059669',
-    previewSurface: '#ffffff',
-    previewBorder: 'rgba(79, 70, 229, 0.34)',
-    isDark: false,
-  },
-  {
     id: 'parchment-ink',
     name: 'Antique Parchment',
-    tagline: '300-Year-Old Pages',
-    previewBg: '#f5e6d3',
+    tagline: '300-Year-Old Aged Amber Pages',
+    previewBg: '#f4ebd9',
     previewAccent: '#d97706',
     previewSecondary: '#b45309',
-    previewSurface: '#faf0e6',
-    previewBorder: 'rgba(180, 83, 9, 0.38)',
-    isDark: false,
-  },
-  {
-    id: 'xianxia-realm',
-    name: 'Blossom Ascendant',
-    tagline: 'Pink-Purple Xianxia Realm',
-    previewBg: '#fdf2f8',
-    previewAccent: '#e11d48',
-    previewSecondary: '#db2777',
-    previewSurface: '#fce7f3',
-    previewBorder: 'rgba(219, 39, 119, 0.36)',
-    isDark: false,
-  },
-  {
-    id: 'ink',
-    name: 'Ink',
-    tagline: 'Pure White & Stark Black',
-    previewBg: '#ffffff',
-    previewAccent: '#09090b',
-    previewSecondary: '#dc2626',
-    previewSurface: '#f4f4f5',
-    previewBorder: 'rgba(9, 9, 11, 0.45)',
+    previewSurface: '#ede0c8',
+    previewBorder: 'rgba(180, 83, 9, 0.45)',
     isDark: false,
   },
   {
     id: 'midnight-arcana',
     name: 'Midnight Arcana',
-    tagline: 'Dark Blues & Violets',
-    previewBg: '#0f172a',
+    tagline: 'Obsidian Night Blues & Violets',
+    previewBg: '#090d16',
     previewAccent: '#6366f1',
     previewSecondary: '#8b5cf6',
-    previewSurface: '#1e293b',
+    previewSurface: '#1e1b4b',
     previewBorder: 'rgba(99, 102, 241, 0.40)',
     isDark: true,
   },
+  {
+    id: 'xianxia-realm',
+    name: 'Blossom Ascendant',
+    tagline: 'Pink-Purple Xianxia Spectrum',
+    previewBg: '#fdf2f8',
+    previewAccent: '#c026d3',
+    previewSecondary: '#a21caf',
+    previewSurface: '#fae8ff',
+    previewBorder: 'rgba(192, 38, 211, 0.36)',
+    isDark: false,
+  },
+  {
+    id: 'ink',
+    name: 'Sumi-e Charcoal Ink',
+    tagline: 'Simple Black & White Washi',
+    previewBg: '#e8e6e1',
+    previewAccent: '#09090b',
+    previewSecondary: '#dc2626',
+    previewSurface: '#dedad2',
+    previewBorder: 'rgba(9, 9, 11, 0.45)',
+    isDark: false,
+  },
 ];
 
-export const THEME_STORAGE_KEY = 'chronicles-vault-theme';
+export const THEME_STORAGE_KEY = 'grimoire-theme';
 
 export function applyTheme(themeId: ThemeId) {
   if (typeof document === 'undefined') return;
   const legacyMap: Record<string, ThemeId> = {
+    'prism-arcana': 'parchment-ink',
     'night-theme': 'midnight-arcana',
-    'midnight-arcana-legacy': 'prism-arcana',
+    'midnight-arcana-legacy': 'midnight-arcana',
   };
   const normalizedId: ThemeId =
     (legacyMap[themeId as string] as ThemeId | undefined) ?? (themeId as ThemeId);
@@ -95,10 +85,11 @@ export function applyTheme(themeId: ThemeId) {
 
 export function useTheme() {
   const [themeId, setThemeIdState] = useState<ThemeId>(() => {
-    if (typeof window === 'undefined') return 'prism-arcana';
+    if (typeof window === 'undefined') return 'parchment-ink';
     try {
       const storedRaw = window.localStorage.getItem(THEME_STORAGE_KEY) as string | null;
       const legacyStoredMap: Record<string, ThemeId> = {
+        'prism-arcana': 'parchment-ink',
         'night-theme': 'midnight-arcana',
       };
       const stored =
@@ -111,13 +102,14 @@ export function useTheme() {
     } catch {
       // Ignore localStorage access failures
     }
-    return 'prism-arcana';
+    return 'parchment-ink';
   });
 
   const setTheme = useCallback((id: ThemeId) => {
     const legacyMap: Record<string, ThemeId> = {
+      'prism-arcana': 'parchment-ink',
       'night-theme': 'midnight-arcana',
-      'midnight-arcana-legacy': 'prism-arcana',
+      'midnight-arcana-legacy': 'midnight-arcana',
     };
     const normalized = (legacyMap[id as string] as ThemeId | undefined) ?? id;
     setThemeIdState(normalized);
@@ -127,7 +119,7 @@ export function useTheme() {
       // Ignore write errors
     }
     applyTheme(normalized);
-    window.dispatchEvent(new CustomEvent('cv-theme-change', { detail: normalized }));
+    window.dispatchEvent(new CustomEvent('gm-theme-change', { detail: normalized }));
   }, []);
 
   useEffect(() => {
@@ -151,10 +143,10 @@ export function useTheme() {
     };
 
     window.addEventListener('storage', handleStorage);
-    window.addEventListener('cv-theme-change', handleCustom);
+    window.addEventListener('gm-theme-change', handleCustom);
     return () => {
       window.removeEventListener('storage', handleStorage);
-      window.removeEventListener('cv-theme-change', handleCustom);
+      window.removeEventListener('gm-theme-change', handleCustom);
     };
   }, [themeId]);
 

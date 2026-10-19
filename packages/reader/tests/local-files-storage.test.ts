@@ -15,7 +15,7 @@ import {
 import { listPdfBookmarks, togglePdfBookmark } from "../src/pdf-bookmarks";
 import { getMemoryAssetBlob, storeMemoryAssetBlob } from "../src/memory-assets";
 
-const DATABASE_NAME = "chronicles-vault-reader";
+const DATABASE_NAME = "grimoire-reader";
 
 function deleteDatabase(): Promise<void> {
   return new Promise((resolve, reject) => {

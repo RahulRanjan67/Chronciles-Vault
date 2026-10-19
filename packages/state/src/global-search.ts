@@ -16,7 +16,7 @@
  *  - Source results expose only the host of a URL, never its path or query.
  */
 
-import { MemoryType, PrivacyState, SpoilerLevel } from "@chronicles-vault/domain";
+import { MemoryType, PrivacyState, SpoilerLevel } from "@grimoire/domain";
 
 export type SearchCategory = "works" | "memories" | "lore" | "sources" | "files" | "vault";
 

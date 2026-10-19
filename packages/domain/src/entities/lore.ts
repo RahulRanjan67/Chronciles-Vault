@@ -2,7 +2,7 @@ import {
   LoreEntryId,
   WorkId,
   newId,
-} from '@chronicles-vault/shared';
+} from '@grimoire/shared';
 import { ProgressAnchor, validateProgressAnchor } from './progress.js';
 
 // ---------------------------------------------------------------------------

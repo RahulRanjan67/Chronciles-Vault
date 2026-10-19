@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss';
-import { cvTokens } from '@chronicles-vault/ui/tailwind';
+import { cvTokens } from '@grimoire/ui/tailwind';
 
 export default {
   darkMode: ['class'],

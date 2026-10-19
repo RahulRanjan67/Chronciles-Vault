@@ -5,8 +5,8 @@ import type {
   AccessPathId,
   ReadingRelationshipId,
   MemoryId,
-} from '@chronicles-vault/shared';
-import { newId } from '@chronicles-vault/shared';
+} from '@grimoire/shared';
+import { newId } from '@grimoire/shared';
 import type {
   Work,
   ArchiveRecord,

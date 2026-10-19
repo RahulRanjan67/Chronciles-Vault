@@ -1,9 +1,9 @@
 {
-  "name": "@chronicles-vault/domain",
+  "name": "@grimoire/domain",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Pure domain model for Chronicles Vault — entities, value objects, repository interfaces, domain events",
+  "description": "Pure domain model for Grimoire — entities, value objects, repository interfaces, domain events",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,7 +21,7 @@
     "test": "node --experimental-strip-types --test tests/domain.test.ts tests/health-scheduler.test.ts tests/merge-archive.test.ts tests/work-relations.test.ts"
   },
   "dependencies": {
-    "@chronicles-vault/shared": "workspace:*"
+    "@grimoire/shared": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

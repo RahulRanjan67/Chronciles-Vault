@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { WorkId } from "@chronicles-vault/shared";
+import { WorkId } from "@grimoire/shared";
 import { clientRepository } from "../client-repository";
 
 export interface CustomCategory {

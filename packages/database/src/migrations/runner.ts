@@ -1,5 +1,5 @@
 /**
- * Migration runner for Chronicles Vault SQLite database.
+ * Migration runner for Grimoire SQLite database.
  *
  * Tracks applied migrations in `schema_migrations` table and runs
  * missing ones in order. Safe to run on both fresh and existing DBs.

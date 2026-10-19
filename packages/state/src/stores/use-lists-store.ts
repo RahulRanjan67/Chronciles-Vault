@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { WorkId } from "@chronicles-vault/shared";
+import { WorkId } from "@grimoire/shared";
 import {
   ContentType,
   ContentOrigin,
@@ -7,7 +7,7 @@ import {
   PrivacyState,
   PersonalState,
   ProgressAnchor,
-} from "@chronicles-vault/domain";
+} from "@grimoire/domain";
 import { clientRepository } from "../client-repository";
 import { useLibraryStore } from "./use-library-store";
 

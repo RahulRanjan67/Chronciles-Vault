@@ -15,7 +15,7 @@ export const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'fixed inset-0 z-[var(--cv-z-modal)] bg-black/75 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      'fixed inset-0 z-[var(--gm-z-modal)] bg-black/75 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className,
     )}
     {...props}
@@ -34,14 +34,14 @@ export const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed left-[50%] top-[50%] z-[var(--cv-z-modal)] grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-cv-xl border border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] p-6 shadow-xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]',
+        'fixed left-[50%] top-[50%] z-[var(--gm-z-modal)] grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-gm-xl border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-6 shadow-xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]',
         className,
       )}
       {...props}
     >
       {children}
       {!hideCloseButton && (
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-cv-sm p-1 text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)] hover:bg-[var(--cv-surface)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--cv-border-focus)] cursor-pointer">
+        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-gm-sm p-1 text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)] hover:bg-[var(--gm-surface)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--gm-border-focus)] cursor-pointer">
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
@@ -82,7 +82,7 @@ export const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-cv-lg font-semibold leading-none text-[var(--cv-text)] tracking-tight', className)}
+    className={cn('text-gm-lg font-semibold leading-none text-[var(--gm-text)] tracking-tight', className)}
     {...props}
   />
 ));
@@ -94,7 +94,7 @@ export const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-cv-sm text-[var(--cv-text-muted)]', className)}
+    className={cn('text-gm-sm text-[var(--gm-text-muted)]', className)}
     {...props}
   />
 ));

@@ -1,4 +1,4 @@
-import type { ProgressAnchor } from "@chronicles-vault/domain";
+import type { ProgressAnchor } from "@grimoire/domain";
 
 export interface ReaderSession {
   readonly id: string;
@@ -12,7 +12,7 @@ export interface ReaderSession {
   readonly anchorAfter: ProgressAnchor | null;
 }
 
-const DATABASE_NAME = "chronicles-vault-reader";
+const DATABASE_NAME = "grimoire-reader";
 const DATABASE_VERSION = 4;
 const FILE_STORE_NAME = "local-files";
 const SESSION_STORE_NAME = "reading-sessions";

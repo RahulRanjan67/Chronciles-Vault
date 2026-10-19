@@ -2,9 +2,9 @@ import {
   AccessPathKind,
   SourceHealthState,
   UpdateCertainty,
-} from '@chronicles-vault/domain';
-import type { AccessPath, FeedAccessPath } from '@chronicles-vault/domain';
-import { err, ok } from '@chronicles-vault/shared';
+} from '@grimoire/domain';
+import type { AccessPath, FeedAccessPath } from '@grimoire/domain';
+import { err, ok } from '@grimoire/shared';
 import type { ProviderAdapter, ProviderDependencies, ProviderMetadata, ProviderUpdateResult } from './provider.js';
 import {
   Capability,

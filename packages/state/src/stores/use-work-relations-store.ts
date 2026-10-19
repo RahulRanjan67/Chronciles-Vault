@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { WorkId, WorkRelationId } from '@chronicles-vault/shared';
-import { WorkRelationType, WorkRelation } from '@chronicles-vault/domain';
+import { WorkId, WorkRelationId } from '@grimoire/shared';
+import { WorkRelationType, WorkRelation } from '@grimoire/domain';
 import { clientRepository } from '../client-repository';
 
 export interface WorkRelationsState {

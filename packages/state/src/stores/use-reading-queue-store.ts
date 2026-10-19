@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { PersonalState } from "@chronicles-vault/domain";
+import { PersonalState } from "@grimoire/domain";
 import { clientRepository, type HydratedWorkItem } from "../client-repository";
 
 export interface ReadingQueueItem {

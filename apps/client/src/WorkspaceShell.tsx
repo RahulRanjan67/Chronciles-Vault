@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Home, Layers, RefreshCw } from "lucide-react";
-import { AppShell, toast, ThemeSwitcher } from "@chronicles-vault/ui";
+import { DoorOpen, Layers, Lock, LogOut, RefreshCw, Unlock } from "lucide-react";
+import { AppShell, toast, ThemeSwitcher } from "@grimoire/ui";
 import { matchRoute } from "./router";
 import { TermsAndConditions } from "./components/features/TermsAndConditions/TermsAndConditions";
 import {
@@ -8,9 +8,8 @@ import {
   useLibraryStore,
   useRadarStore,
   useUpdatesStore,
-} from "@chronicles-vault/state";
-import { useVaultAutoLock, useVaultStore } from "@chronicles-vault/vault";
-import { OfflineStatusBadge } from "./components/layout/OfflineStatusBadge";
+} from "@grimoire/state";
+import { useVaultAutoLock, useVaultStore } from "@grimoire/vault";
 import { APP_ROUTES, CommandPalette } from "./routes-config";
 import { syncWithCrossPlatformHub } from "./utils/cross-platform-sync";
 
@@ -32,6 +31,18 @@ export function WorkspaceShell({
   const [isSyncing, setIsSyncing] = React.useState(false);
   const isVaultUnlocked = useVaultStore((state) => state.status === "unlocked");
   useVaultAutoLock({ timeoutMinutes: 30, lockOnVisibilityChange: false });
+
+  const handleLogOut = React.useCallback(() => {
+    try {
+      localStorage.removeItem("cv:username");
+      localStorage.removeItem("cv:auth_token");
+    } catch {}
+    toast({
+      title: "Logged Out",
+      description: "Archivist room exited and identity sealed.",
+    });
+    onOpenSanctumHome();
+  }, [onOpenSanctumHome]);
 
   const handleCrossPlatformSync = async () => {
     setIsSyncing(true);
@@ -77,7 +88,7 @@ export function WorkspaceShell({
         onNavigate(`/work/${encodeURIComponent(workId)}`);
         return;
       }
-      void import("@chronicles-vault/reader")
+      void import("@grimoire/reader")
         .then(({ listLocalFiles }) => listLocalFiles())
         .then((files) => {
           const file = files.find(
@@ -145,53 +156,66 @@ export function WorkspaceShell({
           updates: updatesUnreadCount,
         }}
         headerSlot={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={() => onNavigate("/vault")}
-              className="inline-flex items-center justify-center gap-1.5 border border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] px-3 py-2 text-cv-xs font-bold text-[var(--cv-text)] shadow-[2px_2px_0px_var(--cv-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer min-w-[40px]"
+              className="inline-flex h-8 sm:h-9 items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer min-w-[34px] sm:min-w-[38px]"
               title="Open Private Vault to reveal or conceal Hidden Works"
             >
-              <span>{isVaultUnlocked ? "🔓" : "🔒"}</span>
+              {isVaultUnlocked ? (
+                <Unlock className="h-4 w-4 text-[var(--gm-warning)]" />
+              ) : (
+                <Lock className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+              )}
             </button>
             <button
               type="button"
               onClick={() => void handleCrossPlatformSync()}
-              className="inline-flex items-center justify-center gap-1.5 border border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] px-3 py-2 text-cv-xs font-bold text-[var(--cv-text)] shadow-[2px_2px_0px_var(--cv-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer min-w-[40px]"
+              className="inline-flex h-8 sm:h-9 items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
               title="Sync Works, Progress & Memories across Web, PC App & Mobile App"
             >
               <RefreshCw
-                className={`h-3.5 w-3.5 text-[var(--cv-accent-strong)] ${
+                className={`h-4 w-4 text-[var(--gm-accent-strong)] ${
                   isSyncing ? "animate-spin" : ""
                 }`}
               />
-              <span className="hidden md:inline">Sync Room</span>
+              <span className="hidden md:inline">Sync</span>
             </button>
             <button
               type="button"
               onClick={onOpenSanctumHome}
-              className="inline-flex items-center justify-center gap-1.5 border border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] px-3 py-2 text-cv-xs font-bold text-[var(--cv-text)] shadow-[2px_2px_0px_var(--cv-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer min-w-[40px]"
-              title="Return to Sanctum Room Homepage"
+              className="inline-flex h-8 sm:h-9 items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
+              title="Exit Room and return to Sanctum Title Screen"
             >
-              <Home className="h-3.5 w-3.5 text-[var(--cv-accent-strong)]" />
-              <span className="hidden sm:inline">Room Home</span>
+              <DoorOpen className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+              <span className="hidden sm:inline">Exit Room</span>
             </button>
             <button
               type="button"
               onClick={onOpenFeaturesGuide}
-              className="inline-flex items-center justify-center gap-1.5 border border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] px-3 py-2 text-cv-xs font-bold text-[var(--cv-text)] shadow-[2px_2px_0px_var(--cv-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer min-w-[40px]"
-              title="Open Complete 32-Feature Step-by-Step Encyclopedia"
+              className="inline-flex h-8 sm:h-9 items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
+              title="Open 32-Feature Step-by-Step Encyclopedia"
             >
-              <Layers className="h-3.5 w-3.5 text-[var(--cv-accent-strong)]" />
-              <span className="hidden lg:inline">Features Guide</span>
+              <Layers className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+              <span className="hidden lg:inline">Guide</span>
             </button>
             <ThemeSwitcher />
+            <button
+              type="button"
+              onClick={handleLogOut}
+              className="inline-flex h-8 sm:h-9 items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-danger)] hover:bg-[var(--gm-danger)] hover:text-white shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
+              title="Log Out and Seal Room Session"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden xl:inline">Log Out</span>
+            </button>
           </div>
         }
       >
         <React.Suspense
           fallback={
-            <div className="p-8 text-center text-[var(--cv-text-muted)]">Loading view…</div>
+            <div className="p-8 text-center text-[var(--gm-text-muted)]">Loading view…</div>
           }
         >
           <Component

@@ -1,5 +1,5 @@
 /**
- * Date and text formatting utilities for Chronicles Vault.
+ * Date and text formatting utilities for Grimoire.
  */
 
 const SECOND = 1000;

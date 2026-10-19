@@ -18,7 +18,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@chronicles-vault/ui";
+} from "@grimoire/ui";
 import {
   useRadarStore,
   selectFilteredRadarItems,
@@ -26,13 +26,13 @@ import {
   type CaptureState,
   parseRadarImport,
   useLibraryStore,
-} from "@chronicles-vault/state";
+} from "@grimoire/state";
 import {
   PrivacyState,
   CaptureState as DomainCaptureState,
   createCapture,
   triageCaptureItem,
-} from "@chronicles-vault/domain";
+} from "@grimoire/domain";
 import { RadarItemCard, RadarFilters, type RadarFilterState } from "../components/features/Radar";
 import { CreateWorkModal } from "../components/features/Library/CreateWorkModal";
 
@@ -295,8 +295,8 @@ export function Radar({ onNavigateWork }: RadarProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2.5">
-            <RadarIcon className="h-6 w-6 text-[var(--cv-accent-strong)]" />
-            <h1 className="text-cv-2xl sm:text-cv-3xl font-extrabold tracking-tight text-[var(--cv-text)]">
+            <RadarIcon className="h-6 w-6 text-[var(--gm-accent-strong)]" />
+            <h1 className="text-gm-2xl sm:text-gm-3xl font-extrabold tracking-tight text-[var(--gm-text)]">
               Radar
             </h1>
             {hasPendingItems && (
@@ -305,7 +305,7 @@ export function Radar({ onNavigateWork }: RadarProps) {
               </Badge>
             )}
           </div>
-          <p className="mt-1 text-cv-sm text-[var(--cv-text-muted)]">
+          <p className="mt-1 text-gm-sm text-[var(--gm-text-muted)]">
             Intake queue for browser tabs and bookmarks captured via the Radar extension.
           </p>
         </div>
@@ -316,7 +316,7 @@ export function Radar({ onNavigateWork }: RadarProps) {
               variant="outline"
               size="sm"
               onClick={handleBulkDiscard}
-              className="gap-1.5 text-[var(--cv-danger)] hover:text-[var(--cv-danger)] hover:bg-[var(--cv-danger-muted)]"
+              className="gap-1.5 text-[var(--gm-danger)] hover:text-[var(--gm-danger)] hover:bg-[var(--gm-danger-muted)]"
             >
               <Trash2 className="h-3.5 w-3.5" />
               <span>Discard ({selectedIds.size})</span>
@@ -360,14 +360,14 @@ export function Radar({ onNavigateWork }: RadarProps) {
       {storageError && (
         <div
           role="alert"
-          className="mb-4 rounded-cv border border-[var(--cv-danger)] bg-[var(--cv-danger-muted)] p-3 text-cv-sm text-[var(--cv-text)]"
+          className="mb-4 rounded-cv border border-[var(--gm-danger)] bg-[var(--gm-danger-muted)] p-3 text-gm-sm text-[var(--gm-text)]"
         >
           Radar storage could not be read or written: {storageError}
         </div>
       )}
 
       {items.length === 0 && (
-        <div className="mb-6 rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-4 text-cv-sm text-[var(--cv-text-muted)]">
+        <div className="mb-6 rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 text-gm-sm text-[var(--gm-text-muted)]">
           Capture tabs or bookmark folders in the Radar browser companion, export a batch, then
           import its JSON file here. Captures remain local and require your review.
         </div>
@@ -375,22 +375,22 @@ export function Radar({ onNavigateWork }: RadarProps) {
 
       {/* Batch Summary Banner */}
       {items.length > 0 && (
-        <div className="mb-6 rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+        <div className="mb-6 rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-cv bg-[var(--cv-accent-muted)] text-[var(--cv-accent-strong)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-cv bg-[var(--gm-accent-muted)] text-[var(--gm-accent-strong)]">
               <Inbox className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-cv-sm font-semibold text-[var(--cv-text)]">
+              <h3 className="text-gm-sm font-semibold text-[var(--gm-text)]">
                 {items.length} captured items
               </h3>
-              <p className="text-cv-xs text-[var(--cv-text-muted)]">
+              <p className="text-gm-xs text-[var(--gm-text-muted)]">
                 {pendingCount} pending review · {items.filter((i) => i.state === "matched").length}{" "}
                 linked to works
               </p>
             </div>
           </div>
-          <p className="text-cv-xs text-[var(--cv-text-muted)]">
+          <p className="text-gm-xs text-[var(--gm-text-muted)]">
             No works are created or tabs closed without your action.
           </p>
         </div>
@@ -510,7 +510,7 @@ export function Radar({ onNavigateWork }: RadarProps) {
             </DialogDescription>
           </DialogHeader>
           {availableWorks.length === 0 ? (
-            <p className="text-cv-sm text-[var(--cv-text-muted)]">
+            <p className="text-gm-sm text-[var(--gm-text-muted)]">
               There are no eligible works in your library yet.
             </p>
           ) : (

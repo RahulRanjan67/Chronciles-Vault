@@ -20,7 +20,7 @@ import {
   type MemoryRepository,
   type MemoryListOptions,
   type GlobalMemoryOptions,
-} from '@chronicles-vault/domain';
+} from '@grimoire/domain';
 import { runInTransaction } from '../connection.js';
 
 interface MemoryRow {

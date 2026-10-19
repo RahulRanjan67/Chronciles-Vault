@@ -1,5 +1,5 @@
 {
-  "name": "@chronicles-vault/reader",
+  "name": "@grimoire/reader",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -27,7 +27,7 @@
     "vitest": "^2.0.0"
   },
   "dependencies": {
-    "@chronicles-vault/domain": "workspace:*",
+    "@grimoire/domain": "workspace:*",
     "dompurify": "^3.2.6",
     "pdfjs-dist": "^4.10.38"
   }

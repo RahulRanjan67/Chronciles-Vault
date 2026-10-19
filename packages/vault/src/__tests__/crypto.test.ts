@@ -37,7 +37,7 @@ describe('Vault Cryptography', () => {
       timeCost: 1,
     })
 
-    const secretText = 'Chronicles Vault Confidential Memory Note 42'
+    const secretText = 'Grimoire Confidential Memory Note 42'
     const payload = await encrypt(secretText, key)
 
     expect(payload.version).toBe(1)

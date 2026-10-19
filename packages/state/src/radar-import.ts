@@ -1,4 +1,4 @@
-import { normalizeUrl } from "@chronicles-vault/domain";
+import { normalizeUrl } from "@grimoire/domain";
 
 export type RadarBrowserSource = "chromium" | "firefox" | "edge" | "safari" | "unknown";
 
@@ -17,7 +17,7 @@ export interface RadarImportedItem {
 }
 
 export interface RadarImportBatch {
-  readonly format: "chronicles-vault-radar";
+  readonly format: "grimoire-radar";
   readonly version: 1;
   readonly batchId: string;
   readonly batchLabel: string;
@@ -88,7 +88,7 @@ export function parseRadarImport(json: string): RadarImportBatch {
 
   if (
     !isRecord(decoded) ||
-    decoded["format"] !== "chronicles-vault-radar" ||
+    decoded["format"] !== "grimoire-radar" ||
     decoded["version"] !== 1
   ) {
     throw new Error("The selected file is not a supported Radar capture export.");
@@ -161,7 +161,7 @@ export function parseRadarImport(json: string): RadarImportBatch {
   if (items.length === 0) throw new Error("Radar import contains no usable capture URLs.");
 
   return {
-    format: "chronicles-vault-radar",
+    format: "grimoire-radar",
     version: 1,
     batchId,
     batchLabel,

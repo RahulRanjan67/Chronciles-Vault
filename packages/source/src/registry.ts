@@ -1,10 +1,10 @@
 import {
   AccessPathKind,
   SourceHealthState,
-} from '@chronicles-vault/domain';
-import type { AccessPath, WebAccessPath, Work } from '@chronicles-vault/domain';
-import { err, ok } from '@chronicles-vault/shared';
-import type { Result } from '@chronicles-vault/shared';
+} from '@grimoire/domain';
+import type { AccessPath, WebAccessPath, Work } from '@grimoire/domain';
+import { err, ok } from '@grimoire/shared';
+import type { Result } from '@grimoire/shared';
 import type {
   Clock,
   FetchLike,
@@ -142,7 +142,7 @@ export class ManualWebAdapter implements ProviderAdapter {
     return err(
       new SourceProviderError(
         'NOT_SUPPORTED',
-        'Manual web sources require user-mediated tracking or an official feed. Chronicles Vault does not perform unauthorized automated scraping.',
+        'Manual web sources require user-mediated tracking or an official feed. Grimoire does not perform unauthorized automated scraping.',
         SourceHealthState.Healthy,
       ),
     );

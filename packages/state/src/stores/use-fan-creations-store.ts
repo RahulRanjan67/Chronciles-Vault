@@ -8,8 +8,8 @@ import {
   ContentOrigin,
   PublicationState,
   PrivacyState,
-} from "@chronicles-vault/domain";
-import type { WorkId } from "@chronicles-vault/shared";
+} from "@grimoire/domain";
+import type { WorkId } from "@grimoire/shared";
 
 export interface FanfictionEntry {
   readonly id: string;
@@ -151,7 +151,7 @@ const DEFAULT_VIDEO_EDITS: readonly VideoEditEntry[] = [
     url: "https://www.youtube.com/watch?v=takopi_sunflower_reel",
     audioTrack: "Radwimps - Sparkle (Piano Solo)",
     aspectRatio: "16:9",
-    notes: "Linked to local PC archive in C:\\Users\\67rah\\Downloads\\watch.",
+    notes: "Linked to local PC archive in C:\\Media\\Vault\\Downloads.",
     createdAt: "2026-10-02T11:00:00Z",
   },
 ];

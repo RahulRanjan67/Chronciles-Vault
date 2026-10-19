@@ -8,7 +8,7 @@ import { createStoredZip } from "./zip-fixture";
 const previousWindow = globalThis.window;
 const previousParser = globalThis.DOMParser;
 const previousSerializer = globalThis.XMLSerializer;
-const browserWindow = new JSDOM("", { url: "https://chronicles-vault.invalid" }).window;
+const browserWindow = new JSDOM("", { url: "https://grimoire.invalid" }).window;
 
 beforeEach(() => {
   globalThis.window = browserWindow as unknown as Window & typeof globalThis;
@@ -91,7 +91,7 @@ describe("EPUB package and locator handling", () => {
     const clean = sanitizeEpubXhtml(unsafe);
     expect(clean).toContain("safe");
     expect(clean).not.toMatch(/<script|<iframe|foreignObject|onclick|onerror/i);
-    expect(clean).toContain('data-cv-src="x"');
+    expect(clean).toContain('data-gm-src="x"');
     expect(clean).not.toMatch(/src="https:\/\/bad.invalid/i);
     expect(EPUB_CSP).toContain("default-src 'none'");
     expect(EPUB_CSP).toContain("script-src 'none'");

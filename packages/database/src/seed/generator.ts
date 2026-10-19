@@ -1,5 +1,5 @@
 /**
- * Deterministic Seed Data Generator for Chronicles Vault.
+ * Deterministic Seed Data Generator for Grimoire.
  *
  * Populates a SQLite database with realisticWorks, reading relationships,
  * access paths, progress logs, memories, captures, and update records.
@@ -31,7 +31,7 @@ import {
   UpdateCertainty,
   ProgressMethod,
   ProgressConfidence,
-} from '@chronicles-vault/domain';
+} from '@grimoire/domain';
 import {
   GENRES,
   TAGS,

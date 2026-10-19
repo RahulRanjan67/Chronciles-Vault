@@ -11,7 +11,7 @@ import {
   type UpdateEntry,
   UpdateCertainty,
   type UpdateRepository,
-} from '@chronicles-vault/domain';
+} from '@grimoire/domain';
 import { runInTransaction } from '../connection.js';
 
 interface UpdateEntryRow {

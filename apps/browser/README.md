@@ -3,7 +3,7 @@
 Build both extension folders from the shared sources:
 
 ```sh
-pnpm --filter @chronicles-vault/browser build
+pnpm --filter @grimoire/browser build
 ```
 
 Load `apps/browser/chromium` as an unpacked extension in a Chromium-based
@@ -14,7 +14,7 @@ uses its WebExtensions Manifest V2 compatibility configuration.
 The popup can stage the active tab, up to 100 tabs in the current window, or up
 to 100 bookmarks from a selected folder. Captures stay in the browser's
 IndexedDB queue until explicitly exported as a JSON file. Import that file with
-**Radar → Import Capture Batch** in Chronicles Vault. Clear the browser copy
+**Radar → Import Capture Batch** in Grimoire. Clear the browser copy
 only after confirming the import succeeded.
 
 The companion captures only tab/bookmark titles and HTTP(S) URLs. It does not

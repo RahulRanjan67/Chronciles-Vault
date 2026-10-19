@@ -8,13 +8,13 @@ import {
   SelectTrigger,
   SelectValue,
   cn,
-} from "@chronicles-vault/ui";
+} from "@grimoire/ui";
 import type {
   CaptureState,
   BrowserSource,
   RadarSortBy,
   RadarSortOrder,
-} from "@chronicles-vault/state";
+} from "@grimoire/state";
 
 function isCaptureStateFilter(value: string): value is CaptureState | "all" {
   return ["all", "pending", "matched", "created", "merged", "discarded", "temporary"].includes(
@@ -62,8 +62,8 @@ export function RadarFilters({ filters, onFilterChange, onReset, className }: Ra
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         {/* Header with filter icon */}
         <div className="flex items-center gap-2">
-          <SlidersHorizontal className="h-4 w-4 text-[var(--cv-text-muted)]" />
-          <span className="text-cv-sm font-medium text-[var(--cv-text)]">Filters</span>
+          <SlidersHorizontal className="h-4 w-4 text-[var(--gm-text-muted)]" />
+          <span className="text-gm-sm font-medium text-[var(--gm-text)]">Filters</span>
         </div>
 
         {/* Reset button */}
@@ -73,7 +73,7 @@ export function RadarFilters({ filters, onFilterChange, onReset, className }: Ra
               variant="ghost"
               size="sm"
               onClick={onReset}
-              className="text-cv-xs text-[var(--cv-text-muted)] hover:text-[var(--cv-text)] gap-1"
+              className="text-gm-xs text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] gap-1"
             >
               <RotateCcw className="h-3 w-3" />
               <span>Reset</span>
@@ -83,7 +83,7 @@ export function RadarFilters({ filters, onFilterChange, onReset, className }: Ra
       </div>
 
       {/* Filter row */}
-      <div className="flex flex-wrap items-center gap-2 text-cv-xs">
+      <div className="flex flex-wrap items-center gap-2 text-gm-xs">
         {/* State Filter */}
         <div className="w-36">
           <Select
@@ -92,7 +92,7 @@ export function RadarFilters({ filters, onFilterChange, onReset, className }: Ra
               if (isCaptureStateFilter(state)) update({ state });
             }}
           >
-            <SelectTrigger className="h-8 text-cv-xs">
+            <SelectTrigger className="h-8 text-gm-xs">
               <SelectValue placeholder="State" />
             </SelectTrigger>
             <SelectContent>
@@ -115,7 +115,7 @@ export function RadarFilters({ filters, onFilterChange, onReset, className }: Ra
               if (isBrowserSourceFilter(browserSource)) update({ browserSource });
             }}
           >
-            <SelectTrigger className="h-8 text-cv-xs">
+            <SelectTrigger className="h-8 text-gm-xs">
               <SelectValue placeholder="Browser" />
             </SelectTrigger>
             <SelectContent>
@@ -136,7 +136,7 @@ export function RadarFilters({ filters, onFilterChange, onReset, className }: Ra
               if (isRadarSortBy(sortBy)) update({ sortBy });
             }}
           >
-            <SelectTrigger className="h-8 text-cv-xs">
+            <SelectTrigger className="h-8 text-gm-xs">
               <div className="flex items-center gap-1.5 truncate">
                 <ArrowUpDown className="h-3 w-3 opacity-60 shrink-0" />
                 <SelectValue placeholder="Sort by" />
@@ -155,7 +155,7 @@ export function RadarFilters({ filters, onFilterChange, onReset, className }: Ra
           variant="outline"
           size="sm"
           onClick={() => update({ sortOrder: filters.sortOrder === "asc" ? "desc" : "asc" })}
-          className="h-8 px-2 text-cv-xs"
+          className="h-8 px-2 text-gm-xs"
         >
           {filters.sortOrder === "asc" ? "↑" : "↓"}
         </Button>
@@ -165,7 +165,7 @@ export function RadarFilters({ filters, onFilterChange, onReset, className }: Ra
           variant={filters.groupByWork ? "secondary" : "outline"}
           size="sm"
           onClick={() => update({ groupByWork: !filters.groupByWork })}
-          className="h-8 px-2 text-cv-xs gap-1.5"
+          className="h-8 px-2 text-gm-xs gap-1.5"
         >
           <Layers className="h-3 w-3" />
           <span>Group by Work</span>

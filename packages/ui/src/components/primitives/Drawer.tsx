@@ -15,7 +15,7 @@ export const DrawerOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     className={cn(
-      'fixed inset-0 z-[var(--cv-z-drawer)] bg-black/70 backdrop-blur-xs transition-opacity data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      'fixed inset-0 z-[var(--gm-z-drawer)] bg-black/70 backdrop-blur-xs transition-opacity data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className,
     )}
     {...props}
@@ -25,16 +25,16 @@ export const DrawerOverlay = React.forwardRef<
 DrawerOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const drawerVariants = cva(
-  'fixed z-[var(--cv-z-drawer)] gap-4 bg-[var(--cv-bg-elevated)] p-6 shadow-xl transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:duration-300',
+  'fixed z-[var(--gm-z-drawer)] gap-4 bg-[var(--gm-bg-elevated)] p-6 shadow-xl transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:duration-300',
   {
     variants: {
       side: {
-        top: 'inset-x-0 top-0 border-b border-[var(--cv-border-strong)] data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
+        top: 'inset-x-0 top-0 border-b border-[var(--gm-border-strong)] data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
         bottom:
-          'inset-x-0 bottom-0 border-t border-[var(--cv-border-strong)] rounded-t-cv-xl data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
-        left: 'inset-y-0 left-0 h-full w-3/4 border-r border-[var(--cv-border-strong)] sm:max-w-md data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
+          'inset-x-0 bottom-0 border-t border-[var(--gm-border-strong)] rounded-t-gm-xl data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
+        left: 'inset-y-0 left-0 h-full w-3/4 border-r border-[var(--gm-border-strong)] sm:max-w-md data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
         right:
-          'inset-y-0 right-0 h-full w-3/4 border-l border-[var(--cv-border-strong)] sm:max-w-md data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
+          'inset-y-0 right-0 h-full w-3/4 border-l border-[var(--gm-border-strong)] sm:max-w-md data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
       },
     },
     defaultVariants: {
@@ -62,7 +62,7 @@ export const DrawerContent = React.forwardRef<
     >
       {children}
       {!hideCloseButton && (
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-cv-sm p-1 text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)] hover:bg-[var(--cv-surface)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--cv-border-focus)] cursor-pointer">
+        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-gm-sm p-1 text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)] hover:bg-[var(--gm-surface)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--gm-border-focus)] cursor-pointer">
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
@@ -103,7 +103,7 @@ export const DrawerTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-cv-lg font-semibold text-[var(--cv-text)]', className)}
+    className={cn('text-gm-lg font-semibold text-[var(--gm-text)]', className)}
     {...props}
   />
 ));
@@ -115,7 +115,7 @@ export const DrawerDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-cv-sm text-[var(--cv-text-muted)]', className)}
+    className={cn('text-gm-sm text-[var(--gm-text-muted)]', className)}
     {...props}
   />
 ));

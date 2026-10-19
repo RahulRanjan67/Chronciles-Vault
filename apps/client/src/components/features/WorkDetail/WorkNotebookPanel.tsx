@@ -8,13 +8,13 @@ import {
   Check,
   PowerOff,
 } from "lucide-react";
-import { Badge, Button, Input, toast } from "@chronicles-vault/ui";
-import type { WorkId } from "@chronicles-vault/shared";
+import { Badge, Button, Input, toast } from "@grimoire/ui";
+import type { WorkId } from "@grimoire/shared";
 import {
   useNotebookStore,
   useWorkDetailStore,
   type NotebookEntryCategory,
-} from "@chronicles-vault/state";
+} from "@grimoire/state";
 
 export interface WorkNotebookPanelProps {
   workId: WorkId;
@@ -63,12 +63,12 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
 
   if (!isActivated) {
     return (
-      <div className="rounded-cv-xl border border-dashed border-[var(--cv-border)] bg-[var(--cv-surface)]/40 p-8 text-center">
-        <BookMarked className="h-8 w-8 mx-auto mb-3 text-[var(--cv-accent-strong)] opacity-80" />
-        <h3 className="text-cv-base font-bold text-[var(--cv-text)]">
+      <div className="rounded-gm-xl border border-dashed border-[var(--gm-border)] bg-[var(--gm-surface)]/40 p-8 text-center">
+        <BookMarked className="h-8 w-8 mx-auto mb-3 text-[var(--gm-accent-strong)] opacity-80" />
+        <h3 className="text-gm-base font-bold text-[var(--gm-text)]">
           Working Notebook is Inactive for &ldquo;{workTitle}&rdquo;
         </h3>
-        <p className="mt-1.5 text-cv-xs text-[var(--cv-text-muted)] max-w-lg mx-auto leading-relaxed">
+        <p className="mt-1.5 text-gm-xs text-[var(--gm-text-muted)] max-w-lg mx-auto leading-relaxed">
           Notebooks are opt-in per work so simple reads stay lightweight. Activate a Notebook to track active reading theories, mystery clues, character maps, and open questions — and promote any working note into a permanent Memory with one click.
         </p>
         <Button
@@ -119,11 +119,11 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-cv-sm font-semibold text-[var(--cv-text)] flex items-center gap-2">
-            <BookMarked className="h-4 w-4 text-[var(--cv-accent-strong)]" />
+          <h3 className="text-gm-sm font-semibold text-[var(--gm-text)] flex items-center gap-2">
+            <BookMarked className="h-4 w-4 text-[var(--gm-accent-strong)]" />
             <span>Active Reading Notebook ({workEntries.length})</span>
           </h3>
-          <p className="text-cv-xs text-[var(--cv-text-muted)]">
+          <p className="text-gm-xs text-[var(--gm-text-muted)]">
             Working scratchpad for live theories, clues, and character notes. Promote worth-keeping notes into Memories anytime.
           </p>
         </div>
@@ -138,7 +138,7 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
                 description: "Existing entries are preserved if you re-activate later.",
               });
             }}
-            className="gap-1 text-cv-xs text-[var(--cv-text-muted)]"
+            className="gap-1 text-gm-xs text-[var(--gm-text-muted)]"
             title="Deactivate Notebook view on this work"
           >
             <PowerOff className="h-3.5 w-3.5" />
@@ -148,7 +148,7 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
             variant="default"
             size="sm"
             onClick={() => setShowAdd(!showAdd)}
-            className="gap-1.5 text-cv-xs"
+            className="gap-1.5 text-gm-xs"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>New Working Note</span>
@@ -163,10 +163,10 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
             key={cat}
             type="button"
             onClick={() => setFilterCategory(cat)}
-            className={`px-2.5 py-1 rounded-cv-full text-cv-xs font-medium transition-colors cursor-pointer ${
+            className={`px-2.5 py-1 rounded-gm-full text-gm-xs font-medium transition-colors cursor-pointer ${
               filterCategory === cat
-                ? "bg-[var(--cv-accent)] text-white"
-                : "bg-[var(--cv-surface)] text-[var(--cv-text-muted)] hover:text-[var(--cv-text)] border border-[var(--cv-border)]"
+                ? "bg-[var(--gm-accent)] text-white"
+                : "bg-[var(--gm-surface)] text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] border border-[var(--gm-border)]"
             }`}
           >
             {cat === "all" ? "All Notes" : CATEGORY_LABELS[cat]}
@@ -178,7 +178,7 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
       {showAdd && (
         <form
           onSubmit={handleCreateEntry}
-          className="rounded-cv-xl border border-[var(--cv-accent-muted)] bg-[var(--cv-bg-elevated)] p-4 space-y-3"
+          className="rounded-gm-xl border border-[var(--gm-accent-muted)] bg-[var(--gm-bg-elevated)] p-4 space-y-3"
         >
           <div className="grid gap-3 sm:grid-cols-3">
             <Input
@@ -189,7 +189,7 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as NotebookEntryCategory)}
-              className="h-9 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-2.5 text-cv-xs text-[var(--cv-text)]"
+              className="h-9 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2.5 text-gm-xs text-[var(--gm-text)]"
             >
               <option value="theory">Theory</option>
               <option value="clue">Clue</option>
@@ -208,7 +208,7 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder="Write your working theory, clue, or relationship notes…"
-            className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-sm text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-accent)]"
+            className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-accent)]"
           />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" size="sm" onClick={() => setShowAdd(false)}>
@@ -223,7 +223,7 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
 
       {/* Entries List */}
       {visibleEntries.length === 0 ? (
-        <div className="rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-6 text-center text-cv-xs text-[var(--cv-text-muted)]">
+        <div className="rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-6 text-center text-gm-xs text-[var(--gm-text-muted)]">
           No working notes in this view yet. Click <strong>New Working Note</strong> above to start jotting down theories or clues.
         </div>
       ) : (
@@ -231,7 +231,7 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
           {visibleEntries.map((entry) => (
             <div
               key={entry.id}
-              className="flex flex-col justify-between rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-4"
+              className="flex flex-col justify-between rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
@@ -240,7 +240,7 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
                       {CATEGORY_LABELS[entry.category]}
                     </Badge>
                     {entry.chapterHint && (
-                      <span className="font-mono text-[11px] text-[var(--cv-text-muted)]">
+                      <span className="font-mono text-[11px] text-[var(--gm-text-muted)]">
                         {entry.chapterHint}
                       </span>
                     )}
@@ -255,10 +255,10 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
                       type="button"
                       onClick={() => togglePin(entry.id)}
                       title={entry.pinned ? "Unpin note" : "Pin note"}
-                      className={`p-1 rounded-cv-sm cursor-pointer ${
+                      className={`p-1 rounded-gm-sm cursor-pointer ${
                         entry.pinned
-                          ? "text-[var(--cv-accent-strong)] bg-[var(--cv-accent)]/15"
-                          : "text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)]"
+                          ? "text-[var(--gm-accent-strong)] bg-[var(--gm-accent)]/15"
+                          : "text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)]"
                       }`}
                     >
                       <Pin className="h-3.5 w-3.5" />
@@ -270,21 +270,21 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
                         toast({ title: "Notebook note deleted" });
                       }}
                       title="Delete working note"
-                      className="p-1 rounded-cv-sm text-[var(--cv-text-subtle)] hover:text-red-400 cursor-pointer"
+                      className="p-1 rounded-gm-sm text-[var(--gm-text-subtle)] hover:text-red-400 cursor-pointer"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 </div>
 
-                <h4 className="text-cv-sm font-bold text-[var(--cv-text)]">{entry.title}</h4>
-                <p className="mt-1.5 text-cv-xs text-[var(--cv-text-muted)] whitespace-pre-wrap leading-relaxed">
+                <h4 className="text-gm-sm font-bold text-[var(--gm-text)]">{entry.title}</h4>
+                <p className="mt-1.5 text-gm-xs text-[var(--gm-text-muted)] whitespace-pre-wrap leading-relaxed">
                   {entry.body}
                 </p>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-[var(--cv-border)] flex items-center justify-between">
-                <span className="text-[10px] font-mono text-[var(--cv-text-subtle)]">
+              <div className="mt-4 pt-3 border-t border-[var(--gm-border)] flex items-center justify-between">
+                <span className="text-[10px] font-mono text-[var(--gm-text-subtle)]">
                   Working Scratchpad
                 </span>
                 <Button
@@ -312,7 +312,7 @@ export function WorkNotebookPanel({ workId, workTitle }: WorkNotebookPanelProps)
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-3 w-3 text-[var(--cv-accent-strong)]" />
+                      <Sparkles className="h-3 w-3 text-[var(--gm-accent-strong)]" />
                       <span>Promote to Memory</span>
                     </>
                   )}

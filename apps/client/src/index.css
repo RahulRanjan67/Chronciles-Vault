@@ -4,13 +4,13 @@
 @import "@fontsource/inter/700.css";
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/500.css";
-@import "@chronicles-vault/ui/tokens";
+@import "@grimoire/ui/tokens";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-.cv-pdf-text-layer {
+.gm-pdf-text-layer {
   position: absolute;
   inset: 0;
   overflow: hidden;
@@ -22,7 +22,7 @@
   user-select: text;
 }
 
-.cv-pdf-text-layer :is(span, br) {
+.gm-pdf-text-layer :is(span, br) {
   position: absolute;
   color: transparent;
   white-space: pre;
@@ -30,8 +30,8 @@
   transform-origin: 0 0;
 }
 
-.cv-pdf-text-layer ::selection {
-  background: var(--cv-accent-muted);
+.gm-pdf-text-layer ::selection {
+  background: var(--gm-accent-muted);
 }
 
 /* ============================================================
@@ -114,17 +114,17 @@
   }
 }
 
-.cv-mote {
+.gm-mote {
   animation: cvFloatMote 5.5s ease-in-out infinite;
   will-change: transform, opacity;
 }
 
-.cv-lamp-glow {
+.gm-lamp-glow {
   animation: cvLampBreathe 4s ease-in-out infinite;
   will-change: transform, opacity;
 }
 
-.cv-page-flip {
+.gm-page-flip {
   transform-origin: left center;
   transform-style: preserve-3d;
   backface-visibility: hidden;
@@ -167,7 +167,7 @@
   }
 }
 
-.cv-page-turn-active {
+.gm-page-turn-active {
   animation: cvPageTurn 0.42s cubic-bezier(0.22, 1, 0.36, 1);
   transform-origin: left center;
   transform-style: preserve-3d;
@@ -175,7 +175,7 @@
   will-change: transform;
 }
 
-.cv-page-turn-reverse {
+.gm-page-turn-reverse {
   animation: cvPageTurnReverse 0.42s cubic-bezier(0.22, 1, 0.36, 1);
   transform-origin: right center;
   transform-style: preserve-3d;
@@ -183,34 +183,34 @@
   will-change: transform;
 }
 
-.cv-spine-active {
+.gm-spine-active {
   animation: cvSpinePulse 2.8s ease-in-out infinite;
   will-change: transform, opacity;
 }
 
-.cv-kinetic-enter {
+.gm-kinetic-enter {
   animation: cvKineticUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.cv-orbit-ring {
+.gm-orbit-ring {
   animation: cvShorthandSpin 24s linear infinite;
   will-change: transform;
 }
 
-.cv-room-exit-curtain {
+.gm-room-exit-curtain {
   animation: cvRoomDoorOpen 0.55s cubic-bezier(0.65, 0, 0.35, 1) forwards;
 }
 
 /* Reduced motion compliance per modern-web-guidance */
 @media (prefers-reduced-motion: reduce) {
-  .cv-mote,
-  .cv-lamp-glow,
-  .cv-page-flip,
-  .cv-spine-active,
-  .cv-orbit-ring {
+  .gm-mote,
+  .gm-lamp-glow,
+  .gm-page-flip,
+  .gm-spine-active,
+  .gm-orbit-ring {
     animation: none !important;
   }
-  .cv-kinetic-enter {
+  .gm-kinetic-enter {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
@@ -219,20 +219,31 @@
 
 @layer base {
   * {
-    border-color: var(--cv-border);
+    border-color: var(--gm-border);
     box-sizing: border-box;
   }
 
   html,
   body {
-    background-color: var(--cv-bg);
-    color: var(--cv-text);
-    font-family: var(--cv-font-sans);
+    background-color: var(--gm-bg);
+    color: var(--gm-text);
+    font-family: var(--gm-font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
     margin: 0;
     padding: 0;
+  }
+
+  h1, h2, h3, .gm-heading {
+    font-family: 'Cinzel', 'Plus Jakarta Sans', serif;
+    letter-spacing: -0.015em;
+  }
+
+  .gm-flavor-text, .work-description, .memory-excerpt {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.05em;
+    line-height: 1.7;
   }
 
   /* Custom scrollbar styling */
@@ -246,16 +257,16 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--cv-surface-raised);
-    border-radius: var(--cv-radius-full);
+    background: var(--gm-surface-raised);
+    border-radius: var(--gm-radius-full);
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--cv-surface-hover);
+    background: var(--gm-surface-hover);
   }
 
   ::selection {
-    background-color: var(--cv-accent-muted);
-    color: var(--cv-accent-strong);
+    background-color: var(--gm-accent-muted);
+    color: var(--gm-accent-strong);
   }
 }

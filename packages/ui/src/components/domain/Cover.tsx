@@ -6,7 +6,7 @@ import { generateCoverFallback } from '../../utils/cover-fallback';
 import { cn } from '../../utils/cn';
 
 const coverVariants = cva(
-  'relative overflow-hidden rounded-cv select-none bg-[var(--cv-surface)] shadow-sm shrink-0 aspect-[3/4]',
+  'relative overflow-hidden rounded-cv select-none bg-[var(--gm-surface)] shadow-sm shrink-0 aspect-[3/4]',
   {
     variants: {
       size: {

@@ -8,7 +8,7 @@ import {
   PublicationState,
   SpoilerLevel,
   UpdateCertainty,
-} from "@chronicles-vault/domain";
+} from "@grimoire/domain";
 import {
   buildUpdateFeedId,
   ClientRepository,
@@ -297,7 +297,7 @@ describe("Cycle 13.5 — Updates Store, Reading Queue, Reread Attempt Gate & Rep
       normalizeAccessPathHealth,
       normalizePrivacyState,
       SourceHealth,
-    } = await import("@chronicles-vault/domain");
+    } = await import("@grimoire/domain");
 
     const active = getActiveClientRepository();
     expect(active).toBe(getActiveRepository());

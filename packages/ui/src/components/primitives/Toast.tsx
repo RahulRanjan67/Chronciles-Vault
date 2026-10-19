@@ -13,7 +13,7 @@ export const ToastViewport = React.forwardRef<
   <ToastPrimitive.Viewport
     ref={ref}
     className={cn(
-      'fixed bottom-0 right-0 z-[var(--cv-z-toast)] flex max-h-screen w-full flex-col-reverse p-4 sm:max-w-[380px]',
+      'fixed bottom-0 right-0 z-[var(--gm-z-toast)] flex max-h-screen w-full flex-col-reverse p-4 sm:max-w-[380px]',
       className,
     )}
     {...props}
@@ -22,18 +22,18 @@ export const ToastViewport = React.forwardRef<
 ToastViewport.displayName = ToastPrimitive.Viewport.displayName;
 
 const toastVariants = cva(
-  'group pointer-events-auto relative flex w-full items-center justify-between space-x-3 overflow-hidden rounded-cv-lg border p-4 shadow-xl transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
+  'group pointer-events-auto relative flex w-full items-center justify-between space-x-3 overflow-hidden rounded-gm-lg border p-4 shadow-xl transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
   {
     variants: {
       variant: {
         default:
-          'border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] text-[var(--cv-text)]',
+          'border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] text-[var(--gm-text)]',
         success:
-          'border-[var(--cv-success)]/30 bg-[var(--cv-bg-elevated)] text-[var(--cv-text)]',
+          'border-[var(--gm-success)]/30 bg-[var(--gm-bg-elevated)] text-[var(--gm-text)]',
         destructive:
-          'border-[var(--cv-danger)]/40 bg-[var(--cv-bg-elevated)] text-[var(--cv-text)]',
+          'border-[var(--gm-danger)]/40 bg-[var(--gm-bg-elevated)] text-[var(--gm-text)]',
         warning:
-          'border-[var(--cv-warning)]/40 bg-[var(--cv-bg-elevated)] text-[var(--cv-text)]',
+          'border-[var(--gm-warning)]/40 bg-[var(--gm-bg-elevated)] text-[var(--gm-text)]',
       },
     },
     defaultVariants: {
@@ -64,7 +64,7 @@ export const ToastAction = React.forwardRef<
   <ToastPrimitive.Action
     ref={ref}
     className={cn(
-      'inline-flex h-8 shrink-0 items-center justify-center rounded-cv border border-[var(--cv-border)] bg-transparent px-3 text-cv-xs font-medium text-[var(--cv-text)] transition-colors hover:bg-[var(--cv-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-border-focus)] disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
+      'inline-flex h-8 shrink-0 items-center justify-center rounded-cv border border-[var(--gm-border)] bg-transparent px-3 text-gm-xs font-medium text-[var(--gm-text)] transition-colors hover:bg-[var(--gm-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-border-focus)] disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
       className,
     )}
     {...props}
@@ -79,7 +79,7 @@ export const ToastClose = React.forwardRef<
   <ToastPrimitive.Close
     ref={ref}
     className={cn(
-      'absolute right-2 top-2 rounded-cv-sm p-1 text-[var(--cv-text-subtle)] opacity-0 transition-opacity hover:text-[var(--cv-text)] group-hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-1 cursor-pointer',
+      'absolute right-2 top-2 rounded-gm-sm p-1 text-[var(--gm-text-subtle)] opacity-0 transition-opacity hover:text-[var(--gm-text)] group-hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-1 cursor-pointer',
       className,
     )}
     toast-close=""
@@ -96,7 +96,7 @@ export const ToastTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitive.Title
     ref={ref}
-    className={cn('text-cv-sm font-semibold text-[var(--cv-text)]', className)}
+    className={cn('text-gm-sm font-semibold text-[var(--gm-text)]', className)}
     {...props}
   />
 ));
@@ -108,7 +108,7 @@ export const ToastDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitive.Description
     ref={ref}
-    className={cn('text-cv-xs text-[var(--cv-text-muted)]', className)}
+    className={cn('text-gm-xs text-[var(--gm-text-muted)]', className)}
     {...props}
   />
 ));
@@ -189,12 +189,12 @@ export function Toaster() {
 
         const iconColor =
           variant === 'success'
-            ? 'text-[var(--cv-success)]'
+            ? 'text-[var(--gm-success)]'
             : variant === 'destructive'
-            ? 'text-[var(--cv-danger)]'
+            ? 'text-[var(--gm-danger)]'
             : variant === 'warning'
-            ? 'text-[var(--cv-warning)]'
-            : 'text-[var(--cv-accent-strong)]';
+            ? 'text-[var(--gm-warning)]'
+            : 'text-[var(--gm-accent-strong)]';
 
         return (
           <Toast

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { MemoryType, PrivacyState, SpoilerLevel } from "@chronicles-vault/domain";
-import type { WorkId } from "@chronicles-vault/shared";
+import { MemoryType, PrivacyState, SpoilerLevel } from "@grimoire/domain";
+import type { WorkId } from "@grimoire/shared";
 import {
   clientRepository,
   generateLocalRecommendations,

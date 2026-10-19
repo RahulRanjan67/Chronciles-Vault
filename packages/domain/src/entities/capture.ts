@@ -3,7 +3,7 @@ import {
   CaptureBatchId,
   WorkId,
   newId,
-} from '@chronicles-vault/shared';
+} from '@grimoire/shared';
 import { normalizeUrl } from '../use-cases/url-normalizer.js';
 
 // ---------------------------------------------------------------------------

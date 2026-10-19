@@ -1,5 +1,5 @@
 import { AccessPathKind, SourceHealth, type AccessPath } from "../entities/access-path.js";
-import type { AccessPathId } from "@chronicles-vault/shared";
+import type { AccessPathId } from "@grimoire/shared";
 
 /**
  * Chooses a safe reading fallback without probing or opening any source.

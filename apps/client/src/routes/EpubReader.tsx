@@ -16,22 +16,22 @@ import {
   startReaderSession,
   updateReaderSession,
   endReaderSession,
-} from "@chronicles-vault/reader";
+} from "@grimoire/reader";
 import type {
   EpubChapter,
   EpubLocator,
   EpubTocItem,
   LocalFileMetadata,
-} from "@chronicles-vault/reader";
+} from "@grimoire/reader";
 import {
   MemoryType,
   PrivacyState,
   SpoilerLevel,
   type ProgressAnchor,
   type Work,
-} from "@chronicles-vault/domain";
-import { clientRepository, useLibraryStore } from "@chronicles-vault/state";
-import { Button } from "@chronicles-vault/ui";
+} from "@grimoire/domain";
+import { clientRepository, useLibraryStore } from "@grimoire/state";
+import { Button } from "@grimoire/ui";
 
 const MAX_CHAPTER_IMAGE_COUNT = 20;
 const MAX_CHAPTER_IMAGE_BYTES = 16 * 1024 * 1024;
@@ -65,12 +65,12 @@ function formatDuration(seconds: number): string {
 
 function createReaderCss(settings: ReaderSettings): string {
   const computed = getComputedStyle(document.documentElement);
-  const background = computed.getPropertyValue("--cv-bg").trim();
-  const elevated = computed.getPropertyValue("--cv-bg-elevated").trim();
-  const text = computed.getPropertyValue("--cv-text").trim();
-  const muted = computed.getPropertyValue("--cv-text-muted").trim();
-  const inverse = computed.getPropertyValue("--cv-text-inverse").trim();
-  const warning = computed.getPropertyValue("--cv-warning").trim();
+  const background = computed.getPropertyValue("--gm-bg").trim();
+  const elevated = computed.getPropertyValue("--gm-bg-elevated").trim();
+  const text = computed.getPropertyValue("--gm-text").trim();
+  const muted = computed.getPropertyValue("--gm-text-muted").trim();
+  const inverse = computed.getPropertyValue("--gm-text-inverse").trim();
+  const warning = computed.getPropertyValue("--gm-warning").trim();
   const palette =
     settings.theme === "light"
       ? { background: text, text: inverse, muted: background }
@@ -85,7 +85,7 @@ function createReaderCss(settings: ReaderSettings): string {
       : settings.font === "sans-serif"
         ? "sans-serif"
         : "system-ui, sans-serif";
-  return `:root{color-scheme:${settings.theme === "light" ? "light" : "dark"};--cv-reader-font-size:${settings.fontSize}px;--cv-reader-line-height:${settings.lineHeight};--cv-reader-font-family:${font};--cv-reader-margin:${settings.margin}px;--cv-reader-background:${palette.background};--cv-reader-text:${palette.text};--cv-reader-muted:${palette.muted}}html,body{min-height:100%;margin:0;background:var(--cv-reader-background);color:var(--cv-reader-text)}body{box-sizing:border-box;font-family:var(--cv-reader-font-family);font-size:var(--cv-reader-font-size);line-height:var(--cv-reader-line-height);padding:0 var(--cv-reader-margin);max-width:824px;margin:0 auto}p,span,div,li{color:inherit!important;background-color:transparent!important}img{max-width:100%;height:auto}`;
+  return `:root{color-scheme:${settings.theme === "light" ? "light" : "dark"};--gm-reader-font-size:${settings.fontSize}px;--gm-reader-line-height:${settings.lineHeight};--gm-reader-font-family:${font};--gm-reader-margin:${settings.margin}px;--gm-reader-background:${palette.background};--gm-reader-text:${palette.text};--gm-reader-muted:${palette.muted}}html,body{min-height:100%;margin:0;background:var(--gm-reader-background);color:var(--gm-reader-text)}body{box-sizing:border-box;font-family:var(--gm-reader-font-family);font-size:var(--gm-reader-font-size);line-height:var(--gm-reader-line-height);padding:0 var(--gm-reader-margin);max-width:824px;margin:0 auto}p,span,div,li{color:inherit!important;background-color:transparent!important}img{max-width:100%;height:auto}`;
 }
 
 function cfiSteps(body: HTMLElement, target: Node): number[] | null {
@@ -353,8 +353,8 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
       let imageBytes = 0;
       const imageUrls: string[] = [];
       for (const image of images.slice(0, MAX_CHAPTER_IMAGE_COUNT)) {
-        const source = image.getAttribute("data-cv-src");
-        image.removeAttribute("data-cv-src");
+        const source = image.getAttribute("data-gm-src");
+        image.removeAttribute("data-gm-src");
         const resource = source ? resolveEpubHref(loaded.path, source) : null;
         const extension = resource?.path.split(".").pop()?.toLowerCase() ?? "";
         if (!resource || !["jpg", "jpeg", "png", "webp", "avif"].includes(extension)) {
@@ -670,7 +670,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
       <React.Fragment key={item.id}>
         <button
           type="button"
-          className="block w-full truncate rounded px-2 py-1 text-left text-cv-xs text-[var(--cv-text)] hover:bg-[var(--cv-accent-muted)]"
+          className="block w-full truncate rounded px-2 py-1 text-left text-gm-xs text-[var(--gm-text)] hover:bg-[var(--gm-accent-muted)]"
           style={{ paddingLeft: `${8 + depth * 12}px` }}
           onClick={() => navigateToToc(item)}
         >
@@ -710,7 +710,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-[32rem] items-center justify-center gap-2 text-[var(--cv-text-muted)]">
+      <main className="flex min-h-[32rem] items-center justify-center gap-2 text-[var(--gm-text-muted)]">
         <LoaderCircle className="h-4 w-4 animate-spin" />
         Loading EPUB locally…
       </main>
@@ -719,7 +719,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
   if (error) {
     return (
       <main className="flex min-h-[32rem] flex-col items-center justify-center gap-4 p-8 text-center">
-        <p role="alert" className="max-w-xl text-cv-sm text-[var(--cv-danger)]">
+        <p role="alert" className="max-w-xl text-gm-sm text-[var(--gm-danger)]">
           {error}
         </p>
         <Button variant="outline" onClick={onBack}>
@@ -770,17 +770,17 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
   };
 
   return (
-    <main className="flex h-[calc(100vh-4rem)] min-h-[32rem] flex-col bg-[var(--cv-bg)]">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--cv-border)] bg-[var(--cv-surface)] px-4 py-3">
+    <main className="flex h-[calc(100vh-4rem)] min-h-[32rem] flex-col bg-[var(--gm-bg)]">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--gm-border)] bg-[var(--gm-surface)] px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
           <Button variant="ghost" size="icon" aria-label="Back to Local Shelf" onClick={onBack}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="min-w-0">
-            <h1 className="truncate font-semibold text-[var(--cv-text)]">
+            <h1 className="truncate font-semibold text-[var(--gm-text)]">
               {reader?.book.title ?? reader?.file.displayName ?? "EPUB Reader"}
             </h1>
-            <p className="truncate text-cv-xs text-[var(--cv-text-muted)]">
+            <p className="truncate text-gm-xs text-[var(--gm-text-muted)]">
               {tocTitle ?? chapter?.title ?? `Chapter ${spineIndex + 1}`} · {Math.round(progress)}%
               · Session {formatDuration(sessionElapsed)}
             </p>
@@ -804,7 +804,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
             onChange={(event) =>
               setSettings((current) => ({ ...current, fontSize: Number(event.target.value) }))
             }
-            className="max-w-24 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-2 py-2 text-cv-xs text-[var(--cv-text)]"
+            className="max-w-24 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-2 py-2 text-gm-xs text-[var(--gm-text)]"
           >
             {[14, 16, 18, 20, 22, 24, 28, 32].map((size) => (
               <option key={size} value={size}>
@@ -821,7 +821,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
             onChange={(event) =>
               setSettings((current) => ({ ...current, margin: Number(event.target.value) }))
             }
-            className="max-w-24 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-2 py-2 text-cv-xs text-[var(--cv-text)]"
+            className="max-w-24 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-2 py-2 text-gm-xs text-[var(--gm-text)]"
           >
             {[16, 24, 32, 40, 48].map((margin) => (
               <option key={margin} value={margin}>
@@ -838,7 +838,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
             onChange={(event) =>
               setSettings((current) => ({ ...current, lineHeight: Number(event.target.value) }))
             }
-            className="max-w-28 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-2 py-2 text-cv-xs text-[var(--cv-text)]"
+            className="max-w-28 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-2 py-2 text-gm-xs text-[var(--gm-text)]"
           >
             {[1.4, 1.6, 1.8, 2].map((lineHeight) => (
               <option key={lineHeight} value={lineHeight}>
@@ -855,7 +855,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
             onChange={(event) =>
               setSettings((current) => ({ ...current, font: event.target.value as ReaderFont }))
             }
-            className="max-w-32 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-2 py-2 text-cv-xs text-[var(--cv-text)]"
+            className="max-w-32 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-2 py-2 text-gm-xs text-[var(--gm-text)]"
           >
             <option value="serif">Serif</option>
             <option value="sans-serif">Sans</option>
@@ -870,7 +870,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
             onChange={(event) =>
               setSettings((current) => ({ ...current, theme: event.target.value as ReaderTheme }))
             }
-            className="max-w-28 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-2 py-2 text-cv-xs text-[var(--cv-text)]"
+            className="max-w-28 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-2 py-2 text-gm-xs text-[var(--gm-text)]"
           >
             <option value="dark">Dark</option>
             <option value="sepia">Sepia</option>
@@ -883,7 +883,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
       {reader && reader.book.toc.length > 0 && tocOpen && (
         <nav
           aria-label="EPUB table of contents"
-          className="max-h-48 overflow-auto border-b border-[var(--cv-border)] bg-[var(--cv-surface)] p-2"
+          className="max-h-48 overflow-auto border-b border-[var(--gm-border)] bg-[var(--gm-surface)] p-2"
         >
           {renderToc(reader.book.toc)}
         </nav>
@@ -891,7 +891,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
       {warning && (
         <div
           role="status"
-          className="border-b border-[var(--cv-warning)]/40 bg-[var(--cv-warning-muted)] px-4 py-2 text-center text-cv-xs text-[var(--cv-warning)]"
+          className="border-b border-[var(--gm-warning)]/40 bg-[var(--gm-warning-muted)] px-4 py-2 text-center text-gm-xs text-[var(--gm-warning)]"
         >
           {warning}
         </div>
@@ -902,7 +902,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
             event.preventDefault();
             saveMemory();
           }}
-          className="flex flex-wrap items-center gap-2 border-b border-[var(--cv-border)] bg-[var(--cv-surface)] px-4 py-2"
+          className="flex flex-wrap items-center gap-2 border-b border-[var(--gm-border)] bg-[var(--gm-surface)] px-4 py-2"
         >
           <label htmlFor="epub-memory" className="sr-only">
             Note for {chapter?.title ?? `chapter ${spineIndex + 1}`}
@@ -913,7 +913,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
             onChange={(event) => setMemoryDraft(event.target.value)}
             maxLength={5000}
             placeholder="Add a note for this chapter"
-            className="min-w-48 flex-1 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-3 py-2 text-cv-sm text-[var(--cv-text)]"
+            className="min-w-48 flex-1 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-3 py-2 text-gm-sm text-[var(--gm-text)]"
           />
           <Button type="submit" variant="outline" disabled={!memoryDraft.trim()}>
             Save chapter note
@@ -921,7 +921,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
         </form>
       )}
 
-      <section className="relative min-h-0 flex-1 bg-[var(--cv-bg)] p-2">
+      <section className="relative min-h-0 flex-1 bg-[var(--gm-bg)] p-2">
         {frameContent && (
           <iframe
             key={`${spineIndex}-${pageTurnKey}`}
@@ -931,7 +931,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
             sandbox="allow-same-origin"
             referrerPolicy="no-referrer"
             onLoad={handleFrameLoad}
-            className="h-full w-full border-0 bg-[var(--cv-bg)] cv-page-turn-active"
+            className="h-full w-full border-0 bg-[var(--gm-bg)] gm-page-turn-active"
           />
         )}
         <button
@@ -939,7 +939,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
           aria-label="Previous chapter"
           disabled={spineIndex <= 0}
           onClick={() => navigateChapter(spineIndex - 1)}
-          className="absolute inset-y-2 left-2 z-10 flex w-10 items-center justify-center rounded-r-cv bg-[var(--cv-surface)]/70 text-[var(--cv-text)] disabled:opacity-30 sm:hidden"
+          className="absolute inset-y-2 left-2 z-10 flex w-10 items-center justify-center rounded-r-cv bg-[var(--gm-surface)]/70 text-[var(--gm-text)] disabled:opacity-30 sm:hidden"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -948,13 +948,13 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
           aria-label="Next chapter"
           disabled={spineIndex >= totalChapters - 1}
           onClick={() => navigateChapter(spineIndex + 1)}
-          className="absolute inset-y-2 right-2 z-10 flex w-10 items-center justify-center rounded-l-cv bg-[var(--cv-surface)]/70 text-[var(--cv-text)] disabled:opacity-30 sm:hidden"
+          className="absolute inset-y-2 right-2 z-10 flex w-10 items-center justify-center rounded-l-cv bg-[var(--gm-surface)]/70 text-[var(--gm-text)] disabled:opacity-30 sm:hidden"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
       </section>
 
-      <footer className="flex flex-wrap items-center gap-3 border-t border-[var(--cv-border)] bg-[var(--cv-surface)] px-4 py-3">
+      <footer className="flex flex-wrap items-center gap-3 border-t border-[var(--gm-border)] bg-[var(--gm-surface)] px-4 py-3">
         <Button
           variant="outline"
           size="icon"
@@ -964,7 +964,7 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <span className="min-w-36 text-center text-cv-xs text-[var(--cv-text-muted)]">
+        <span className="min-w-36 text-center text-gm-xs text-[var(--gm-text-muted)]">
           Chapter {spineIndex + 1} of {totalChapters}
         </span>
         <Button
@@ -987,9 +987,9 @@ export function EpubReader({ fileId, onBack }: EpubReaderProps) {
           step="0.1"
           value={progress}
           onChange={(event) => navigateToPercentage(Number(event.target.value))}
-          className="min-w-28 flex-1 accent-[var(--cv-accent-strong)]"
+          className="min-w-28 flex-1 accent-[var(--gm-accent-strong)]"
         />
-        <span className="min-w-12 text-right text-cv-xs text-[var(--cv-text-muted)]">
+        <span className="min-w-12 text-right text-gm-xs text-[var(--gm-text-muted)]">
           {Math.round(progress)}%
         </span>
       </footer>

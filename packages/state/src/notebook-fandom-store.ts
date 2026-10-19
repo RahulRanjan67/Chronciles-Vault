@@ -5,8 +5,8 @@ import {
   PrivacyState,
   SpoilerLevel,
   type Memory,
-} from "@chronicles-vault/domain";
-import type { WorkId } from "@chronicles-vault/shared";
+} from "@grimoire/domain";
+import type { WorkId } from "@grimoire/shared";
 import { clientRepository, type HydratedWorkItem } from "./client-repository";
 
 // =============================================================================

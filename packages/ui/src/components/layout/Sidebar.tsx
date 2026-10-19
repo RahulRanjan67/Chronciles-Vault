@@ -52,10 +52,10 @@ export function Sidebar({
               type="button"
               onClick={() => onNavigate(item.href)}
               className={cn(
-                'group flex w-full items-center justify-between rounded-cv px-2.5 py-2 text-cv-sm font-medium transition-colors select-none text-left cursor-pointer',
+                'group flex w-full items-center justify-between rounded-cv px-2.5 py-2 text-gm-sm font-medium transition-colors select-none text-left cursor-pointer',
                 active
-                  ? 'bg-[var(--cv-surface)] text-[var(--cv-text)] font-semibold shadow-xs'
-                  : 'text-[var(--cv-text-muted)] hover:bg-[var(--cv-surface)]/60 hover:text-[var(--cv-text)]',
+                  ? 'bg-[var(--gm-surface)] text-[var(--gm-text)] font-semibold shadow-xs'
+                  : 'text-[var(--gm-text-muted)] hover:bg-[var(--gm-surface)]/60 hover:text-[var(--gm-text)]',
               )}
             >
               <div className="flex items-center gap-2.5 min-w-0">
@@ -63,8 +63,8 @@ export function Sidebar({
                   className={cn(
                     'h-4 w-4 shrink-0 transition-colors',
                     active
-                      ? 'text-[var(--cv-accent-strong)]'
-                      : 'text-[var(--cv-text-subtle)] group-hover:text-[var(--cv-text)]',
+                      ? 'text-[var(--gm-accent-strong)]'
+                      : 'text-[var(--gm-text-subtle)] group-hover:text-[var(--gm-text)]',
                   )}
                 />
                 <span className="truncate">{item.label}</span>
@@ -72,10 +72,10 @@ export function Sidebar({
               {count !== undefined && count > 0 && (
                 <span
                   className={cn(
-                    'ml-auto inline-flex items-center justify-center rounded-cv-full px-1.5 py-0.2 text-[10px] font-mono font-medium',
+                    'ml-auto inline-flex items-center justify-center rounded-gm-full px-1.5 py-0.2 text-[10px] font-mono font-medium',
                     active
-                      ? 'bg-[var(--cv-accent)] text-white'
-                      : 'bg-[var(--cv-surface-raised)] text-[var(--cv-text-muted)]',
+                      ? 'bg-[var(--gm-accent)] text-white'
+                      : 'bg-[var(--gm-surface-raised)] text-[var(--gm-text-muted)]',
                   )}
                 >
                   {count > 99 ? '99+' : count}
@@ -91,13 +91,13 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        'hidden md:flex flex-col w-[var(--cv-sidebar-width)] shrink-0 border-r border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] h-screen select-none sticky top-0 z-[var(--cv-z-sticky)]',
+        'hidden md:flex flex-col w-[var(--gm-sidebar-width)] shrink-0 border-r border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] h-screen select-none sticky top-0 z-[var(--gm-z-sticky)]',
         className,
       )}
       {...props}
     >
       {/* Brand / Logo Header */}
-      <div className="h-[var(--cv-header-height)] px-4 flex items-center gap-2.5 border-b border-[var(--cv-border)]">
+      <div className="h-[var(--gm-header-height)] px-4 flex items-center gap-2.5 border-b border-[var(--gm-border)]">
         {logoSlot ? (
           logoSlot
         ) : (
@@ -114,11 +114,11 @@ export function Sidebar({
                   target.src = '/logo.jpg';
                 }
               }}
-              alt="Chronicles Vault"
-              className="h-8 w-8 rounded-full object-cover shadow-sm ring-1 ring-[var(--cv-border)] group-hover:ring-[var(--cv-accent)] transition-all shrink-0"
+              alt="Grimoire"
+              className="h-8 w-8 rounded-full object-cover shadow-sm ring-1 ring-[var(--gm-border)] group-hover:ring-[var(--gm-accent)] transition-all shrink-0"
             />
-            <span className="font-bold text-cv-sm tracking-tight text-[var(--cv-text)] group-hover:text-[var(--cv-accent-strong)] transition-colors truncate">
-              Chronicles Vault
+            <span className="font-bold text-gm-sm tracking-tight text-[var(--gm-text)] group-hover:text-[var(--gm-accent-strong)] transition-colors truncate">
+              Grimoire
             </span>
           </button>
         )}
@@ -129,30 +129,30 @@ export function Sidebar({
         {/* Tier 1 primary items */}
         <div>{renderNavList(PRIMARY_NAV_ITEMS)}</div>
 
-        <Separator className="bg-[var(--cv-border)]" />
+        <Separator className="bg-[var(--gm-border)]" />
 
         {/* Tier 2 & 3 secondary items */}
         <div>{renderNavList(SECONDARY_NAV_ITEMS)}</div>
       </div>
 
       {/* Bottom utilities: Help, Vault & Settings */}
-      <div className="p-3 border-t border-[var(--cv-border)] space-y-1">
+      <div className="p-3 border-t border-[var(--gm-border)] space-y-1">
         <button
           type="button"
           onClick={() => onNavigate('/help')}
           className={cn(
-            'group flex w-full items-center gap-2.5 rounded-cv px-2.5 py-2 text-cv-sm font-medium transition-colors select-none text-left cursor-pointer',
+            'group flex w-full items-center gap-2.5 rounded-cv px-2.5 py-2 text-gm-sm font-medium transition-colors select-none text-left cursor-pointer',
             isItemActive('/help')
-              ? 'bg-[var(--cv-surface)] text-[var(--cv-text)] font-semibold shadow-xs'
-              : 'text-[var(--cv-text-muted)] hover:bg-[var(--cv-surface)]/60 hover:text-[var(--cv-text)]',
+              ? 'bg-[var(--gm-surface)] text-[var(--gm-text)] font-semibold shadow-xs'
+              : 'text-[var(--gm-text-muted)] hover:bg-[var(--gm-surface)]/60 hover:text-[var(--gm-text)]',
           )}
         >
           <HelpCircle
             className={cn(
               'h-4 w-4 shrink-0 transition-colors',
               isItemActive('/help')
-                ? 'text-[var(--cv-accent-strong)]'
-                : 'text-[var(--cv-text-subtle)] group-hover:text-[var(--cv-text)]',
+                ? 'text-[var(--gm-accent-strong)]'
+                : 'text-[var(--gm-text-subtle)] group-hover:text-[var(--gm-text)]',
             )}
           />
           <span className="truncate">Help &amp; Guide</span>
@@ -164,21 +164,21 @@ export function Sidebar({
             onNavigate('/vault');
           }}
           className={cn(
-            'group flex w-full items-center justify-between rounded-cv px-2.5 py-2 text-cv-sm font-medium transition-colors select-none text-left cursor-pointer',
+            'group flex w-full items-center justify-between rounded-cv px-2.5 py-2 text-gm-sm font-medium transition-colors select-none text-left cursor-pointer',
             isItemActive('/vault')
-              ? 'bg-[var(--cv-surface)] text-[var(--cv-text)]'
-              : 'text-[var(--cv-text-muted)] hover:bg-[var(--cv-surface)]/60 hover:text-[var(--cv-text)]',
+              ? 'bg-[var(--gm-surface)] text-[var(--gm-text)]'
+              : 'text-[var(--gm-text-muted)] hover:bg-[var(--gm-surface)]/60 hover:text-[var(--gm-text)]',
           )}
         >
           <div className="flex items-center gap-2.5 min-w-0">
             {isVaultUnlocked ? (
-              <Unlock className="h-4 w-4 text-[var(--cv-warning)] shrink-0" />
+              <Unlock className="h-4 w-4 text-[var(--gm-warning)] shrink-0" />
             ) : (
-              <Lock className="h-4 w-4 text-[var(--cv-text-subtle)] group-hover:text-[var(--cv-text)] shrink-0" />
+              <Lock className="h-4 w-4 text-[var(--gm-text-subtle)] group-hover:text-[var(--gm-text)] shrink-0" />
             )}
             <span className="truncate">Private Vault</span>
           </div>
-          <span className="text-[10px] uppercase font-mono tracking-wider text-[var(--cv-text-subtle)]">
+          <span className="text-[10px] uppercase font-mono tracking-wider text-[var(--gm-text-subtle)]">
             {isVaultUnlocked ? 'Unlocked' : 'Locked'}
           </span>
         </button>
@@ -187,13 +187,13 @@ export function Sidebar({
           type="button"
           onClick={() => onNavigate('/settings')}
           className={cn(
-            'group flex w-full items-center gap-2.5 rounded-cv px-2.5 py-2 text-cv-sm font-medium transition-colors select-none text-left cursor-pointer',
+            'group flex w-full items-center gap-2.5 rounded-cv px-2.5 py-2 text-gm-sm font-medium transition-colors select-none text-left cursor-pointer',
             isItemActive('/settings')
-              ? 'bg-[var(--cv-surface)] text-[var(--cv-text)]'
-              : 'text-[var(--cv-text-muted)] hover:bg-[var(--cv-surface)]/60 hover:text-[var(--cv-text)]',
+              ? 'bg-[var(--gm-surface)] text-[var(--gm-text)]'
+              : 'text-[var(--gm-text-muted)] hover:bg-[var(--gm-surface)]/60 hover:text-[var(--gm-text)]',
           )}
         >
-          <Settings className="h-4 w-4 text-[var(--cv-text-subtle)] group-hover:text-[var(--cv-text)] shrink-0" />
+          <Settings className="h-4 w-4 text-[var(--gm-text-subtle)] group-hover:text-[var(--gm-text)] shrink-0" />
           <span className="truncate">Settings</span>
         </button>
       </div>

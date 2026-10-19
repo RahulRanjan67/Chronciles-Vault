@@ -9,7 +9,7 @@ import {
   SourceHealthIndicator,
   SourceHealthType,
   cn,
-} from '@chronicles-vault/ui';
+} from '@grimoire/ui';
 
 export interface ReturnCardData {
   id: string;
@@ -56,7 +56,7 @@ export function ReturnCard({
     <div
       onClick={() => onCardClick?.(id)}
       className={cn(
-        'group relative flex flex-col sm:flex-row gap-4 sm:gap-5 rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-4 sm:p-5 shadow-sm transition-all duration-[var(--cv-duration-base)] hover:border-[var(--cv-border-strong)] hover:shadow-md cursor-pointer',
+        'group relative flex flex-col sm:flex-row gap-4 sm:gap-5 rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 sm:p-5 shadow-sm transition-all duration-[var(--gm-duration-base)] hover:border-[var(--gm-border-strong)] hover:shadow-md cursor-pointer',
         className,
       )}
       {...props}
@@ -74,24 +74,24 @@ export function ReturnCard({
         <div className="flex flex-col gap-2">
           {/* Header Row: Title and relative time */}
           <div className="flex items-start justify-between gap-3">
-            <h3 className="text-cv-base sm:text-cv-lg font-bold text-[var(--cv-text)] tracking-tight line-clamp-1 group-hover:text-[var(--cv-accent-strong)] transition-colors">
+            <h3 className="text-gm-base sm:text-gm-lg font-bold text-[var(--gm-text)] tracking-tight line-clamp-1 group-hover:text-[var(--gm-accent-strong)] transition-colors">
               {title}
             </h3>
-            <div className="flex items-center gap-1 text-[11px] text-[var(--cv-text-subtle)] font-mono shrink-0">
+            <div className="flex items-center gap-1 text-[11px] text-[var(--gm-text-subtle)] font-mono shrink-0">
               <Clock className="h-3 w-3" />
               <span>{relativeTime(lastReadDate)}</span>
             </div>
           </div>
 
           {/* Progress Display */}
-          <div className="flex items-center gap-2 text-cv-xs">
-            <span className="text-[var(--cv-text-muted)]">Progress:</span>
+          <div className="flex items-center gap-2 text-gm-xs">
+            <span className="text-[var(--gm-text-muted)]">Progress:</span>
             <ProgressDisplay anchor={lastProgress} emphasize />
           </div>
 
           {/* New Releases Banner */}
           {newReleasesCount > 0 && (
-            <div className="inline-flex items-center gap-2 rounded-cv-md bg-[var(--cv-accent-muted)] px-2.5 py-1 text-cv-xs font-semibold text-[var(--cv-accent-strong)] w-fit mt-0.5">
+            <div className="inline-flex items-center gap-2 rounded-gm-md bg-[var(--gm-accent-muted)] px-2.5 py-1 text-gm-xs font-semibold text-[var(--gm-accent-strong)] w-fit mt-0.5">
               <Sparkles className="h-3.5 w-3.5 shrink-0" />
               <span>
                 {newReleasesCount} new {newReleasesLabel} since your visit
@@ -107,11 +107,11 @@ export function ReturnCard({
                 e.stopPropagation();
                 onOpenMemoryRefresher?.(id);
               }}
-              className="mt-1 flex items-start gap-2 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)]/60 p-2.5 text-left text-cv-xs text-[var(--cv-text-muted)] transition-colors hover:border-[var(--cv-border-strong)] hover:text-[var(--cv-text)] cursor-pointer"
+              className="mt-1 flex items-start gap-2 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)]/60 p-2.5 text-left text-gm-xs text-[var(--gm-text-muted)] transition-colors hover:border-[var(--gm-border-strong)] hover:text-[var(--gm-text)] cursor-pointer"
             >
-              <Lightbulb className="h-3.5 w-3.5 text-[var(--cv-warning)] shrink-0 mt-0.5" />
+              <Lightbulb className="h-3.5 w-3.5 text-[var(--gm-warning)] shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <span className="font-semibold text-[var(--cv-text-subtle)] uppercase text-[10px] block mb-0.5">
+                <span className="font-semibold text-[var(--gm-text-subtle)] uppercase text-[10px] block mb-0.5">
                   Last Memory Note
                 </span>
                 <p className="italic line-clamp-2">&ldquo;{memorySnippet}&rdquo;</p>
@@ -121,9 +121,9 @@ export function ReturnCard({
         </div>
 
         {/* Footer Actions & Source Health */}
-        <div className="mt-4 pt-3 border-t border-[var(--cv-border)] flex items-center justify-between gap-3">
+        <div className="mt-4 pt-3 border-t border-[var(--gm-border)] flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-cv-xs text-[var(--cv-text-subtle)] hidden sm:inline">Source:</span>
+            <span className="text-gm-xs text-[var(--gm-text-subtle)] hidden sm:inline">Source:</span>
             <SourceHealthIndicator health={sourceHealth} label={sourceName} size="sm" />
           </div>
 
@@ -132,7 +132,7 @@ export function ReturnCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-cv-xs gap-1 hidden sm:inline-flex"
+                className="text-gm-xs gap-1 hidden sm:inline-flex"
                 onClick={(e) => {
                   e.stopPropagation();
                   onOpenMemoryRefresher(id);

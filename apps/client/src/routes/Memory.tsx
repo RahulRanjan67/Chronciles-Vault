@@ -1,5 +1,5 @@
 import * as React from "react";
-import { MessageSquare, Plus } from "lucide-react";
+import { MessageSquare, Plus, Trash2 } from "lucide-react";
 import {
   MemoryType,
   PrivacyState,
@@ -7,10 +7,11 @@ import {
   SpoilerLevel,
   MemoryAssetType,
   formatProgressAnchor,
-} from "@chronicles-vault/domain";
-import { MemoryAssetId, newId } from "@chronicles-vault/shared";
-import { clientRepository } from "@chronicles-vault/state";
-import { getMemoryAssetBlob, storeMemoryImage } from "@chronicles-vault/reader";
+} from "@grimoire/domain";
+import { MemoryAssetId, MemoryId, newId } from "@grimoire/shared";
+import { clientRepository } from "@grimoire/state";
+import { useVaultStore } from "@grimoire/vault";
+import { getMemoryAssetBlob, storeMemoryImage } from "@grimoire/reader";
 import {
   Button,
   EmptyState,
@@ -18,7 +19,7 @@ import {
   PageContainer,
   SearchInput,
   toast,
-} from "@chronicles-vault/ui";
+} from "@grimoire/ui";
 import { toUIMemoryType } from "../utils/display-adapters";
 
 export interface MemoryProps {
@@ -64,7 +65,36 @@ export function Memory({ onNavigateWork }: MemoryProps) {
   const [viewport, setViewport] = React.useState({ top: 0, height: 0, width: 0 });
 
   const works = clientRepository.getItems().filter((item) => !item.work.deletedAt);
+  const isVaultUnlocked = useVaultStore((state) => state.status === "unlocked");
   const memories = React.useMemo(() => clientRepository.listMemories(), [revision]);
+
+  const handleDeleteMemory = (memoryId: MemoryId) => {
+    if (typeof window !== "undefined" && !window.confirm("Permanently delete this memory? This cannot be undone.")) {
+      return;
+    }
+    clientRepository.deleteMemory(memoryId);
+    setRevision((v) => v + 1);
+    toast({
+      title: "Memory deleted",
+      description: "Note and associated captures removed.",
+    });
+  };
+
+  const handleFlushFilteredMemories = () => {
+    if (filteredMemories.length === 0) return;
+    if (typeof window !== "undefined" && !window.confirm(`Permanently flush all ${filteredMemories.length} visible memories? This cannot be undone.`)) {
+      return;
+    }
+    for (const item of filteredMemories) {
+      clientRepository.deleteMemory(item.memory.id as MemoryId);
+    }
+    setRevision((v) => v + 1);
+    toast({
+      title: "Memories flushed",
+      description: `Removed ${filteredMemories.length} memories.`,
+    });
+  };
+
   React.useEffect(
     () => () => {
       for (const url of objectUrlsRef.current) URL.revokeObjectURL(url);
@@ -97,7 +127,7 @@ export function Memory({ onNavigateWork }: MemoryProps) {
     };
   }, []);
   const filteredMemories = memories.filter(({ memory, workTitle }) => {
-    if (memory.privacyState === PrivacyState.Vault) return false;
+    if (memory.privacyState === PrivacyState.Vault && !isVaultUnlocked) return false;
     if (!showHidden && !memory.showInGlobalGallery) return false;
     if (!showSpoilers && memory.spoilerLevel !== SpoilerLevel.SpoilerFree) return false;
     if (filterType !== "all" && memory.type !== filterType) return false;
@@ -244,12 +274,12 @@ export function Memory({ onNavigateWork }: MemoryProps) {
       <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-2.5">
-            <MessageSquare className="h-6 w-6 text-[var(--cv-accent-strong)]" />
-            <h1 className="text-cv-2xl font-extrabold tracking-tight text-[var(--cv-text)] sm:text-cv-3xl">
+            <MessageSquare className="h-6 w-6 text-[var(--gm-accent-strong)]" />
+            <h1 className="text-gm-2xl font-extrabold tracking-tight text-[var(--gm-text)] sm:text-gm-3xl">
               Memory
             </h1>
           </div>
-          <p className="mt-1 text-cv-sm text-[var(--cv-text-muted)]">
+          <p className="mt-1 text-gm-sm text-[var(--gm-text-muted)]">
             Your notes, quotes, and reflections, linked to their work and reading position.
           </p>
         </div>
@@ -266,15 +296,15 @@ export function Memory({ onNavigateWork }: MemoryProps) {
       {showCapture && (
         <form
           onSubmit={(event) => void capture(event)}
-          className="mb-6 grid gap-3 rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-surface)] p-4 sm:grid-cols-2"
+          className="mb-6 grid gap-3 rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-surface)] p-4 sm:grid-cols-2"
         >
-          <label className="grid gap-1 text-cv-xs text-[var(--cv-text-muted)]">
+          <label className="grid gap-1 text-gm-xs text-[var(--gm-text-muted)]">
             Work
             <select
               required
               value={workId}
               onChange={(event) => setWorkId(event.target.value)}
-              className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-3 py-2 text-cv-sm text-[var(--cv-text)]"
+              className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-3 py-2 text-gm-sm text-[var(--gm-text)]"
             >
               <option value="">Choose a work</option>
               {works.map((item) => (
@@ -284,21 +314,21 @@ export function Memory({ onNavigateWork }: MemoryProps) {
               ))}
             </select>
           </label>
-          <label className="grid gap-1 text-cv-xs text-[var(--cv-text-muted)] sm:col-span-2">
+          <label className="grid gap-1 text-gm-xs text-[var(--gm-text-muted)] sm:col-span-2">
             Image (optional, up to 10 MB)
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp,image/avif"
               onChange={(event) => setImageFile(event.target.files?.[0] ?? null)}
-              className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-3 py-2 text-cv-sm text-[var(--cv-text)]"
+              className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-3 py-2 text-gm-sm text-[var(--gm-text)]"
             />
           </label>
-          <label className="grid gap-1 text-cv-xs text-[var(--cv-text-muted)]">
+          <label className="grid gap-1 text-gm-xs text-[var(--gm-text-muted)]">
             Memory type
             <select
               value={type}
               onChange={(event) => setType(event.target.value as MemoryType)}
-              className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-3 py-2 text-cv-sm text-[var(--cv-text)]"
+              className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-3 py-2 text-gm-sm text-[var(--gm-text)]"
             >
               {MEMORY_TYPES.map((memoryType) => (
                 <option key={memoryType} value={memoryType}>
@@ -307,31 +337,31 @@ export function Memory({ onNavigateWork }: MemoryProps) {
               ))}
             </select>
           </label>
-          <label className="grid gap-1 text-cv-xs text-[var(--cv-text-muted)] sm:col-span-2">
+          <label className="grid gap-1 text-gm-xs text-[var(--gm-text-muted)] sm:col-span-2">
             Title
             <input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               maxLength={200}
-              className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-3 py-2 text-cv-sm text-[var(--cv-text)]"
+              className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-3 py-2 text-gm-sm text-[var(--gm-text)]"
             />
           </label>
-          <label className="grid gap-1 text-cv-xs text-[var(--cv-text-muted)] sm:col-span-2">
+          <label className="grid gap-1 text-gm-xs text-[var(--gm-text-muted)] sm:col-span-2">
             Note
             <textarea
               value={body}
               onChange={(event) => setBody(event.target.value)}
               maxLength={10000}
               rows={4}
-              className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-3 py-2 text-cv-sm text-[var(--cv-text)]"
+              className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-3 py-2 text-gm-sm text-[var(--gm-text)]"
             />
           </label>
-          <label className="grid gap-1 text-cv-xs text-[var(--cv-text-muted)]">
+          <label className="grid gap-1 text-gm-xs text-[var(--gm-text-muted)]">
             Spoiler level
             <select
               value={spoilerLevel}
               onChange={(event) => setSpoilerLevel(event.target.value as SpoilerLevel)}
-              className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-3 py-2 text-cv-sm text-[var(--cv-text)]"
+              className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-3 py-2 text-gm-sm text-[var(--gm-text)]"
             >
               {Object.values(SpoilerLevel).map((level) => (
                 <option key={level} value={level}>
@@ -341,12 +371,12 @@ export function Memory({ onNavigateWork }: MemoryProps) {
             </select>
           </label>
           {type === MemoryType.LoreEntry && (
-            <label className="grid gap-1 text-cv-xs text-[var(--cv-text-muted)]">
+            <label className="grid gap-1 text-gm-xs text-[var(--gm-text-muted)]">
               Lore category
               <select
                 value={loreCategory}
                 onChange={(event) => setLoreCategory(event.target.value)}
-                className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-3 py-2 text-cv-sm text-[var(--cv-text)]"
+                className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-3 py-2 text-gm-sm text-[var(--gm-text)]"
               >
                 <option value="character">Character</option>
                 <option value="faction">Faction</option>
@@ -370,10 +400,10 @@ export function Memory({ onNavigateWork }: MemoryProps) {
               key={memoryType}
               type="button"
               onClick={() => setFilterType(memoryType)}
-              className={`rounded-cv-full px-3 py-1 text-cv-xs font-medium capitalize ${
+              className={`rounded-gm-full px-3 py-1 text-gm-xs font-medium capitalize ${
                 filterType === memoryType
-                  ? "bg-[var(--cv-accent)] text-white"
-                  : "bg-[var(--cv-surface)] text-[var(--cv-text-muted)]"
+                  ? "bg-[var(--gm-accent)] text-white"
+                  : "bg-[var(--gm-surface)] text-[var(--gm-text-muted)]"
               }`}
             >
               {memoryType === "all" ? "All" : memoryType.replaceAll("_", " ")}
@@ -390,23 +420,37 @@ export function Memory({ onNavigateWork }: MemoryProps) {
         </div>
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-5 text-cv-xs text-[var(--cv-text-muted)]">
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={showHidden}
-            onChange={(event) => setShowHidden(event.target.checked)}
-          />
-          Include hidden from gallery
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={showSpoilers}
-            onChange={(event) => setShowSpoilers(event.target.checked)}
-          />
-          Show spoiler memories
-        </label>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-4 text-gm-xs text-[var(--gm-text-muted)]">
+        <div className="flex flex-wrap items-center gap-5">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showHidden}
+              onChange={(event) => setShowHidden(event.target.checked)}
+            />
+            Include hidden from gallery
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showSpoilers}
+              onChange={(event) => setShowSpoilers(event.target.checked)}
+            />
+            Show spoiler memories
+          </label>
+        </div>
+        {filteredMemories.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-gm-xs text-[var(--gm-danger)] hover:bg-[var(--gm-danger-muted)]"
+            onClick={handleFlushFilteredMemories}
+            title="Flush visible memories"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            <span>Flush Filtered ({filteredMemories.length})</span>
+          </Button>
+        )}
       </div>
 
       {filteredMemories.length === 0 ? (
@@ -448,7 +492,7 @@ export function Memory({ onNavigateWork }: MemoryProps) {
                 return (
                   <div
                     key={asset.id}
-                    className="relative max-h-64 overflow-hidden rounded-cv-lg border border-[var(--cv-border)]"
+                    className="relative max-h-64 overflow-hidden rounded-gm-lg border border-[var(--gm-border)]"
                   >
                     <img
                       src={preview.thumbnail}
@@ -466,18 +510,29 @@ export function Memory({ onNavigateWork }: MemoryProps) {
                   </div>
                 );
               })}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  clientRepository.updateMemory(memory.id, {
-                    showInGlobalGallery: !memory.showInGlobalGallery,
-                  });
-                  setRevision((value) => value + 1);
-                }}
-              >
-                {memory.showInGlobalGallery ? "Hide from gallery" : "Show in gallery"}
-              </Button>
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-[var(--gm-border)]/40">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    clientRepository.updateMemory(memory.id, {
+                      showInGlobalGallery: !memory.showInGlobalGallery,
+                    });
+                    setRevision((value) => value + 1);
+                  }}
+                >
+                  {memory.showInGlobalGallery ? "Hide from gallery" : "Show in gallery"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[var(--gm-text-muted)] hover:text-[var(--gm-danger)] hover:bg-[var(--gm-danger-muted)] p-2"
+                  title="Delete memory"
+                  onClick={() => handleDeleteMemory(memory.id as MemoryId)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </article>
           ))}
           {lastRow < totalRows && (

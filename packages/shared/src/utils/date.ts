@@ -1,7 +1,7 @@
 /**
  * ISO 8601 date-time string utilities.
  *
- * All timestamps in Chronicles Vault are stored as ISO 8601 strings
+ * All timestamps in Grimoire are stored as ISO 8601 strings
  * (e.g. "2024-03-15T10:30:00.000Z") so that they survive JSON serialisation,
  * SQLite TEXT columns, and cross-platform boundary crossings without any
  * date-object magic.

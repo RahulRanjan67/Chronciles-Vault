@@ -1,8 +1,8 @@
 import * as React from "react";
 import { LoaderCircle } from "lucide-react";
-import { listLocalFiles } from "@chronicles-vault/reader";
-import type { LocalFileMetadata } from "@chronicles-vault/reader";
-import { Button } from "@chronicles-vault/ui";
+import { listLocalFiles } from "@grimoire/reader";
+import type { LocalFileMetadata } from "@grimoire/reader";
+import { Button } from "@grimoire/ui";
 
 const PdfReader = React.lazy(() =>
   import("./PdfReader").then((module) => ({ default: module.PdfReader })),
@@ -12,6 +12,9 @@ const EpubReader = React.lazy(() =>
 );
 const CbzReader = React.lazy(() =>
   import("./CbzReader").then((module) => ({ default: module.CbzReader })),
+);
+const TxtReader = React.lazy(() =>
+  import("./TxtReader").then((module) => ({ default: module.TxtReader })),
 );
 
 interface FileReaderProps {
@@ -47,7 +50,7 @@ export function FileReader({ fileId, onBack }: FileReaderProps) {
   if (error) {
     return (
       <main className="flex min-h-[32rem] flex-col items-center justify-center gap-4 p-8 text-center">
-        <p role="alert" className="max-w-xl text-cv-sm text-[var(--cv-danger)]">
+        <p role="alert" className="max-w-xl text-gm-sm text-[var(--gm-danger)]">
           {error}
         </p>
         <Button variant="outline" onClick={onBack}>
@@ -58,7 +61,7 @@ export function FileReader({ fileId, onBack }: FileReaderProps) {
   }
   if (!file) {
     return (
-      <main className="flex min-h-[32rem] items-center justify-center gap-2 text-[var(--cv-text-muted)]">
+      <main className="flex min-h-[32rem] items-center justify-center gap-2 text-[var(--gm-text-muted)]">
         <LoaderCircle className="h-4 w-4 animate-spin" />
         Opening local reader…
       </main>
@@ -68,7 +71,7 @@ export function FileReader({ fileId, onBack }: FileReaderProps) {
   return (
     <React.Suspense
       fallback={
-        <main className="flex min-h-[32rem] items-center justify-center gap-2 text-[var(--cv-text-muted)]">
+        <main className="flex min-h-[32rem] items-center justify-center gap-2 text-[var(--gm-text-muted)]">
           <LoaderCircle className="h-4 w-4 animate-spin" />
           Loading {file.format.toUpperCase()} reader…
         </main>
@@ -78,6 +81,8 @@ export function FileReader({ fileId, onBack }: FileReaderProps) {
         <EpubReader fileId={file.id} onBack={onBack} />
       ) : file.format === "cbz" ? (
         <CbzReader fileId={file.id} onBack={onBack} />
+      ) : file.format === "txt" ? (
+        <TxtReader fileId={file.id} onBack={onBack} />
       ) : (
         <PdfReader fileId={file.id} onBack={onBack} />
       )}

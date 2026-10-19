@@ -28,7 +28,7 @@ export function Spinner({
       {...props}
     >
       <Loader2
-        className={cn('animate-spin text-[var(--cv-accent-strong)]', sizeClass)}
+        className={cn('animate-spin text-[var(--gm-accent-strong)]', sizeClass)}
       />
       <span className="sr-only">{label}</span>
     </div>

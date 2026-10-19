@@ -1,6 +1,6 @@
 import * as React from "react";
 import { AlertTriangle, Download, Eye, ShieldCheck, ShieldAlert, Undo2 } from "lucide-react";
-import { Badge, Button, toast } from "@chronicles-vault/ui";
+import { Badge, Button, toast } from "@grimoire/ui";
 import {
   evaluatePublication,
   renderPublicationHtml,
@@ -13,9 +13,9 @@ import {
   type PublicationWork,
   type UserPersonalList,
   type VaultVerificationStatus,
-} from "@chronicles-vault/state";
-import { PrivacyState } from "@chronicles-vault/domain";
-import { useVaultStore } from "@chronicles-vault/vault";
+} from "@grimoire/state";
+import { PrivacyState } from "@grimoire/domain";
+import { useVaultStore } from "@grimoire/vault";
 import { loadUnlockedVaultNotes, vaultHasKeyRecord, type UnlockedVaultNote } from "../../../utils/vault-notes";
 
 export interface PublicationPanelProps {
@@ -219,13 +219,13 @@ export function PublicationPanel({ list }: PublicationPanelProps) {
   const excludedTitles = excludedIds.map((id) => titleFor(id) ?? id);
 
   return (
-    <section className="mt-8 rounded-cv-xl border border-[var(--cv-border)] bg-[var(--cv-surface)] p-5" aria-labelledby="publication-heading">
+    <section className="mt-8 rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-surface)] p-5" aria-labelledby="publication-heading">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 id="publication-heading" className="text-cv-base font-semibold text-[var(--cv-text)]">
+          <h3 id="publication-heading" className="text-gm-base font-semibold text-[var(--gm-text)]">
             Publication
           </h3>
-          <p className="mt-0.5 text-cv-xs text-[var(--cv-text-muted)]">
+          <p className="mt-0.5 text-gm-xs text-[var(--gm-text-muted)]">
             Every private memory, note, tag, and vault reference is checked before export.
           </p>
         </div>
@@ -249,9 +249,9 @@ export function PublicationPanel({ list }: PublicationPanelProps) {
             return (
               <li
                 key={`${finding.kind}-${finding.entryId ?? "list"}-${index}`}
-                className="flex items-start gap-2 rounded-cv border border-[var(--cv-danger)]/30 bg-[var(--cv-danger-muted)] px-3 py-2 text-cv-xs text-[var(--cv-text)]"
+                className="flex items-start gap-2 rounded-cv border border-[var(--gm-danger)]/30 bg-[var(--gm-danger-muted)] px-3 py-2 text-gm-xs text-[var(--gm-text)]"
               >
-                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--cv-danger)]" />
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--gm-danger)]" />
                 <span>
                   {entryTitle && <strong className="font-semibold">{entryTitle}: </strong>}
                   {finding.message}
@@ -277,7 +277,7 @@ export function PublicationPanel({ list }: PublicationPanelProps) {
             </Button>
           )}
           {vaultLocked && (
-            <p className="w-full text-cv-xs text-[var(--cv-text-muted)]">
+            <p className="w-full text-gm-xs text-[var(--gm-text-muted)]">
               Open Private Vault and unlock it. The vault has to be open so private notes can be compared.
             </p>
           )}
@@ -295,14 +295,14 @@ export function PublicationPanel({ list }: PublicationPanelProps) {
       )}
 
       {excludedIds.length > 0 && (
-        <div className="mt-4 text-cv-xs text-[var(--cv-text-muted)]">
+        <div className="mt-4 text-gm-xs text-[var(--gm-text-muted)]">
           <span className="mr-2">Excluded from publication:</span>
           {excludedTitles.map((title, index) => (
             <button
               key={excludedIds[index]}
               type="button"
               onClick={() => setExcludedIds((current) => current.filter((id) => id !== excludedIds[index]))}
-              className="mr-2 inline-flex items-center gap-1 rounded-cv-sm border border-[var(--cv-border)] px-2 py-0.5 hover:text-[var(--cv-text)]"
+              className="mr-2 inline-flex items-center gap-1 rounded-gm-sm border border-[var(--gm-border)] px-2 py-0.5 hover:text-[var(--gm-text)]"
             >
               <Undo2 className="h-3 w-3" /> {title}
             </button>
@@ -328,7 +328,7 @@ export function PublicationPanel({ list }: PublicationPanelProps) {
         >
           <Download className="h-3.5 w-3.5" /> Export Markdown
         </Button>
-        <p className="text-[11px] text-[var(--cv-text-subtle)]">
+        <p className="text-[11px] text-[var(--gm-text-subtle)]">
           Export stays disabled until the scrubber reports zero findings.
         </p>
       </div>

@@ -8,7 +8,7 @@ import {
   WorkRow,
   cn,
   usePerformanceProfile,
-} from '@chronicles-vault/ui';
+} from '@grimoire/ui';
 import { LibraryViewMode } from './LibraryViewToggle';
 
 export interface WorkItemData {
@@ -156,12 +156,12 @@ export function VirtualWorkGrid({
         ref={containerRef}
         data-virtualized={windowSlice.isVirtualized ? 'true' : 'false'}
         className={cn(
-          'flex flex-col divide-y divide-[var(--cv-border)] rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] overflow-hidden',
+          'flex flex-col divide-y divide-[var(--gm-border)] rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] overflow-hidden',
           className,
         )}
       >
         {viewMode === 'table' && (
-          <div className="flex items-center justify-between gap-4 px-3 py-2 text-[11px] font-semibold text-[var(--cv-text-subtle)] uppercase tracking-wider bg-[var(--cv-surface)]/40 border-b border-[var(--cv-border)]">
+          <div className="flex items-center justify-between gap-4 px-3 py-2 text-[11px] font-semibold text-[var(--gm-text-subtle)] uppercase tracking-wider bg-[var(--gm-surface)]/40 border-b border-[var(--gm-border)]">
             <span className="flex-1">Title & Format</span>
             <span className="hidden sm:inline w-36">Progress</span>
             <span className="hidden md:inline w-28">Status</span>

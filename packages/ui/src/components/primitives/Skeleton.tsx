@@ -7,7 +7,7 @@ export function Skeleton({ className, ...props }: SkeletonProps) {
   return (
     <div
       className={cn(
-        'animate-pulse rounded-cv bg-[var(--cv-surface)]/70',
+        'animate-pulse rounded-cv bg-[var(--gm-surface)]/70',
         className,
       )}
       {...props}
@@ -62,7 +62,7 @@ export function SkeletonCard({ className, ...props }: SkeletonProps) {
   return (
     <div
       className={cn(
-        'flex flex-col gap-3 rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] p-3 shadow-xs',
+        'flex flex-col gap-3 rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-3 shadow-xs',
         className,
       )}
       {...props}

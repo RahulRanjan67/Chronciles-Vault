@@ -4,7 +4,10 @@ import {
   Bookmark,
   ChevronLeft,
   ChevronRight,
+  List,
   LoaderCircle,
+  PenLine,
+  Search,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
@@ -28,19 +31,19 @@ import {
   resolvePdfOutline,
   togglePdfBookmark,
   toPdfProgressAnchor,
-} from "@chronicles-vault/reader";
-import type { PdfTextMatch } from "@chronicles-vault/reader";
-import type { LocalFileMetadata } from "@chronicles-vault/reader";
-import type { PdfBookmark, PdfOutlineEntry } from "@chronicles-vault/reader";
-import type { ProgressAnchor } from "@chronicles-vault/domain";
+} from "@grimoire/reader";
+import type { PdfTextMatch } from "@grimoire/reader";
+import type { LocalFileMetadata } from "@grimoire/reader";
+import type { PdfBookmark, PdfOutlineEntry } from "@grimoire/reader";
+import type { ProgressAnchor } from "@grimoire/domain";
 import {
   MemoryType,
   PrivacyState,
   SpoilerLevel,
   formatProgressAnchor,
-} from "@chronicles-vault/domain";
-import { clientRepository, useLibraryStore } from "@chronicles-vault/state";
-import { Button } from "@chronicles-vault/ui";
+} from "@grimoire/domain";
+import { clientRepository, useLibraryStore } from "@grimoire/state";
+import { Button } from "@grimoire/ui";
 
 GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 const MAX_PDF_SEARCH_PAGES = 5000;
@@ -67,6 +70,7 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
   const [file, setFile] = React.useState<LocalFileMetadata | null>(null);
   const [document, setDocument] = React.useState<PDFDocumentProxy | null>(null);
   const [pageNumber, setPageNumber] = React.useState(1);
+  const [turnDirection, setTurnDirection] = React.useState<"forward" | "reverse">("forward");
   const [pageTurnKey, setPageTurnKey] = React.useState(0);
   const triggerPageTurn = React.useCallback(() => {
     setPageTurnKey((key) => key + 1);
@@ -75,8 +79,11 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
   const [containerWidth, setContainerWidth] = React.useState(0);
   const [containerHeight, setContainerHeight] = React.useState(0);
   const [zoom, setZoom] = React.useState(1);
-  const [fitMode, setFitMode] = React.useState<"fit-width" | "fit-height">("fit-width");
+  const [fitMode, setFitMode] = React.useState<"fit-page" | "fit-width" | "actual-size">("fit-page");
   const [spreadMode, setSpreadMode] = React.useState(false);
+  const [showSearch, setShowSearch] = React.useState(false);
+  const [showNoteBar, setShowNoteBar] = React.useState(false);
+  const [showOutline, setShowOutline] = React.useState(false);
   const [outline, setOutline] = React.useState<PdfOutlineEntry[]>([]);
   const [bookmarks, setBookmarks] = React.useState<PdfBookmark[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -307,9 +314,9 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
       const pages = await Promise.all(visiblePageNumbers.map((number) => document.getPage(number)));
       if (cancelled) return;
       const baseViewports = pages.map((page) => page.getViewport({ scale: 1 }));
-      const availableWidth = Math.max(containerWidth - 32, 1);
-      const availableHeight = Math.max(containerHeight - 32, 1);
-      const slotWidth = isSpreadVisible ? Math.max((availableWidth - 16) / 2, 1) : availableWidth;
+      const availableWidth = Math.max(containerWidth - 12, 1);
+      const availableHeight = Math.max(containerHeight - 12, 1);
+      const slotWidth = isSpreadVisible ? Math.max((availableWidth - 12) / 2, 1) : availableWidth;
       const widestPage = Math.max(...baseViewports.map((viewport) => viewport.width));
       const tallestPage = Math.max(...baseViewports.map((viewport) => viewport.height));
       const spreadFitScale = Math.min(slotWidth / widestPage, availableHeight / tallestPage);
@@ -323,10 +330,17 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
         }
         const widthScale = slotWidth / baseViewport.width;
         const heightScale = availableHeight / baseViewport.height;
-        const fitScale = isSpreadVisible
-          ? Math.min(spreadFitScale, widthScale, heightScale) * zoom
-          : Math.min(Math.max(fitMode === "fit-height" ? heightScale : widthScale, 0.1), 1.75) *
-            zoom;
+        let fitScale: number;
+        if (isSpreadVisible) {
+          fitScale = Math.min(spreadFitScale, widthScale, heightScale) * zoom;
+        } else if (fitMode === "fit-page") {
+          fitScale = Math.min(widthScale, heightScale) * zoom;
+        } else if (fitMode === "fit-width") {
+          fitScale = Math.min(widthScale, 1.15) * zoom;
+        } else {
+          // Normalize 100% zoom from 72pt to standard 96dpi display (0.75 ratio) so text is not colossal
+          fitScale = 0.78 * zoom;
+        }
         const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
         const maxPixelScale = Math.min(
           8192 / baseViewport.width,
@@ -437,8 +451,10 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
     navigatePage(result.pageNumber);
   };
 
-  const navigatePage = (nextPage: number) => {
+  const navigatePage = (nextPage: number, explicitDirection?: "forward" | "reverse") => {
     if (!file || !pageCount || nextPage < 1 || nextPage > pageCount) return;
+    const dir = explicitDirection ?? (nextPage >= pageNumber ? "forward" : "reverse");
+    setTurnDirection(dir);
     setPageNumber(nextPage);
     triggerPageTurn();
     setSelectedQuote("");
@@ -586,11 +602,11 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
       <React.Fragment key={`${parentKey}-${depth}-${index}-${entry.pageNumber}`}>
         <button
           type="button"
-          className="block w-full truncate rounded px-2 py-1 text-left text-cv-xs text-[var(--cv-text)] hover:bg-[var(--cv-accent-muted)]"
+          className="block w-full truncate rounded px-2 py-1 text-left text-gm-xs text-[var(--gm-text)] hover:bg-[var(--gm-accent-muted)]"
           style={{ paddingLeft: `${8 + depth * 12}px` }}
           onClick={() => navigatePage(entry.pageNumber)}
         >
-          {entry.title} <span className="text-[var(--cv-text-muted)]">· {entry.pageNumber}</span>
+          {entry.title} <span className="text-[var(--gm-text-muted)]">· {entry.pageNumber}</span>
         </button>
         {entry.children.length > 0 &&
           renderOutline(entry.children, depth + 1, `${parentKey}-${index}`)}
@@ -609,10 +625,10 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
       if (event.key === "ArrowRight" || event.key === "PageDown") {
         if (lastVisiblePage >= pageCount) return;
         event.preventDefault();
-        navigatePage(Math.min(pageNumber + step, pageCount));
+        navigatePage(Math.min(pageNumber + step, pageCount), "forward");
       } else if (event.key === "ArrowLeft" || event.key === "PageUp") {
         event.preventDefault();
-        navigatePage(Math.max(pageNumber - step, 1));
+        navigatePage(Math.max(pageNumber - step, 1), "reverse");
       } else if (event.key === "Escape") {
         onBack?.();
       }
@@ -622,17 +638,17 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
   }, [file, pageNumber, pageCount, spreadMode, lastVisiblePage, onBack, library.recordProgress]);
 
   return (
-    <main className="flex h-[calc(100vh-4rem)] min-h-[32rem] flex-col bg-[var(--cv-bg)]">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--cv-border)] bg-[var(--cv-surface)] px-4 py-3">
+    <main className="flex h-[calc(100vh-4rem)] min-h-[32rem] flex-col bg-[var(--gm-bg)]">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-1.5">
         <div className="flex min-w-0 items-center gap-3">
           <Button variant="ghost" size="icon" aria-label="Back to Local Shelf" onClick={onBack}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="min-w-0">
-            <h1 className="truncate font-semibold text-[var(--cv-text)]">
+            <h1 className="truncate font-semibold text-[var(--gm-text)]">
               {file?.displayName ?? "PDF Reader"}
             </h1>
-            <p className="text-cv-xs text-[var(--cv-text-muted)]">
+            <p className="text-gm-xs text-[var(--gm-text-muted)]">
               {pageCount > 0
                 ? lastVisiblePage > pageNumber
                   ? `Pages ${pageNumber}–${lastVisiblePage} of ${pageCount}`
@@ -650,14 +666,16 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
             <select
               id="pdf-fit-mode"
               value={fitMode}
-              onChange={(event) => setFitMode(event.target.value as "fit-width" | "fit-height")}
-              className="max-w-28 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-2 py-2 text-cv-xs text-[var(--cv-text)]"
+              onChange={(event) => setFitMode(event.target.value as "fit-page" | "fit-width" | "actual-size")}
+              className="max-w-28 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-2 py-1.5 text-gm-xs text-[var(--gm-text)]"
             >
-              <option value="fit-width">Fit width</option>
-              <option value="fit-height">Fit height</option>
+              <option value="fit-page">Fit Page</option>
+              <option value="fit-width">Fit Width</option>
+              <option value="actual-size">100% Actual</option>
             </select>
             <Button
               variant={spreadMode ? "default" : "outline"}
+              size="sm"
               aria-pressed={spreadMode}
               onClick={() => {
                 setSpreadMode((enabled) => !enabled);
@@ -666,8 +684,39 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
                 window.getSelection()?.removeAllRanges();
               }}
             >
-              Double-page spread
+              Spread
             </Button>
+            <Button
+              variant={showSearch ? "default" : "outline"}
+              size="icon"
+              aria-label="Toggle Search"
+              title="Search this PDF"
+              onClick={() => setShowSearch((prev) => !prev)}
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+            {file?.workId && (
+              <Button
+                variant={showNoteBar ? "default" : "outline"}
+                size="icon"
+                aria-label="Toggle Notes"
+                title="Add Page Note / Save Quote"
+                onClick={() => setShowNoteBar((prev) => !prev)}
+              >
+                <PenLine className="h-4 w-4" />
+              </Button>
+            )}
+            {(outline.length > 0 || bookmarks.length > 0) && (
+              <Button
+                variant={showOutline ? "default" : "outline"}
+                size="icon"
+                aria-label="Toggle Outline"
+                title="Contents & Bookmarks"
+                onClick={() => setShowOutline((prev) => !prev)}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               variant="outline"
               size="icon"
@@ -691,34 +740,34 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
               variant="outline"
               size="icon"
               aria-label="Zoom out"
-              disabled={zoom <= 0.6}
-              onClick={() => setZoom((value) => Math.max(0.6, value - 0.2))}
+              disabled={zoom <= 0.4}
+              onClick={() => setZoom((value) => Math.max(0.4, Number((value - 0.15).toFixed(2))))}
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
-            <span className="w-12 text-center text-cv-xs text-[var(--cv-text-muted)]">
+            <span className="w-12 text-center text-gm-xs text-[var(--gm-text-muted)]">
               {Math.round(zoom * 100)}%
             </span>
             <Button
               variant="outline"
               size="icon"
               aria-label="Zoom in"
-              disabled={zoom >= 2}
-              onClick={() => setZoom((value) => Math.min(2, value + 0.2))}
+              disabled={zoom >= 2.5}
+              onClick={() => setZoom((value) => Math.min(2.5, Number((value + 0.15).toFixed(2))))}
             >
               <ZoomIn className="h-4 w-4" />
             </Button>
-            <span className="mx-1 h-6 border-l border-[var(--cv-border)]" />
+            <span className="mx-1 h-6 border-l border-[var(--gm-border)]" />
             <Button
               variant="outline"
               size="icon"
               aria-label={spreadMode ? "Previous spread" : "Previous page"}
               disabled={pageNumber <= 1}
-              onClick={() => navigatePage(Math.max(pageNumber - (spreadMode ? 2 : 1), 1))}
+              onClick={() => navigatePage(Math.max(pageNumber - (spreadMode ? 2 : 1), 1), "reverse")}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="min-w-16 text-center text-cv-sm text-[var(--cv-text)]">
+            <span className="min-w-16 text-center text-gm-sm text-[var(--gm-text)]">
               {pageNumber} / {pageCount}
             </span>
             <Button
@@ -726,7 +775,7 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
               size="icon"
               aria-label={spreadMode ? "Next spread" : "Next page"}
               disabled={!canAdvance}
-              onClick={() => navigatePage(Math.min(pageNumber + (spreadMode ? 2 : 1), pageCount))}
+              onClick={() => navigatePage(Math.min(pageNumber + (spreadMode ? 2 : 1), pageCount), "forward")}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -734,39 +783,43 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
         )}
       </header>
 
-      <form
-        onSubmit={(event) => void runSearch(event)}
-        className="flex flex-wrap items-center gap-2 border-b border-[var(--cv-border)] bg-[var(--cv-surface)] px-4 py-2"
-      >
-        <label htmlFor="pdf-search" className="sr-only">
-          Search this PDF
-        </label>
-        <input
-          id="pdf-search"
-          type="search"
-          value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder="Search this PDF"
-          className="min-w-48 flex-1 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-3 py-2 text-cv-sm text-[var(--cv-text)]"
-        />
-        <Button type="submit" variant="outline" disabled={!document || isSearching}>
-          {isSearching ? "Searching…" : "Search"}
-        </Button>
-        {searchResults.length > 0 && (
-          <span className="text-cv-xs text-[var(--cv-text-muted)]">
-            {activeSearchIndex === null ? 0 : activeSearchIndex + 1} of {searchResults.length}{" "}
-            matches
-          </span>
-        )}
-      </form>
-      {(outline.length > 0 || bookmarks.length > 0) && (
+      {showSearch && (
+        <form
+          onSubmit={(event) => void runSearch(event)}
+          className="flex flex-wrap items-center gap-2 border-b border-[var(--gm-border)] bg-[var(--gm-surface)] px-4 py-2"
+        >
+          <label htmlFor="pdf-search" className="sr-only">
+            Search this PDF
+          </label>
+          <input
+            id="pdf-search"
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search this PDF"
+            className="min-w-48 flex-1 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-3 py-1.5 text-gm-sm text-[var(--gm-text)]"
+            autoFocus
+          />
+          <Button type="submit" variant="outline" size="sm" disabled={!document || isSearching}>
+            {isSearching ? "Searching…" : "Search"}
+          </Button>
+          {searchResults.length > 0 && (
+            <span className="text-gm-xs text-[var(--gm-text-muted)]">
+              {activeSearchIndex === null ? 0 : activeSearchIndex + 1} of {searchResults.length}{" "}
+              matches
+            </span>
+          )}
+        </form>
+      )}
+
+      {showOutline && (outline.length > 0 || bookmarks.length > 0) && (
         <nav
           aria-label="PDF navigation"
-          className="flex max-h-36 gap-4 overflow-auto border-b border-[var(--cv-border)] bg-[var(--cv-surface)] px-4 py-2"
+          className="flex max-h-36 gap-4 overflow-auto border-b border-[var(--gm-border)] bg-[var(--gm-surface)] px-4 py-2"
         >
           {outline.length > 0 && (
             <section className="min-w-56 flex-1" aria-label="Document outline">
-              <h2 className="px-2 pb-1 text-cv-xs font-semibold text-[var(--cv-text-muted)]">
+              <h2 className="px-2 pb-1 text-gm-xs font-semibold text-[var(--gm-text-muted)]">
                 Contents
               </h2>
               {renderOutline(outline)}
@@ -774,14 +827,14 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
           )}
           {bookmarks.length > 0 && (
             <section className="min-w-44" aria-label="Saved bookmarks">
-              <h2 className="px-2 pb-1 text-cv-xs font-semibold text-[var(--cv-text-muted)]">
+              <h2 className="px-2 pb-1 text-gm-xs font-semibold text-[var(--gm-text-muted)]">
                 Bookmarks
               </h2>
               {bookmarks.map((bookmark) => (
                 <button
                   key={bookmark.id}
                   type="button"
-                  className="block w-full rounded px-2 py-1 text-left text-cv-xs text-[var(--cv-text)] hover:bg-[var(--cv-accent-muted)]"
+                  className="block w-full rounded px-2 py-1 text-left text-gm-xs text-[var(--gm-text)] hover:bg-[var(--gm-accent-muted)]"
                   onClick={() => navigatePage(bookmark.pageNumber)}
                 >
                   {bookmark.title}
@@ -791,21 +844,23 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
           )}
         </nav>
       )}
+
       {searchError && (
         <div
           role="status"
-          className="border-b border-[var(--cv-border)] px-4 py-2 text-center text-cv-xs text-[var(--cv-text-muted)]"
+          className="border-b border-[var(--gm-border)] px-4 py-2 text-center text-gm-xs text-[var(--gm-text-muted)]"
         >
           {searchError}
         </div>
       )}
-      {file?.workId && pageCount > 0 && (
+
+      {showNoteBar && file?.workId && pageCount > 0 && (
         <form
           onSubmit={(event) => {
             event.preventDefault();
             savePageMemory();
           }}
-          className="flex flex-wrap items-center gap-2 border-b border-[var(--cv-border)] bg-[var(--cv-surface)] px-4 py-2"
+          className="flex flex-wrap items-center gap-2 border-b border-[var(--gm-border)] bg-[var(--gm-surface)] px-4 py-2"
         >
           <label htmlFor="pdf-page-memory" className="sr-only">
             Note for {formatProgressAnchor(toPdfProgressAnchor(pageNumber, pageCount))}
@@ -816,20 +871,22 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
             onChange={(event) => setMemoryDraft(event.target.value)}
             maxLength={5000}
             placeholder={`Add a note for page ${pageNumber}`}
-            className="min-w-48 flex-1 rounded-cv border border-[var(--cv-border)] bg-[var(--cv-bg)] px-3 py-2 text-cv-sm text-[var(--cv-text)]"
+            className="min-w-48 flex-1 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg)] px-3 py-1.5 text-gm-sm text-[var(--gm-text)]"
+            autoFocus
           />
-          <Button type="submit" variant="outline" disabled={!memoryDraft.trim()}>
+          <Button type="submit" variant="outline" size="sm" disabled={!memoryDraft.trim()}>
             Save page note
           </Button>
           <Button
             type="button"
             variant="outline"
+            size="sm"
             disabled={!selectedQuote || selectedQuotePage === null}
             onMouseDown={(event) => event.preventDefault()}
             onClick={saveSelectedQuote}
           >
             {selectedQuotePage !== null && selectedQuotePage !== pageNumber
-              ? `Save page ${selectedQuotePage} selection as quote`
+              ? `Save page ${selectedQuotePage} quote`
               : "Save selection as quote"}
           </Button>
         </form>
@@ -837,7 +894,7 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
       {searchResults.length > 0 && (
         <div
           aria-label="PDF search results"
-          className="flex max-h-28 gap-2 overflow-x-auto border-b border-[var(--cv-border)] bg-[var(--cv-surface)] p-2"
+          className="flex max-h-28 gap-2 overflow-x-auto border-b border-[var(--gm-border)] bg-[var(--gm-surface)] p-2"
         >
           {searchResults.map((result) => (
             <button
@@ -845,14 +902,14 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
               type="button"
               aria-current={activeSearchIndex === result.matchIndex ? "true" : undefined}
               onClick={() => navigateToSearchResult(result)}
-              className={`min-w-64 max-w-96 rounded-cv border px-3 py-2 text-left text-cv-xs ${
+              className={`min-w-64 max-w-96 rounded-cv border px-3 py-2 text-left text-gm-xs ${
                 activeSearchIndex === result.matchIndex
-                  ? "border-[var(--cv-accent-strong)] bg-[var(--cv-accent-muted)]"
-                  : "border-[var(--cv-border)]"
+                  ? "border-[var(--gm-accent-strong)] bg-[var(--gm-accent-muted)]"
+                  : "border-[var(--gm-border)]"
               }`}
             >
-              <span className="font-semibold text-[var(--cv-text)]">Page {result.pageNumber}</span>
-              <span className="mt-1 block text-[var(--cv-text-muted)]">{result.excerpt}</span>
+              <span className="font-semibold text-[var(--gm-text)]">Page {result.pageNumber}</span>
+              <span className="mt-1 block text-[var(--gm-text-muted)]">{result.excerpt}</span>
             </button>
           ))}
         </div>
@@ -861,7 +918,7 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
       {progressWarning && (
         <div
           role="status"
-          className="border-b border-[var(--cv-warning)]/40 bg-[var(--cv-warning)]/10 px-4 py-2 text-center text-cv-xs text-[var(--cv-warning)]"
+          className="border-b border-[var(--gm-warning)]/40 bg-[var(--gm-warning)]/10 px-4 py-2 text-center text-gm-xs text-[var(--gm-warning)]"
         >
           {progressWarning}
         </div>
@@ -873,7 +930,7 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
           const target = event.target;
           const isTextOrControl =
             target instanceof Element &&
-            Boolean(target.closest(".cv-pdf-text-layer, button, input"));
+            Boolean(target.closest(".gm-pdf-text-layer, button, input"));
           if (event.pointerType === "touch" && event.isPrimary && !isTextOrControl) {
             touchStartRef.current = { x: event.clientX, y: event.clientY };
           }
@@ -897,10 +954,10 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
           touchStartRef.current = null;
         }}
         style={{ touchAction: zoom > 1 ? "auto" : "pan-y pinch-zoom" }}
-        className="relative flex min-h-0 flex-1 items-center justify-center gap-4 overflow-auto p-4"
+        className="relative flex min-h-0 flex-1 items-center justify-center gap-2 overflow-auto p-1 md:p-2"
       >
         {isLoading && (
-          <div className="flex items-center gap-2 text-[var(--cv-text-muted)]">
+          <div className="flex items-center gap-2 text-[var(--gm-text-muted)]">
             <LoaderCircle className="h-4 w-4 animate-spin" />
             Loading PDF locally…
           </div>
@@ -908,7 +965,7 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
         {error && (
           <div
             role="alert"
-            className="m-auto max-w-xl rounded-cv border border-[var(--cv-danger)]/40 bg-[var(--cv-danger)]/10 p-4 text-cv-sm text-[var(--cv-danger)]"
+            className="m-auto max-w-xl rounded-cv border border-[var(--gm-danger)]/40 bg-[var(--gm-danger)]/10 p-4 text-gm-sm text-[var(--gm-danger)]"
           >
             {error}
           </div>
@@ -918,7 +975,9 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
           visiblePageNumbers.map((visiblePageNumber, index) => (
             <div
               key={`${visiblePageNumber}-${pageTurnKey}`}
-              className="relative my-auto shrink-0 shadow-xl cv-page-turn-active"
+              className={`relative my-auto shrink-0 shadow-xl ${
+                turnDirection === "reverse" ? "gm-page-turn-reverse" : "gm-page-turn-active"
+              }`}
               role="group"
               aria-label={`PDF page ${visiblePageNumber}`}
             >
@@ -932,7 +991,7 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
                 ref={(element) => {
                   textLayerRefs.current[index] = element;
                 }}
-                className="cv-pdf-text-layer"
+                className="gm-pdf-text-layer"
                 aria-label={`Selectable text on page ${visiblePageNumber}`}
               />
             </div>
@@ -943,8 +1002,8 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
               type="button"
               aria-label={spreadMode ? "Previous spread" : "Previous page"}
               disabled={pageNumber <= 1}
-              onClick={() => navigatePage(Math.max(pageNumber - (spreadMode ? 2 : 1), 1))}
-              className="absolute inset-y-0 left-0 z-10 flex w-12 items-center justify-center rounded-r-cv bg-[var(--cv-surface)]/70 text-[var(--cv-text)] disabled:opacity-30 sm:hidden"
+              onClick={() => navigatePage(Math.max(pageNumber - (spreadMode ? 2 : 1), 1), "reverse")}
+              className="absolute inset-y-0 left-0 z-10 flex w-12 items-center justify-center rounded-r-cv bg-[var(--gm-surface)]/70 text-[var(--gm-text)] disabled:opacity-30 sm:hidden"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -952,8 +1011,8 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
               type="button"
               aria-label={spreadMode ? "Next spread" : "Next page"}
               disabled={!canAdvance}
-              onClick={() => navigatePage(Math.min(pageNumber + (spreadMode ? 2 : 1), pageCount))}
-              className="absolute inset-y-0 right-0 z-10 flex w-12 items-center justify-center rounded-l-cv bg-[var(--cv-surface)]/70 text-[var(--cv-text)] disabled:opacity-30 sm:hidden"
+              onClick={() => navigatePage(Math.min(pageNumber + (spreadMode ? 2 : 1), pageCount), "forward")}
+              className="absolute inset-y-0 right-0 z-10 flex w-12 items-center justify-center rounded-l-cv bg-[var(--gm-surface)]/70 text-[var(--gm-text)] disabled:opacity-30 sm:hidden"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -961,8 +1020,8 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
         )}
       </div>
       {pageCount > 0 && (
-        <footer className="flex items-center gap-3 border-t border-[var(--cv-border)] bg-[var(--cv-surface)] px-4 py-3">
-          <span className="min-w-20 text-cv-xs text-[var(--cv-text-muted)]">
+        <footer className="flex items-center gap-3 border-t border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-1.5">
+          <span className="min-w-20 text-gm-xs text-[var(--gm-text-muted)]">
             {pageNumber} / {pageCount}
           </span>
           <label className="sr-only" htmlFor="pdf-page-slider">
@@ -975,9 +1034,9 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
             max={pageCount}
             value={pageNumber}
             onChange={(event) => navigatePage(Number(event.target.value))}
-            className="min-w-28 flex-1 accent-[var(--cv-accent-strong)]"
+            className="min-w-28 flex-1 accent-[var(--gm-accent-strong)]"
           />
-          <span className="min-w-16 text-right text-cv-xs text-[var(--cv-text-muted)]">
+          <span className="min-w-16 text-right text-gm-xs text-[var(--gm-text-muted)]">
             {Math.round((pageNumber / pageCount) * 100)}%
           </span>
         </footer>

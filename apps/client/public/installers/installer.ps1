@@ -1,8 +1,8 @@
 <#
 .SYNOPSIS
-  Chronicles Vault — Universal Windows x86/x64 Standalone Studio Installer
+  Grimoire — Universal Windows x86/x64 Standalone Studio Installer
   Target: Any supported Windows 10/11 PC (x86 or x64).
-  Zero hardcoded paths: dynamically installs to $env:LOCALAPPDATA\Programs\ChroniclesVault
+  Zero hardcoded paths: dynamically installs to $env:LOCALAPPDATA\Programs\Grimoire
 #>
 
 [CmdletBinding()]
@@ -11,15 +11,15 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$AppName = "Chronicles Vault PC Workstation"
-$AppExeName = "ChroniclesVault"
+$AppName = "Grimoire PC Workstation"
+$AppExeName = "Grimoire"
 $SourceDir = $PSScriptRoot
-$InstallDir = Join-Path $env:LOCALAPPDATA "Programs\ChroniclesVault"
+$InstallDir = Join-Path $env:LOCALAPPDATA "Programs\Grimoire"
 $DesktopDir = [Environment]::GetFolderPath("Desktop")
-$StartMenuDir = Join-Path ([Environment]::GetFolderPath("StartMenu")) "Programs\Chronicles Vault"
+$StartMenuDir = Join-Path ([Environment]::GetFolderPath("StartMenu")) "Programs\Grimoire"
 
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "   Chronicles Vault — Universal Windows Installer (x86/x64)   " -ForegroundColor Yellow
+Write-Host "   Grimoire — Universal Windows Installer (x86/x64)   " -ForegroundColor Yellow
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "Source:      $SourceDir"
 Write-Host "Destination: $InstallDir"
@@ -33,8 +33,8 @@ if (-not (Test-Path $InstallDir)) {
 
 # 2. Copy App Files (Zero dependencies outside standard Python)
 $AppFiles = @(
-    "pc_workstation_app.py",
-    "pc_workstation_features_data.py",
+    "grimoire_workstation_app.py",
+    "grimoire_workstation_features_data.py",
     "sync_engine.py",
     "public",
     "src",
@@ -90,12 +90,12 @@ if (-not $PythonExe) {
 Write-Host "  [✓] Runtime Engine: $PythonExe" -ForegroundColor Green
 
 # 4. Create App Launcher Batch Script inside Install Directory
-$LauncherBat = Join-Path $InstallDir "ChroniclesVault.bat"
+$LauncherBat = Join-Path $InstallDir "Grimoire.bat"
 $LauncherContent = @"
 @echo off
 setlocal
 cd /d "%~dp0"
-title Chronicles Vault PC Workstation
+title Grimoire PC Workstation
 where python >nul 2>nul
 if %ERRORLEVEL% equ 0 (
     set PY_EXE=python
@@ -107,7 +107,7 @@ if %ERRORLEVEL% equ 0 (
         set PY_EXE="$PythonExe"
     )
 )
-start "" %PY_EXE% pc_workstation_app.py
+start "" %PY_EXE% grimoire_workstation_app.py
 exit /b 0
 "@
 Set-Content -Path $LauncherBat -Value $LauncherContent -Encoding ASCII
@@ -116,22 +116,22 @@ Set-Content -Path $LauncherBat -Value $LauncherContent -Encoding ASCII
 $WshShell = New-Object -ComObject WScript.Shell
 
 # Desktop Shortcut
-$DesktopShortcut = $WshShell.CreateShortcut((Join-Path $DesktopDir "Chronicles Vault.lnk"))
+$DesktopShortcut = $WshShell.CreateShortcut((Join-Path $DesktopDir "Grimoire.lnk"))
 $DesktopShortcut.TargetPath = $LauncherBat
 $DesktopShortcut.WorkingDirectory = $InstallDir
-$DesktopShortcut.Description = "Chronicles Vault — Native Multi-Medium Sanctum & Local Media Workstation"
+$DesktopShortcut.Description = "Grimoire — Native Multi-Medium Sanctum & Local Media Workstation"
 $DesktopShortcut.WindowStyle = 7 # Minimized launch
 $DesktopShortcut.Save()
-Write-Host "  [✓] Desktop Shortcut created: $DesktopDir\Chronicles Vault.lnk" -ForegroundColor Green
+Write-Host "  [✓] Desktop Shortcut created: $DesktopDir\Grimoire.lnk" -ForegroundColor Green
 
 # Start Menu Shortcut
 if (-not (Test-Path $StartMenuDir)) {
     New-Item -ItemType Directory -Path $StartMenuDir -Force | Out-Null
 }
-$StartShortcut = $WshShell.CreateShortcut((Join-Path $StartMenuDir "Chronicles Vault.lnk"))
+$StartShortcut = $WshShell.CreateShortcut((Join-Path $StartMenuDir "Grimoire.lnk"))
 $StartShortcut.TargetPath = $LauncherBat
 $StartShortcut.WorkingDirectory = $InstallDir
-$StartShortcut.Description = "Chronicles Vault — Native PC Workstation"
+$StartShortcut.Description = "Grimoire — Native PC Workstation"
 $StartShortcut.WindowStyle = 7
 $StartShortcut.Save()
 Write-Host "  [✓] Start Menu Shortcut created" -ForegroundColor Green
@@ -140,8 +140,8 @@ Write-Host "  [✓] Start Menu Shortcut created" -ForegroundColor Green
 $UninstallBat = Join-Path $InstallDir "Uninstall.bat"
 $UninstallContent = @"
 @echo off
-echo Removing Chronicles Vault PC Workstation...
-del /f /q "$DesktopDir\Chronicles Vault.lnk" 2>nul
+echo Removing Grimoire PC Workstation...
+del /f /q "$DesktopDir\Grimoire.lnk" 2>nul
 rmdir /s /q "$StartMenuDir" 2>nul
 rmdir /s /q "$InstallDir" 2>nul
 echo Uninstalled successfully.
@@ -153,10 +153,10 @@ Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host "  Installation Completed Successfully!                     " -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green
-Write-Host "Launch Chronicles Vault anytime from your Desktop or Start Menu."
+Write-Host "Launch Grimoire anytime from your Desktop or Start Menu."
 Write-Host ""
 
 if (-not $Silent) {
-    Write-Host "Launching Chronicles Vault PC Workstation..." -ForegroundColor Cyan
+    Write-Host "Launching Grimoire PC Workstation..." -ForegroundColor Cyan
     Start-Process -FilePath $LauncherBat
 }

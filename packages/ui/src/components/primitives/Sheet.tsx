@@ -14,7 +14,7 @@ export const SheetOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'fixed inset-0 z-[var(--cv-z-drawer)] bg-black/75 backdrop-blur-xs transition-opacity data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      'fixed inset-0 z-[var(--gm-z-drawer)] bg-black/75 backdrop-blur-xs transition-opacity data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className,
     )}
     {...props}
@@ -36,17 +36,17 @@ export const SheetContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed inset-x-0 bottom-0 z-[var(--cv-z-drawer)] flex max-h-[85vh] flex-col rounded-t-cv-xl border-t border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] p-6 shadow-xl transition ease-in-out',
+        'fixed inset-x-0 bottom-0 z-[var(--gm-z-drawer)] flex max-h-[85vh] flex-col rounded-t-gm-xl border-t border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-6 shadow-xl transition ease-in-out',
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:duration-300 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
         className,
       )}
       {...props}
     >
       {showHandle && (
-        <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[var(--cv-surface-raised)]" />
+        <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[var(--gm-surface-raised)]" />
       )}
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-cv-sm p-1 text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)] hover:bg-[var(--cv-surface)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--cv-border-focus)] cursor-pointer">
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-gm-sm p-1 text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)] hover:bg-[var(--gm-surface)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--gm-border-focus)] cursor-pointer">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
@@ -72,7 +72,7 @@ export const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-cv-lg font-semibold text-[var(--cv-text)]', className)}
+    className={cn('text-gm-lg font-semibold text-[var(--gm-text)]', className)}
     {...props}
   />
 ));
@@ -84,7 +84,7 @@ export const SheetDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-cv-sm text-[var(--cv-text-muted)]', className)}
+    className={cn('text-gm-sm text-[var(--gm-text-muted)]', className)}
     {...props}
   />
 ));

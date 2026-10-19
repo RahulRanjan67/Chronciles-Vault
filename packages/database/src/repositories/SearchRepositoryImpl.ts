@@ -14,7 +14,7 @@ import {
   type SearchScope,
   type SearchResults,
   type SearchMatch,
-} from '@chronicles-vault/domain';
+} from '@grimoire/domain';
 import { runInTransaction } from '../connection.js';
 
 interface FtsJoinedRow {

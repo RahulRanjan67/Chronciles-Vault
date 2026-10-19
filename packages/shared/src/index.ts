@@ -1,5 +1,5 @@
 /**
- * @chronicles-vault/shared
+ * @grimoire/shared
  *
  * Zero-dependency shared primitives used by every package in the monorepo.
  * Import from here instead of reaching into sub-paths.

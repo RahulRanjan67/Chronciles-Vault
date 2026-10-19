@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { CornerDownLeft, Search } from "lucide-react";
-import { cn, useDebounce } from "@chronicles-vault/ui";
+import { cn, useDebounce } from "@grimoire/ui";
 import {
   clientRepository,
   runGlobalSearch,
@@ -12,9 +12,9 @@ import {
   type SearchableMemory,
   type SearchableVaultNote,
   type SearchableWork,
-} from "@chronicles-vault/state";
-import { listLocalFiles } from "@chronicles-vault/reader";
-import { useVaultStore } from "@chronicles-vault/vault";
+} from "@grimoire/state";
+import { listLocalFiles } from "@grimoire/reader";
+import { useVaultStore } from "@grimoire/vault";
 import { requestCreateWork } from "../../../utils/palette-requests";
 import { loadUnlockedVaultNotes, vaultRepository } from "../../../utils/vault-notes";
 import {
@@ -31,7 +31,7 @@ export interface CommandPaletteProps {
 }
 
 const VIEW_ORDER = ["grid", "compact", "table", "board"] as const;
-const LISTBOX_ID = "cv-command-palette-list";
+const LISTBOX_ID = "gm-command-palette-list";
 
 type Row =
   | { kind: "command"; key: string; id: string; command: CommandItem }
@@ -190,7 +190,7 @@ export function CommandPalette({ open, onOpenChange, context }: CommandPalettePr
     for (const category of COMMAND_CATEGORY_ORDER) {
       for (const command of commands) {
         if (command.category === category) {
-          list.push({ kind: "command", key: `command:${command.id}`, id: `cv-opt-command-${command.id}`, command });
+          list.push({ kind: "command", key: `command:${command.id}`, id: `gm-opt-command-${command.id}`, command });
         }
       }
     }
@@ -199,7 +199,7 @@ export function CommandPalette({ open, onOpenChange, context }: CommandPalettePr
         list.push({
           kind: "result",
           key: result.key,
-          id: `cv-opt-${result.key.replace(/[^a-zA-Z0-9-]/g, "-")}`,
+          id: `gm-opt-${result.key.replace(/[^a-zA-Z0-9-]/g, "-")}`,
           result,
         });
       }
@@ -260,15 +260,15 @@ export function CommandPalette({ open, onOpenChange, context }: CommandPalettePr
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-[var(--cv-z-command)] bg-black/75 backdrop-blur-sm transition-opacity data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[var(--gm-z-command)] bg-black/75 backdrop-blur-sm transition-opacity data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
           aria-describedby={undefined}
-          className="fixed left-[50%] top-[20%] z-[var(--cv-z-command)] w-[92vw] max-w-xl -translate-x-[50%] overflow-hidden rounded-cv-xl border border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] shadow-2xl transition-all focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+          className="fixed left-[50%] top-[20%] z-[var(--gm-z-command)] w-[92vw] max-w-xl -translate-x-[50%] overflow-hidden rounded-gm-xl border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] shadow-2xl transition-all focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
         >
           <DialogPrimitive.Title className="sr-only">Command palette</DialogPrimitive.Title>
 
-          <div className="flex items-center border-b border-[var(--cv-border)] px-4 py-3">
-            <Search className="mr-3 h-4 w-4 shrink-0 text-[var(--cv-text-subtle)]" aria-hidden="true" />
+          <div className="flex items-center border-b border-[var(--gm-border)] px-4 py-3">
+            <Search className="mr-3 h-4 w-4 shrink-0 text-[var(--gm-text-subtle)]" aria-hidden="true" />
             <input
               type="text"
               role="combobox"
@@ -282,9 +282,9 @@ export function CommandPalette({ open, onOpenChange, context }: CommandPalettePr
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Search works, memories, sources, files, or commands…"
-              className="flex-1 bg-transparent text-cv-sm text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none"
+              className="flex-1 bg-transparent text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none"
             />
-            <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded-cv-sm border border-[var(--cv-border)] bg-[var(--cv-surface)] px-1.5 font-mono text-[10px] text-[var(--cv-text-subtle)]">
+            <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded-gm-sm border border-[var(--gm-border)] bg-[var(--gm-surface)] px-1.5 font-mono text-[10px] text-[var(--gm-text-subtle)]">
               ESC
             </kbd>
           </div>
@@ -296,7 +296,7 @@ export function CommandPalette({ open, onOpenChange, context }: CommandPalettePr
             className="max-h-96 overflow-y-auto p-2"
           >
             {!hasAnyRow ? (
-              <div className="py-8 text-center text-cv-sm text-[var(--cv-text-muted)]">
+              <div className="py-8 text-center text-gm-sm text-[var(--gm-text-muted)]">
                 {!data.loaded && query.trim()
                   ? "Loading library…"
                   : "No matches. Try a title, a tag, a source host, or a command."}
@@ -305,7 +305,7 @@ export function CommandPalette({ open, onOpenChange, context }: CommandPalettePr
               <>
                 {renderedCommandCategories.map(({ category, rows: categoryRows }) => (
                   <div key={`cat-${category}`} className="mb-2 last:mb-0">
-                    <div className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--cv-text-subtle)]">
+                    <div className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--gm-text-subtle)]">
                       {category}
                     </div>
                     {categoryRows.map((row) => renderRow(row))}
@@ -313,7 +313,7 @@ export function CommandPalette({ open, onOpenChange, context }: CommandPalettePr
                 ))}
                 {searchGroups.map((group) => (
                   <div key={`group-${group.category}`} className="mb-2 last:mb-0">
-                    <div className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--cv-text-subtle)]">
+                    <div className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--gm-text-subtle)]">
                       {group.label}
                     </div>
                     {group.results.map((result) => {
@@ -330,7 +330,7 @@ export function CommandPalette({ open, onOpenChange, context }: CommandPalettePr
             {searchPending ? "Searching" : `${rows.length} results`}
           </div>
 
-          <div className="flex items-center justify-between border-t border-[var(--cv-border)] bg-[var(--cv-surface)]/30 px-4 py-2 text-[11px] text-[var(--cv-text-subtle)]">
+          <div className="flex items-center justify-between border-t border-[var(--gm-border)] bg-[var(--gm-surface)]/30 px-4 py-2 text-[11px] text-[var(--gm-text-subtle)]">
             <div className="flex items-center gap-3">
               <span>↑↓ Navigate</span>
               <span>↵ Open</span>
@@ -361,10 +361,10 @@ export function CommandPalette({ open, onOpenChange, context }: CommandPalettePr
         onMouseEnter={() => setSelectedIndex(index)}
         onClick={() => runRow(row)}
         className={cn(
-          "flex w-full cursor-pointer items-center justify-between rounded-cv px-2.5 py-2 text-left text-cv-sm transition-colors",
+          "flex w-full cursor-pointer items-center justify-between rounded-cv px-2.5 py-2 text-left text-gm-sm transition-colors",
           isSelected
-            ? "bg-[var(--cv-surface-raised)] text-[var(--cv-text)]"
-            : "text-[var(--cv-text-muted)] hover:bg-[var(--cv-surface)] hover:text-[var(--cv-text)]",
+            ? "bg-[var(--gm-surface-raised)] text-[var(--gm-text)]"
+            : "text-[var(--gm-text-muted)] hover:bg-[var(--gm-surface)] hover:text-[var(--gm-text)]",
         )}
       >
         <div className="flex min-w-0 items-center gap-2.5">
@@ -372,23 +372,23 @@ export function CommandPalette({ open, onOpenChange, context }: CommandPalettePr
             <Icon
               className={cn(
                 "h-4 w-4 shrink-0",
-                isSelected ? "text-[var(--cv-accent-strong)]" : "text-[var(--cv-text-subtle)]",
+                isSelected ? "text-[var(--gm-accent-strong)]" : "text-[var(--gm-text-subtle)]",
               )}
             />
           )}
           <div className="min-w-0">
             <div className="truncate">{title}</div>
-            {subtitle && <div className="truncate text-[11px] text-[var(--cv-text-subtle)]">{subtitle}</div>}
-            {snippet && <div className="truncate text-[11px] text-[var(--cv-text-subtle)]">{snippet}</div>}
+            {subtitle && <div className="truncate text-[11px] text-[var(--gm-text-subtle)]">{subtitle}</div>}
+            {snippet && <div className="truncate text-[11px] text-[var(--gm-text-subtle)]">{snippet}</div>}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {shortcut && (
-            <kbd className="inline-flex h-4 items-center rounded-cv-sm border border-[var(--cv-border)] bg-[var(--cv-surface)] px-1 font-mono text-[10px] text-[var(--cv-text-subtle)]">
+            <kbd className="inline-flex h-4 items-center rounded-gm-sm border border-[var(--gm-border)] bg-[var(--gm-surface)] px-1 font-mono text-[10px] text-[var(--gm-text-subtle)]">
               {shortcut}
             </kbd>
           )}
-          {isSelected && <CornerDownLeft className="h-3.5 w-3.5 text-[var(--cv-text-subtle)]" aria-hidden="true" />}
+          {isSelected && <CornerDownLeft className="h-3.5 w-3.5 text-[var(--gm-text-subtle)]" aria-hidden="true" />}
         </div>
       </div>
     );

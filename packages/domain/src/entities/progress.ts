@@ -3,7 +3,7 @@ import {
   ReadingRelationshipId,
   AccessPathId,
   newId,
-} from '@chronicles-vault/shared';
+} from '@grimoire/shared';
 
 // ---------------------------------------------------------------------------
 // Progress Anchor Discriminated Union

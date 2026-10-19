@@ -24,7 +24,7 @@ import {
   type MergeResolution,
   type PaginatedResult,
   type ArchiveReason,
-} from '@chronicles-vault/domain';
+} from '@grimoire/domain';
 import { runInTransaction } from '../connection.js';
 
 interface WorkRow {

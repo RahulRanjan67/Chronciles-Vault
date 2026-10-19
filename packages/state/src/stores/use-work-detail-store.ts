@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { WorkId, AccessPathId, WorkRelationId } from '@chronicles-vault/shared';
+import { WorkId, AccessPathId, WorkRelationId } from '@grimoire/shared';
 import {
   PersonalState,
   ProgressAnchor,
@@ -14,7 +14,7 @@ import {
   ArchiveRecord,
   DuplicateCandidate,
   Work,
-} from '@chronicles-vault/domain';
+} from '@grimoire/domain';
 import {
   clientRepository,
   HydratedWorkItem,

@@ -3,25 +3,25 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 export const iconButtonVariants = cva(
-  'inline-flex items-center justify-center rounded-cv-full transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--cv-border-focus)] disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer shrink-0',
+  'inline-flex items-center justify-center rounded-gm-full transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gm-border-focus)] disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer shrink-0',
   {
     variants: {
       variant: {
         default:
-          'bg-[var(--cv-accent)] text-[var(--cv-text)] hover:bg-[var(--cv-accent-strong)] active:opacity-90',
+          'bg-[var(--gm-accent)] text-[var(--gm-accent-fg)] hover:bg-[var(--gm-accent-strong)] active:opacity-90',
         ghost:
-          'text-[var(--cv-text-muted)] hover:text-[var(--cv-text)] hover:bg-[var(--cv-surface)] active:bg-[var(--cv-surface-raised)]',
+          'text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:bg-[var(--gm-surface)] active:bg-[var(--gm-surface-raised)]',
         outline:
-          'border border-[var(--cv-border)] bg-transparent text-[var(--cv-text)] hover:bg-[var(--cv-surface)] hover:border-[var(--cv-border-strong)]',
+          'border border-[var(--gm-border)] bg-transparent text-[var(--gm-text)] hover:bg-[var(--gm-surface)] hover:border-[var(--gm-border-strong)]',
         secondary:
-          'bg-[var(--cv-surface)] text-[var(--cv-text)] border border-[var(--cv-border)] hover:bg-[var(--cv-surface-raised)]',
+          'bg-[var(--gm-surface)] text-[var(--gm-text)] border border-[var(--gm-border)] hover:bg-[var(--gm-surface-raised)]',
         subtle:
-          'bg-[var(--cv-surface)]/60 text-[var(--cv-text-muted)] hover:text-[var(--cv-text)] hover:bg-[var(--cv-surface)]',
+          'bg-[var(--gm-surface)]/60 text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:bg-[var(--gm-surface)]',
       },
       size: {
-        sm: 'h-7 w-7 text-cv-xs',
-        default: 'h-9 w-9 text-cv-sm',
-        lg: 'h-11 w-11 text-cv-base',
+        sm: 'h-7 w-7 text-gm-xs',
+        default: 'h-9 w-9 text-gm-sm',
+        lg: 'h-11 w-11 text-gm-base',
       },
     },
     defaultVariants: {

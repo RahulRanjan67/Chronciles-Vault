@@ -1,8 +1,8 @@
 {
-  "name": "@chronicles-vault/vault",
+  "name": "@grimoire/vault",
   "version": "0.1.0",
   "private": true,
-  "description": "Cryptographic vault with zero-reload reactive lock/unlock for Chronicles Vault",
+  "description": "Cryptographic vault with zero-reload reactive lock/unlock for Grimoire",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

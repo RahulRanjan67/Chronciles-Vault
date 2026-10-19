@@ -16,8 +16,8 @@ import {
   SourceHealthType,
   relativeTime,
   toast,
-} from "@chronicles-vault/ui";
-import { getMemoryAssetBlob } from "@chronicles-vault/reader";
+} from "@grimoire/ui";
+import { getMemoryAssetBlob } from "@grimoire/reader";
 
 export interface MemoryRefresherData {
   workId: string;
@@ -123,8 +123,8 @@ export function MemoryRefresherDrawer({
         onOpenChange(nextOpen);
       }}
     >
-      <DrawerContent side="right" className="sm:max-w-md w-full flex flex-col h-full max-h-screen overflow-hidden bg-[var(--cv-bg-elevated)]">
-        <DrawerHeader className="pb-3 border-b border-[var(--cv-border)]">
+      <DrawerContent side="right" className="sm:max-w-md w-full flex flex-col h-full max-h-screen overflow-hidden bg-[var(--gm-bg-elevated)]">
+        <DrawerHeader className="pb-3 border-b border-[var(--gm-border)]">
           <div className="flex items-center gap-3">
             <Cover title={data.title} src={data.coverSrc} size="sm" />
             <div className="min-w-0 flex-1">
@@ -146,35 +146,35 @@ export function MemoryRefresherDrawer({
         {/* Content body */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* Refresher context prompt */}
-          <div className="rounded-cv-lg bg-[var(--cv-accent-muted)] p-3 border border-[var(--cv-accent)]/20">
-            <div className="flex items-center gap-2 text-cv-xs font-semibold text-[var(--cv-accent-strong)]">
+          <div className="rounded-gm-lg bg-[var(--gm-accent-muted)] p-3 border border-[var(--gm-accent)]/20">
+            <div className="flex items-center gap-2 text-gm-xs font-semibold text-[var(--gm-accent-strong)]">
               <Sparkles className="h-4 w-4" />
               <span>Memory Briefing</span>
             </div>
-            <p className="mt-1 text-cv-xs text-[var(--cv-text)] leading-relaxed">
+            <p className="mt-1 text-gm-xs text-[var(--gm-text)] leading-relaxed">
               Here are your captured thoughts and key anchors from when you last read{" "}
-              <strong className="text-[var(--cv-text)]">{data.title}</strong> to refresh your
+              <strong className="text-[var(--gm-text)]">{data.title}</strong> to refresh your
               context before jumping back in.
             </p>
           </div>
 
           {(data.stoppedReason || data.stoppedNote) && (
-            <section className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] p-3">
-              <h4 className="text-cv-xs font-semibold uppercase tracking-wider text-[var(--cv-text-muted)]">
+            <section className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] p-3">
+              <h4 className="text-gm-xs font-semibold uppercase tracking-wider text-[var(--gm-text-muted)]">
                 Where you paused
               </h4>
               {data.stoppedReason && (
-                <p className="mt-1 text-cv-xs text-[var(--cv-text)]">
+                <p className="mt-1 text-gm-xs text-[var(--gm-text)]">
                   Reason: {data.stoppedReason.replaceAll("_", " ")}
                 </p>
               )}
               {data.stoppedNote && showSpoilers && (
-                <p className="mt-1 text-cv-xs leading-relaxed text-[var(--cv-text-muted)]">
+                <p className="mt-1 text-gm-xs leading-relaxed text-[var(--gm-text-muted)]">
                   {data.stoppedNote}
                 </p>
               )}
               {data.stoppedNote && !showSpoilers && (
-                <p className="mt-1 text-cv-xs text-[var(--cv-text-subtle)]">
+                <p className="mt-1 text-gm-xs text-[var(--gm-text-subtle)]">
                   Stop note hidden by spoiler-safe mode.
                 </p>
               )}
@@ -182,12 +182,12 @@ export function MemoryRefresherDrawer({
           )}
 
           {data.bestPath && (
-            <section className="rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] p-3">
-              <h4 className="text-cv-xs font-semibold uppercase tracking-wider text-[var(--cv-text-muted)]">
+            <section className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] p-3">
+              <h4 className="text-gm-xs font-semibold uppercase tracking-wider text-[var(--gm-text-muted)]">
                 Best available path
               </h4>
               <div className="mt-2 flex items-center justify-between gap-2">
-                <span className="truncate text-cv-xs text-[var(--cv-text)]">
+                <span className="truncate text-gm-xs text-[var(--gm-text)]">
                   {data.bestPath.label} · {data.bestPath.kind.replaceAll("_", " ")}
                 </span>
                 <SourceHealthIndicator health={data.bestPath.health} size="sm" />
@@ -196,14 +196,14 @@ export function MemoryRefresherDrawer({
           )}
 
           {canShowSpoilers && (
-            <label className="flex cursor-pointer items-center gap-2 text-cv-xs text-[var(--cv-text-muted)]">
+            <label className="flex cursor-pointer items-center gap-2 text-gm-xs text-[var(--gm-text-muted)]">
               <input
                 type="checkbox"
                 checked={showSpoilers}
                 onChange={(event) =>
                   setSpoilerWorkId(event.currentTarget.checked ? data.workId : null)
                 }
-                className="accent-[var(--cv-accent-strong)]"
+                className="accent-[var(--gm-accent-strong)]"
               />
               {showSpoilers ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
               Show potentially spoiler-bearing context
@@ -212,7 +212,7 @@ export function MemoryRefresherDrawer({
 
           {data.favoritePanel && (
             <section className="space-y-2">
-              <h4 className="text-cv-xs font-semibold uppercase tracking-wider text-[var(--cv-text-muted)]">
+              <h4 className="text-gm-xs font-semibold uppercase tracking-wider text-[var(--gm-text-muted)]">
                 Favorite panel
               </h4>
               {favoritePanelVisible ? (
@@ -220,13 +220,13 @@ export function MemoryRefresherDrawer({
                   <img
                     src={favoritePanelUrl}
                     alt="Saved favorite panel"
-                    className="max-h-72 w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] object-contain"
+                    className="max-h-72 w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] object-contain"
                   />
                 ) : (
-                  <p className="text-cv-xs text-[var(--cv-text-subtle)]">Loading saved panel…</p>
+                  <p className="text-gm-xs text-[var(--gm-text-subtle)]">Loading saved panel…</p>
                 )
               ) : (
-                <p className="rounded-cv border border-dashed border-[var(--cv-border)] p-3 text-cv-xs text-[var(--cv-text-muted)]">
+                <p className="rounded-cv border border-dashed border-[var(--gm-border)] p-3 text-gm-xs text-[var(--gm-text-muted)]">
                   Hidden because this memory may contain spoilers.
                 </p>
               )}
@@ -235,7 +235,7 @@ export function MemoryRefresherDrawer({
 
           {/* User captured memories */}
           <div className="space-y-3">
-            <h4 className="text-cv-xs font-semibold text-[var(--cv-text-muted)] uppercase tracking-wider">
+            <h4 className="text-gm-xs font-semibold text-[var(--gm-text-muted)] uppercase tracking-wider">
               Captured Moments ({visibleMemories.length})
             </h4>
 
@@ -250,7 +250,7 @@ export function MemoryRefresherDrawer({
                 />
               ))
             ) : (
-              <div className="rounded-cv border border-dashed border-[var(--cv-border)] p-4 text-center text-cv-xs text-[var(--cv-text-subtle)]">
+              <div className="rounded-cv border border-dashed border-[var(--gm-border)] p-4 text-center text-gm-xs text-[var(--gm-text-subtle)]">
                 {data.memories?.length
                   ? "No spoiler-free memories are visible. Use the toggle to reveal them."
                   : "No memories or notes logged for this work yet."}
@@ -260,7 +260,7 @@ export function MemoryRefresherDrawer({
         </div>
 
         {/* Footer */}
-        <DrawerFooter className="pt-3 border-t border-[var(--cv-border)]">
+        <DrawerFooter className="pt-3 border-t border-[var(--gm-border)]">
           <Button
             variant="default"
             size="lg"

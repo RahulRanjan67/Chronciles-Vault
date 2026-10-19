@@ -1,4 +1,4 @@
-import { toast } from "@chronicles-vault/ui";
+import { toast } from "@grimoire/ui";
 
 /**
  * Opens a local video or media file in the user's default OS video player.
@@ -24,13 +24,22 @@ export async function openLocalDiskPath(filePath: string, label?: string): Promi
     });
     clearTimeout(timeoutId);
 
-    if (res.ok) {
+    const data = (await res.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+
+    if (res.ok && data?.ok) {
       toast({
-        title: "Launched in Default Video Player",
-        description: `Playing ${displayLabel} in your system video player (VLC / Media Player).`,
+        title: "Launched in Default Player",
+        description: `Playing "${displayLabel}" in your system media player.`,
         variant: "success",
       });
       return true;
+    } else if (data?.error) {
+      toast({
+        title: "Could not open media file",
+        description: data.error,
+        variant: "destructive",
+      });
+      return false;
     }
   } catch {
     // Workstation native engine is offline or running in standard web mode
@@ -45,7 +54,7 @@ export async function openLocalDiskPath(filePath: string, label?: string): Promi
     if (opened) {
       toast({
         title: "Opening Local Video",
-        description: `Launching ${displayLabel}.`,
+        description: `Launching ${displayLabel}. Confirm browser prompt if requested.`,
       });
       return true;
     }
@@ -57,14 +66,14 @@ export async function openLocalDiskPath(filePath: string, label?: string): Promi
   try {
     await navigator.clipboard.writeText(cleanPath);
     toast({
-      title: "Local Media Path Copied",
-      description: `Path copied to clipboard: ${cleanPath}. Launch via PC App to open directly with one click.`,
+      title: "File path copied",
+      description: `${cleanPath} (Paste in File Explorer, VLC, or press Win+R to play)`,
     });
     return true;
   } catch {
     toast({
-      title: "Local Video Reference",
-      description: `Location: ${cleanPath}`,
+      title: "Local Media Location",
+      description: cleanPath,
     });
     return false;
   }

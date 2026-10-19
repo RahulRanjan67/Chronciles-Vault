@@ -5,7 +5,7 @@ import {
   WorkId,
   AccessPathId,
   newId,
-} from '@chronicles-vault/shared';
+} from '@grimoire/shared';
 import { ProgressAnchor, validateProgressAnchor } from './progress.js';
 
 // ---------------------------------------------------------------------------

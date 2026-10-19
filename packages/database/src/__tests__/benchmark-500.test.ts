@@ -27,8 +27,8 @@ import {
   PrivacyState,
   SpoilerLevel,
   type WorkId,
-} from '@chronicles-vault/domain';
-import { newId, type MemoryId } from '@chronicles-vault/shared';
+} from '@grimoire/domain';
+import { newId, type MemoryId } from '@grimoire/shared';
 
 describe('Cycle 13: 500-Work SQLite, FTS5 & Vault Benchmark Suite', () => {
   let db: Database.Database;

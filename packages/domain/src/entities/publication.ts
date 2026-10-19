@@ -4,7 +4,7 @@ import {
   UserListId,
   WorkId,
   newId,
-} from '@chronicles-vault/shared';
+} from '@grimoire/shared';
 import { PrivacyState } from './work.js';
 
 // ---------------------------------------------------------------------------

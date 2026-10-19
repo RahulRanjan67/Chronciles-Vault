@@ -9,7 +9,7 @@ import {
   createConditionalRequestHeaders,
   carryForwardConditionalValidators,
 } from "./source-health-policy.js";
-import type { AccessPathId } from "@chronicles-vault/shared";
+import type { AccessPathId } from "@grimoire/shared";
 
 // ---------------------------------------------------------------------------
 // Types

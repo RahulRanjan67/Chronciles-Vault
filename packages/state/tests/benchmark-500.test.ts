@@ -16,7 +16,7 @@ import {
   PrivacyState,
   PublicationState,
   SpoilerLevel,
-} from "@chronicles-vault/domain";
+} from "@grimoire/domain";
 import {
   ClientRepository,
   runGlobalSearch,

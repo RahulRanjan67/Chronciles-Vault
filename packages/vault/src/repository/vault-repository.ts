@@ -296,7 +296,7 @@ export class IndexedDbVaultRepository implements VaultRepository {
           reject(new Error('IndexedDB is unavailable in this environment.'))
           return
         }
-        const request = indexedDB.open('chronicles-vault-private', 1)
+        const request = indexedDB.open('grimoire-private', 1)
         request.onupgradeneeded = () => {
           const database = request.result
           if (!database.objectStoreNames.contains('items')) {

@@ -11,7 +11,6 @@ import {
   ShieldCheck,
   Trash2,
   Unlock,
-  UserCheck,
 } from "lucide-react";
 import {
   IndexedDbVaultRepository,
@@ -19,15 +18,14 @@ import {
   useVault,
   useVaultStore,
   vaultSession,
-} from "@chronicles-vault/vault";
+} from "@grimoire/vault";
 import {
-  DEMO_USER_ACCOUNT,
   useLibraryStore,
-} from "@chronicles-vault/state";
-import { PrivacyState, formatProgressAnchor } from "@chronicles-vault/domain";
-import type { WorkId } from "@chronicles-vault/shared";
-import { Badge, Button, EmptyState, Input, PageContainer, toast } from "@chronicles-vault/ui";
-import { DEMO_VAULT_NOTES, DEMO_VAULT_PASSPHRASE } from "../utils/demo-vault-seed";
+} from "@grimoire/state";
+import { PrivacyState, formatProgressAnchor } from "@grimoire/domain";
+import type { WorkId } from "@grimoire/shared";
+import { Badge, Button, EmptyState, Input, PageContainer, toast } from "@grimoire/ui";
+import { CredentialKeyringPanel } from "../components/features/Vault/CredentialKeyringPanel";
 
 const vaultRepository = new IndexedDbVaultRepository(vaultSession);
 
@@ -46,8 +44,8 @@ export function Vault({ onNavigateWork }: VaultProps) {
   const libraryStore = useLibraryStore();
 
   const [keyRecordLoaded, setKeyRecordLoaded] = React.useState(false);
-  const [passphrase, setPassphrase] = React.useState(DEMO_VAULT_PASSPHRASE);
-  const [confirmation, setConfirmation] = React.useState(DEMO_VAULT_PASSPHRASE);
+  const [passphrase, setPassphrase] = React.useState("");
+  const [confirmation, setConfirmation] = React.useState("");
   const [title, setTitle] = React.useState("");
   const [body, setBody] = React.useState("");
   const [notes, setNotes] = React.useState<VaultNote[]>([]);
@@ -110,24 +108,8 @@ export function Vault({ onNavigateWork }: VaultProps) {
     setError("");
     void vaultRepository
       .list("note", masterKey)
-      .then(async (records) => {
+      .then((records) => {
         if (!active || !vaultSession.isUnlocked()) return;
-        if (records.length === 0) {
-          for (const note of DEMO_VAULT_NOTES) {
-            await vaultRepository.store(
-              "note",
-              crypto.randomUUID(),
-              { title: note.title, body: note.body },
-              masterKey,
-            );
-          }
-          const seededRecords = await vaultRepository.list("note", masterKey);
-          if (active) {
-            setNotes(seededRecords as VaultNote[]);
-            setSummaryCount(seededRecords.length);
-          }
-          return;
-        }
         setNotes(records as VaultNote[]);
       })
       .catch((loadError: unknown) => {
@@ -144,59 +126,20 @@ export function Vault({ onNavigateWork }: VaultProps) {
     };
   }, [isUnlocked]);
 
-  const handleInstantDemoUnlock = async () => {
-    setError("");
-    setBusy(true);
-    try {
-      const existingRecord = keyRecord ?? (await vaultRepository.getKeyRecord());
-      if (existingRecord) {
-        const result = await unlock(DEMO_VAULT_PASSPHRASE, existingRecord);
-        if (result.success) {
-          toast({
-            title: "DemoUser1 Vault Unlocked",
-            description: `Revealed ${hiddenWorks.length} hidden works and encrypted notes. Vault auto-locks when browser closes.`,
-            variant: "success",
-          });
-          return;
-        }
-      }
-      const created = await createVaultKey(DEMO_VAULT_PASSPHRASE);
-      await vaultRepository.saveKeyRecord(created.keyRecord);
-      useVaultStore.getState().activateMasterKey(created.masterKey, created.keyRecord);
-      toast({
-        title: "DemoUser1 Vault Initialized & Unlocked",
-        description: `Revealed ${hiddenWorks.length} hidden works for ${DEMO_USER_ACCOUNT.username}.`,
-        variant: "success",
-      });
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to unlock DemoUser1 vault.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const handleAccess = async (event: React.FormEvent) => {
     event.preventDefault();
     setError("");
     setBusy(true);
     try {
-      const effectivePass = passphrase.trim() || DEMO_VAULT_PASSPHRASE;
+      const effectivePass = passphrase.trim();
+      if (!effectivePass) {
+        setError("Please enter your passphrase.");
+        return;
+      }
       if (keyRecord) {
         const result = await unlock(effectivePass, keyRecord);
         if (!result.success) {
-          // If the user clicked unlock with demo passphrase on a mismatched key, re-key for DemoUser1
-          if (effectivePass === DEMO_VAULT_PASSPHRASE) {
-            const created = await createVaultKey(DEMO_VAULT_PASSPHRASE);
-            await vaultRepository.saveKeyRecord(created.keyRecord);
-            useVaultStore.getState().activateMasterKey(created.masterKey, created.keyRecord);
-            toast({
-              title: "Vault Unlocked",
-              description: `Revealed ${hiddenWorks.length} hidden works for ${DEMO_USER_ACCOUNT.username}.`,
-              variant: "success",
-            });
-            return;
-          }
-          setError("Unable to unlock the vault. Check your passphrase or click 'Instant Unlock DemoUser1 Vault'.");
+          setError("Unable to unlock the vault. Check your passphrase and try again.");
           return;
         }
         toast({
@@ -309,8 +252,8 @@ export function Vault({ onNavigateWork }: VaultProps) {
   if (!keyRecordLoaded) {
     return (
       <PageContainer maxWidth="narrow" className="py-16">
-        <p className="text-center font-mono text-[var(--cv-text-muted)]">
-          [ INITIALIZING AES-256 VAULT CHAMBER… ]
+        <p className="text-center font-mono text-[var(--gm-text-muted)]">
+          Securing your vault…
         </p>
       </PageContainer>
     );
@@ -319,67 +262,38 @@ export function Vault({ onNavigateWork }: VaultProps) {
   if (!isUnlocked) {
     return (
       <PageContainer maxWidth="narrow" className="py-12">
-        <div className="mx-auto max-w-lg border-2 border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] p-8 shadow-[6px_6px_0px_var(--cv-border-strong)]">
-          <div className="flex items-center justify-between border-b border-[var(--cv-border-strong)] pb-4 mb-6">
-            <span className="font-mono text-cv-xs font-extrabold uppercase tracking-wider text-[var(--cv-accent-strong)]">
-              [ 01 · ZERO-KNOWLEDGE VAULT GATE ]
+        <div className="mx-auto max-w-lg border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-8 shadow-[6px_6px_0px_var(--gm-border-strong)]">
+          <div className="flex items-center justify-between border-b border-[var(--gm-border-strong)] pb-4 mb-6">
+            <span className="font-mono text-gm-xs font-extrabold uppercase tracking-wider text-[var(--gm-accent-strong)]">
+              PRIVATE VAULT
             </span>
-            <span className="inline-flex items-center gap-1.5 border border-[var(--cv-border-strong)] bg-[var(--cv-surface)] px-2.5 py-0.5 font-mono text-[11px] font-bold text-[var(--cv-text)]">
-              <UserCheck className="h-3.5 w-3.5 text-[var(--cv-accent-strong)]" />
-              {DEMO_USER_ACCOUNT.username}
+            <span className="inline-flex items-center gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-0.5 font-mono text-[11px] font-bold text-[var(--gm-text)]">
+              <FolderLock className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
+              Locked
             </span>
           </div>
 
-          <div className="mb-5 flex items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center border-2 border-[var(--cv-border-strong)] bg-[var(--cv-surface)]">
-              <Lock className="h-6 w-6 text-[var(--cv-warning)]" />
+          <div className="mb-6 flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center border-2 border-[var(--gm-border-strong)] bg-[var(--gm-surface)]">
+              <Lock className="h-6 w-6 text-[var(--gm-warning)]" />
             </div>
             <div className="text-left">
-              <h1 className="text-cv-xl font-extrabold text-[var(--cv-text)]">
-                Vault Is Locked ({hiddenWorks.length} Hidden Works Sealed)
+              <h1 className="text-gm-xl font-extrabold text-[var(--gm-text)]">
+                Vault Is Locked
               </h1>
-              <p className="mt-1 text-cv-xs leading-relaxed text-[var(--cv-text-muted)]">
-                Unlock to reveal <strong>{hiddenWorks.length} hidden works</strong> (Anime, Movies &amp; Uncensored Novels) both here and in your main Library.
+              <p className="mt-1 text-gm-xs leading-relaxed text-[var(--gm-text-muted)]">
+                Enter your passphrase to reveal your hidden works and private notes for this session.
               </p>
             </div>
           </div>
 
-          {/* 1-Click Instant Unlock Button for DemoUser1 */}
-          <div className="mb-6 border-2 border-[var(--cv-accent)] bg-[var(--cv-surface)] p-4">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="font-mono text-cv-xs font-extrabold uppercase text-[var(--cv-accent-strong)]">
-                ✦ QUICK ACCESS FOR {DEMO_USER_ACCOUNT.username}
-              </span>
-              <code className="font-mono text-[11px] border border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] px-2 py-0.5 font-bold">
-                {DEMO_VAULT_PASSPHRASE}
-              </code>
-            </div>
-            <p className="text-cv-xs text-[var(--cv-text-muted)] mb-3">
-              Click below to unlock the Vault immediately and reveal all {hiddenWorks.length} hidden works. When you close the web browser, the Vault automatically locks again.
-            </p>
-            <Button
-              type="button"
-              variant="default"
-              onClick={() => void handleInstantDemoUnlock()}
-              disabled={busy || status === "unlocking"}
-              className="w-full gap-2 py-2.5 font-extrabold"
-            >
-              <Unlock className="h-4 w-4" />
-              <span>
-                {busy
-                  ? "Unsealing Vault…"
-                  : `1-Click Unlock ${DEMO_USER_ACCOUNT.username} Vault & Reveal ${hiddenWorks.length} Hidden Works`}
-              </span>
-            </Button>
-          </div>
-
-          <form onSubmit={handleAccess} className="space-y-3 border-t border-[var(--cv-border)] pt-4">
-            <label className="block text-left font-mono text-[11px] font-bold uppercase text-[var(--cv-text-subtle)]">
-              Or Unlock / Re-Key With Custom Passphrase:
+          <form onSubmit={handleAccess} className="space-y-3">
+            <label className="block text-left font-mono text-[11px] font-bold uppercase text-[var(--gm-text-subtle)]">
+              {keyRecord ? "Passphrase" : "Create a Passphrase"}
             </label>
             <Input
               type="password"
-              placeholder="Master passphrase (default: blossom-demo-2026)"
+              placeholder="Enter your master passphrase"
               value={passphrase}
               onChange={(event) => setPassphrase(event.target.value)}
               autoComplete={keyRecord ? "current-password" : "new-password"}
@@ -394,24 +308,23 @@ export function Vault({ onNavigateWork }: VaultProps) {
               />
             )}
             {error && (
-              <p role="alert" className="text-left text-sm font-semibold text-[var(--cv-danger)]">
+              <p role="alert" className="text-left text-sm font-semibold text-[var(--gm-danger)]">
                 {error}
               </p>
             )}
             <Button
               type="submit"
-              variant="outline"
+              variant="default"
               className="w-full gap-2"
               disabled={busy || status === "unlocking"}
             >
               <KeyRound className="h-4 w-4" />
-              <span>{busy ? "Working…" : "Unlock with Passphrase"}</span>
+              <span>{busy ? "Unlocking…" : keyRecord ? "Unlock Vault" : "Create & Unlock Vault"}</span>
             </Button>
           </form>
 
-          <div className="mt-5 border-t border-[var(--cv-border)] pt-3 flex items-center justify-between text-[11px] font-mono text-[var(--cv-text-subtle)]">
-            <span>AUTO-LOCK: ON BROWSER CLOSE</span>
-            <span>ENCRYPTION: AES-256-GCM</span>
+          <div className="mt-5 border-t border-[var(--gm-border)] pt-3 text-center text-[11px] font-mono text-[var(--gm-text-subtle)]">
+            <span>Zero-knowledge encryption · auto-locks on exit</span>
           </div>
         </div>
       </PageContainer>
@@ -428,24 +341,24 @@ export function Vault({ onNavigateWork }: VaultProps) {
   return (
     <PageContainer maxWidth="wide">
       {/* Top Vault Unlocked Header */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-2 border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] p-5 shadow-[4px_4px_0px_var(--cv-border-strong)]">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-5 shadow-[4px_4px_0px_var(--gm-border-strong)]">
         <div className="flex items-start gap-3.5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center border-2 border-[var(--cv-border-strong)] bg-[var(--cv-surface)]">
-            <Unlock className="h-5 w-5 text-[var(--cv-success)]" />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center border-2 border-[var(--gm-border-strong)] bg-[var(--gm-surface)]">
+            <Unlock className="h-5 w-5 text-[var(--gm-success)]" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-cv-2xl font-extrabold text-[var(--cv-text)]">
+              <h1 className="text-gm-2xl font-extrabold text-[var(--gm-text)]">
                 Private Vault — Unlocked
               </h1>
-              <span className="border border-[var(--cv-border-strong)] bg-[var(--cv-surface)] px-2 py-0.5 font-mono text-cv-xs font-bold text-[var(--cv-accent-strong)]">
-                ACCOUNT: {DEMO_USER_ACCOUNT.username}
+              <span className="border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2 py-0.5 font-mono text-gm-xs font-bold text-[var(--gm-accent-strong)]">
+                CHAMBER UNSEALED
               </span>
-              <span className="border border-[var(--cv-success)] bg-[var(--cv-success-muted)] px-2 py-0.5 font-mono text-[11px] font-bold text-[var(--cv-success)]">
+              <span className="border border-[var(--gm-success)] bg-[var(--gm-success-muted)] px-2 py-0.5 font-mono text-[11px] font-bold text-[var(--gm-success)]">
                 AUTO-LOCKS ON BROWSER CLOSE
               </span>
             </div>
-            <p className="mt-1 text-cv-xs text-[var(--cv-text-muted)]">
+            <p className="mt-1 text-gm-xs text-[var(--gm-text-muted)]">
               <strong>{hiddenWorks.length} hidden works</strong> are currently unsealed (also visible in your main Library while unlocked) +{" "}
               <strong>{summaryCount ?? notes.length} encrypted notes</strong>.
             </p>
@@ -471,7 +384,7 @@ export function Vault({ onNavigateWork }: VaultProps) {
       </div>
 
       {error && (
-        <p role="alert" className="mb-4 text-sm font-semibold text-[var(--cv-danger)]">
+        <p role="alert" className="mb-4 text-sm font-semibold text-[var(--gm-danger)]">
           {error}
         </p>
       )}
@@ -479,16 +392,16 @@ export function Vault({ onNavigateWork }: VaultProps) {
       {/* ═══════════════════════════════════════════════════════════════════════
           SECTION 1: HIDDEN / VAULTED WORKS (REVEALED WHEN UNLOCKED)
          ═══════════════════════════════════════════════════════════════════════ */}
-      <section className="mb-8 border-2 border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] p-6 shadow-[4px_4px_0px_var(--cv-border-strong)]">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[var(--cv-border-strong)] pb-4 mb-5">
+      <section className="mb-8 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-6 shadow-[4px_4px_0px_var(--gm-border-strong)]">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[var(--gm-border-strong)] pb-4 mb-5">
           <div>
             <div className="flex items-center gap-2">
-              <FolderLock className="h-5 w-5 text-[var(--cv-accent-strong)]" />
-              <h2 className="text-cv-lg font-extrabold text-[var(--cv-text)]">
+              <FolderLock className="h-5 w-5 text-[var(--gm-accent-strong)]" />
+              <h2 className="text-gm-lg font-extrabold text-[var(--gm-text)]">
                 Hidden Vault Works ({hiddenWorks.length} Revealed)
               </h2>
             </div>
-            <p className="text-cv-xs text-[var(--cv-text-muted)] mt-0.5">
+            <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5">
               These works are completely hidden when the Vault is locked or after closing the browser. While unlocked, they appear both here and in your main Library.
             </p>
           </div>
@@ -498,7 +411,7 @@ export function Vault({ onNavigateWork }: VaultProps) {
             <select
               value={workToHideId}
               onChange={(e) => setWorkToHideId(e.target.value)}
-              className="h-9 border border-[var(--cv-border-strong)] bg-[var(--cv-bg)] px-3 text-cv-xs font-semibold text-[var(--cv-text)]"
+              className="h-9 border border-[var(--gm-border-strong)] bg-[var(--gm-bg)] px-3 text-gm-xs font-semibold text-[var(--gm-text)]"
             >
               <option value="">Select a public work to hide in Vault…</option>
               {publicWorks.map((item) => (
@@ -540,16 +453,16 @@ export function Vault({ onNavigateWork }: VaultProps) {
               return (
                 <div
                   key={item.work.id}
-                  className="flex gap-4 border-2 border-[var(--cv-border-strong)] bg-[var(--cv-surface)]/50 p-4 shadow-[3px_3px_0px_var(--cv-border-strong)]"
+                  className="flex gap-4 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-surface)]/50 p-4 shadow-[3px_3px_0px_var(--gm-border-strong)]"
                 >
                   {item.work.coverRef ? (
                     <img
                       src={item.work.coverRef}
                       alt={item.work.title}
-                      className="h-32 w-22 object-cover border border-[var(--cv-border-strong)] shrink-0 bg-[var(--cv-bg)]"
+                      className="h-32 w-22 object-cover border border-[var(--gm-border-strong)] shrink-0 bg-[var(--gm-bg)]"
                     />
                   ) : (
-                    <div className="h-32 w-22 border border-[var(--cv-border-strong)] bg-[var(--cv-bg)] flex items-center justify-center font-mono text-cv-xs shrink-0">
+                    <div className="h-32 w-22 border border-[var(--gm-border-strong)] bg-[var(--gm-bg)] flex items-center justify-center font-mono text-gm-xs shrink-0">
                       VAULT
                     </div>
                   )}
@@ -560,22 +473,22 @@ export function Vault({ onNavigateWork }: VaultProps) {
                         <Badge variant="default" className="font-mono text-[10px] uppercase">
                           {item.work.contentType}
                         </Badge>
-                        <span className="border border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[var(--cv-accent-strong)]">
+                        <span className="border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[var(--gm-accent-strong)]">
                           🔓 HIDDEN WORK REVEALED
                         </span>
                       </div>
 
-                      <h3 className="font-extrabold text-cv-sm text-[var(--cv-text)] leading-snug">
+                      <h3 className="font-extrabold text-gm-sm text-[var(--gm-text)] leading-snug">
                         {item.work.title}
                       </h3>
 
-                      <p className="mt-1 text-cv-xs font-mono font-bold text-[var(--cv-accent-strong)]">
+                      <p className="mt-1 text-gm-xs font-mono font-bold text-[var(--gm-accent-strong)]">
                         Progress: {progressLabel}
                       </p>
 
                       {localPath?.filePath && (
-                        <div className="mt-1.5 flex items-center gap-1 text-[11px] font-mono text-[var(--cv-text-muted)] truncate">
-                          <HardDrive className="h-3 w-3 shrink-0 text-[var(--cv-success)]" />
+                        <div className="mt-1.5 flex items-center gap-1 text-[11px] font-mono text-[var(--gm-text-muted)] truncate">
+                          <HardDrive className="h-3 w-3 shrink-0 text-[var(--gm-success)]" />
                           <span className="truncate" title={localPath.filePath}>
                             {localPath.filePath}
                           </span>
@@ -583,13 +496,13 @@ export function Vault({ onNavigateWork }: VaultProps) {
                       )}
                     </div>
 
-                    <div className="mt-3 flex items-center gap-2 flex-wrap pt-2 border-t border-[var(--cv-border)]">
+                    <div className="mt-3 flex items-center gap-2 flex-wrap pt-2 border-t border-[var(--gm-border)]">
                       <Button
                         type="button"
                         variant="default"
                         size="sm"
                         onClick={() => navigateToWork(item.work.id)}
-                        className="gap-1.5 text-cv-xs"
+                        className="gap-1.5 text-gm-xs"
                       >
                         <ExternalLink className="h-3 w-3" />
                         <span>Open Work</span>
@@ -605,7 +518,7 @@ export function Vault({ onNavigateWork }: VaultProps) {
                             item.work.title,
                           )
                         }
-                        className="gap-1.5 text-cv-xs"
+                        className="gap-1.5 text-gm-xs"
                       >
                         <Eye className="h-3 w-3" />
                         <span>Unhide (Make Public)</span>
@@ -620,15 +533,15 @@ export function Vault({ onNavigateWork }: VaultProps) {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          SECTION 2: ENCRYPTED PRIVATE NOTES (AES-GCM-256)
+          SECTION 2: ENCRYPTED PRIVATE NOTES
          ═══════════════════════════════════════════════════════════════════════ */}
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] mb-10">
         <form
           onSubmit={handleSaveNote}
-          className="space-y-3 border-2 border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] p-5 shadow-[4px_4px_0px_var(--cv-border-strong)]"
+          className="space-y-3 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-5 shadow-[4px_4px_0px_var(--gm-border-strong)]"
         >
-          <h2 className="font-extrabold text-[var(--cv-text)]">
-            [ 02 · NEW ENCRYPTED PRIVATE NOTE ]
+          <h2 className="font-extrabold text-[var(--gm-text)]">
+            NEW ENCRYPTED PRIVATE NOTE
           </h2>
           <Input
             value={title}
@@ -642,7 +555,7 @@ export function Vault({ onNavigateWork }: VaultProps) {
             placeholder="Write an encrypted private note or spoiler log…"
             maxLength={20000}
             rows={7}
-            className="w-full resize-y border border-[var(--cv-border-strong)] bg-[var(--cv-bg)] px-3 py-2 text-cv-sm text-[var(--cv-text)] outline-none focus:border-[var(--cv-accent)]"
+            className="w-full resize-y border border-[var(--gm-border-strong)] bg-[var(--gm-bg)] px-3 py-2 text-gm-sm text-[var(--gm-text)] outline-none focus:border-[var(--gm-accent)]"
           />
           <Button type="submit" disabled={busy} className="gap-2">
             <Plus className="h-4 w-4" />
@@ -663,7 +576,7 @@ export function Vault({ onNavigateWork }: VaultProps) {
               title={notes.length === 0 ? "No private notes yet" : "No matching notes"}
               description={
                 notes.length === 0
-                  ? "Private notes are encrypted with AES-GCM-256 before being stored."
+                  ? "Private notes are encrypted locally before being stored."
                   : "Try another search."
               }
             />
@@ -672,16 +585,16 @@ export function Vault({ onNavigateWork }: VaultProps) {
               {visibleNotes.map((note) => (
                 <li
                   key={note.id}
-                  className="border-2 border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] p-4 shadow-[3px_3px_0px_var(--cv-border-strong)]"
+                  className="border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-4 shadow-[3px_3px_0px_var(--gm-border-strong)]"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h2 className="font-bold text-[var(--cv-text)]">
+                      <h2 className="font-bold text-[var(--gm-text)]">
                         {typeof note.decrypted.title === "string"
                           ? note.decrypted.title
                           : "Untitled note"}
                       </h2>
-                      <p className="mt-2 whitespace-pre-wrap break-words text-sm text-[var(--cv-text-muted)]">
+                      <p className="mt-2 whitespace-pre-wrap break-words text-sm text-[var(--gm-text-muted)]">
                         {typeof note.decrypted.body === "string" ? note.decrypted.body : ""}
                       </p>
                     </div>
@@ -700,6 +613,11 @@ export function Vault({ onNavigateWork }: VaultProps) {
           )}
         </section>
       </div>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          SECTION 3: SECURE CREDENTIAL KEYRING & FAVORITE PORTALS LAUNCHPAD
+         ═══════════════════════════════════════════════════════════════════════ */}
+      <CredentialKeyringPanel />
     </PageContainer>
   );
 }

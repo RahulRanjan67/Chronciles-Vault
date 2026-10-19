@@ -40,7 +40,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
 
     return (
       <div className={cn('relative flex items-center w-full', className)}>
-        <Search className="absolute left-3 h-4 w-4 text-[var(--cv-text-subtle)] pointer-events-none" />
+        <Search className="absolute left-3 h-4 w-4 text-[var(--gm-text-subtle)] pointer-events-none" />
         <input
           ref={inputRef}
           type="text"
@@ -48,9 +48,9 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           defaultValue={defaultValue}
           onChange={handleChange}
           className={cn(
-            'h-9 w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] pl-9 pr-14 py-1 text-cv-sm text-[var(--cv-text)] shadow-xs transition-colors',
-            'placeholder:text-[var(--cv-text-subtle)]',
-            'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--cv-border-focus)] focus-visible:border-[var(--cv-accent)]',
+            'h-9 w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] pl-9 pr-14 py-1 text-gm-sm text-[var(--gm-text)] shadow-xs transition-colors',
+            'placeholder:text-[var(--gm-text-subtle)]',
+            'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gm-border-focus)] focus-visible:border-[var(--gm-accent)]',
             'disabled:cursor-not-allowed disabled:opacity-50',
           )}
           {...props}
@@ -61,13 +61,13 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
               type="button"
               onClick={handleClear}
               aria-label="Clear search"
-              className="p-0.5 rounded-cv-sm text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)] hover:bg-[var(--cv-surface-raised)] transition-colors cursor-pointer"
+              className="p-0.5 rounded-gm-sm text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)] hover:bg-[var(--gm-surface-raised)] transition-colors cursor-pointer"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           )}
           {shortcut && !currentValue && (
-            <kbd className="pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded-cv-sm border border-[var(--cv-border)] bg-[var(--cv-bg-elevated)] px-1.5 font-mono text-[10px] font-medium text-[var(--cv-text-subtle)]">
+            <kbd className="pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded-gm-sm border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] px-1.5 font-mono text-[10px] font-medium text-[var(--gm-text-subtle)]">
               {shortcut}
             </kbd>
           )}

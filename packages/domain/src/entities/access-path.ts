@@ -1,4 +1,4 @@
-import { AccessPathId, WorkId, newId } from '@chronicles-vault/shared';
+import { AccessPathId, WorkId, newId } from '@grimoire/shared';
 import type { HealthMonitorState } from '../use-cases/source-health-policy.js';
 
 // ---------------------------------------------------------------------------

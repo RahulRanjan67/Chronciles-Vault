@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
   toast,
-} from "@chronicles-vault/ui";
+} from "@grimoire/ui";
 import {
   ContentOrigin,
   ContentType,
@@ -23,8 +23,8 @@ import {
   PrivacyState,
   PublicationState,
   normalizeUrl,
-} from "@chronicles-vault/domain";
-import { useLibraryStore } from "@chronicles-vault/state";
+} from "@grimoire/domain";
+import { useLibraryStore } from "@grimoire/state";
 import { WorkItemData } from "./VirtualWorkGrid";
 
 export interface CreateWorkModalProps {
@@ -165,7 +165,7 @@ export function CreateWorkModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center gap-2 text-[var(--cv-accent-strong)]">
+          <div className="flex items-center gap-2 text-[var(--gm-accent-strong)]">
             <BookPlus className="h-5 w-5" />
             <DialogTitle>Add Work to Library</DialogTitle>
           </div>
@@ -201,7 +201,7 @@ export function CreateWorkModal({
           {/* Content Type & Origin Dropdowns */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-cv-xs font-medium text-[var(--cv-text-muted)] select-none">
+              <label className="text-gm-xs font-medium text-[var(--gm-text-muted)] select-none">
                 Format / Content Type
               </label>
               <Select
@@ -229,7 +229,7 @@ export function CreateWorkModal({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-cv-xs font-medium text-[var(--cv-text-muted)] select-none">
+              <label className="text-gm-xs font-medium text-[var(--gm-text-muted)] select-none">
                 Cultural Origin
               </label>
               <Select value={origin} onValueChange={(val) => setOrigin(val as ContentOrigin)}>
@@ -251,7 +251,7 @@ export function CreateWorkModal({
           {/* Initial Personal State & Initial Anchor */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-cv-xs font-medium text-[var(--cv-text-muted)] select-none">
+              <label className="text-gm-xs font-medium text-[var(--gm-text-muted)] select-none">
                 Initial Personal State
               </label>
               <Select
@@ -287,7 +287,7 @@ export function CreateWorkModal({
 
           {/* Synopsis */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-cv-xs font-medium text-[var(--cv-text-muted)] select-none">
+            <label className="text-gm-xs font-medium text-[var(--gm-text-muted)] select-none">
               Synopsis / Description
             </label>
             <textarea
@@ -295,14 +295,14 @@ export function CreateWorkModal({
               value={synopsis}
               onChange={(e) => setSynopsis(e.target.value)}
               placeholder="Brief overview or plot summary..."
-              className="w-full rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-sm text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--cv-border-focus)] transition-colors"
+              className="w-full rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gm-border-focus)] transition-colors"
             />
           </div>
 
           {/* Initial Access Path (Source Provider & URL) */}
-          <div className="rounded-cv-lg border border-[var(--cv-border)] bg-[var(--cv-surface)]/40 p-3.5 space-y-3">
-            <div className="flex items-center gap-2 text-cv-xs font-semibold text-[var(--cv-text)]">
-              <Globe className="h-4 w-4 text-[var(--cv-accent-strong)]" />
+          <div className="rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-surface)]/40 p-3.5 space-y-3">
+            <div className="flex items-center gap-2 text-gm-xs font-semibold text-[var(--gm-text)]">
+              <Globe className="h-4 w-4 text-[var(--gm-accent-strong)]" />
               <span>Initial Access Path / Tracking Source (Optional)</span>
             </div>
 

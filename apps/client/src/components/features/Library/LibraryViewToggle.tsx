@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Grid2X2, Kanban, LayoutGrid, List, Table } from 'lucide-react';
-import { SimpleTooltip, cn } from '@chronicles-vault/ui';
+import { SimpleTooltip, cn } from '@grimoire/ui';
 
 export type LibraryViewMode = 'grid' | 'compact' | 'table' | 'board' | 'list';
 
@@ -25,7 +25,7 @@ export function LibraryViewToggle({
   return (
     <div
       className={cn(
-        'inline-flex items-center rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)]/60 p-0.5',
+        'inline-flex items-center rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)]/60 p-0.5',
         className,
       )}
     >
@@ -40,10 +40,10 @@ export function LibraryViewToggle({
               onClick={() => onViewChange(v.id)}
               aria-label={v.label}
               className={cn(
-                'flex h-7 w-7 items-center justify-center rounded-cv-sm transition-colors cursor-pointer',
+                'flex h-7 w-7 items-center justify-center rounded-gm-sm transition-colors cursor-pointer',
                 active
-                  ? 'bg-[var(--cv-bg-elevated)] text-[var(--cv-accent-strong)] shadow-xs'
-                  : 'text-[var(--cv-text-muted)] hover:text-[var(--cv-text)] hover:bg-[var(--cv-surface-raised)]',
+                  ? 'bg-[var(--gm-bg-elevated)] text-[var(--gm-accent-strong)] shadow-xs'
+                  : 'text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:bg-[var(--gm-surface-raised)]',
               )}
             >
               <Icon className="h-3.5 w-3.5" />

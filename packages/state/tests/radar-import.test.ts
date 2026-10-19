@@ -3,7 +3,7 @@ import { parseRadarImport, sanitizeRadarCaptureUrl } from "../src/radar-import";
 import { useRadarStore } from "../src/stores/use-radar-store";
 
 const sample = {
-  format: "chronicles-vault-radar",
+  format: "grimoire-radar",
   version: 1,
   batchId: "batch-1",
   batchLabel: "Current window",

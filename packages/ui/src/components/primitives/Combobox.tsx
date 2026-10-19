@@ -67,10 +67,10 @@ export function Combobox({
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            'flex h-9 w-full items-center justify-between rounded-cv border border-[var(--cv-border)] bg-[var(--cv-surface)] px-3 py-2 text-cv-sm text-[var(--cv-text)] shadow-xs transition-colors cursor-pointer',
-            'hover:bg-[var(--cv-surface-raised)] focus:outline-none focus:ring-1 focus:ring-[var(--cv-border-focus)] focus:border-[var(--cv-accent)]',
+            'flex h-9 w-full items-center justify-between rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-3 py-2 text-gm-sm text-[var(--gm-text)] shadow-xs transition-colors cursor-pointer',
+            'hover:bg-[var(--gm-surface-raised)] focus:outline-none focus:ring-1 focus:ring-[var(--gm-border-focus)] focus:border-[var(--gm-accent)]',
             'disabled:cursor-not-allowed disabled:opacity-50',
-            !selectedOption && 'text-[var(--cv-text-subtle)]',
+            !selectedOption && 'text-[var(--gm-text-subtle)]',
             className,
           )}
         >
@@ -84,24 +84,24 @@ export function Combobox({
           align="start"
           sideOffset={4}
           className={cn(
-            'z-[var(--cv-z-dropdown)] w-[var(--radix-popover-trigger-width)] min-w-[12rem] overflow-hidden rounded-cv-md border border-[var(--cv-border-strong)] bg-[var(--cv-bg-elevated)] p-1 text-[var(--cv-text)] shadow-lg outline-none',
+            'z-[var(--gm-z-dropdown)] w-[var(--radix-popover-trigger-width)] min-w-[12rem] overflow-hidden rounded-gm-md border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-1 text-[var(--gm-text)] shadow-lg outline-none',
             'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
           )}
         >
-          <div className="relative flex items-center border-b border-[var(--cv-border)] px-2 pb-1.5 pt-1">
-            <Search className="mr-2 h-3.5 w-3.5 text-[var(--cv-text-subtle)] shrink-0" />
+          <div className="relative flex items-center border-b border-[var(--gm-border)] px-2 pb-1.5 pt-1">
+            <Search className="mr-2 h-3.5 w-3.5 text-[var(--gm-text-subtle)] shrink-0" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full bg-transparent text-cv-sm text-[var(--cv-text)] placeholder:text-[var(--cv-text-subtle)] focus:outline-none"
+              className="w-full bg-transparent text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none"
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery('')}
-                className="text-[var(--cv-text-subtle)] hover:text-[var(--cv-text)]"
+                className="text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)]"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -110,7 +110,7 @@ export function Combobox({
 
           <div className="max-h-60 overflow-y-auto py-1">
             {filteredOptions.length === 0 ? (
-              <div className="py-4 text-center text-cv-xs text-[var(--cv-text-muted)]">
+              <div className="py-4 text-center text-gm-xs text-[var(--gm-text-muted)]">
                 {emptyText}
               </div>
             ) : (
@@ -123,15 +123,15 @@ export function Combobox({
                     disabled={opt.disabled}
                     onClick={() => handleSelect(opt.value)}
                     className={cn(
-                      'relative flex w-full cursor-pointer select-none items-center rounded-cv-sm px-2 py-1.5 text-cv-sm outline-none transition-colors text-left',
-                      'hover:bg-[var(--cv-surface)] hover:text-[var(--cv-text)] focus:bg-[var(--cv-surface)]',
-                      isSelected ? 'text-[var(--cv-accent-strong)] font-medium' : 'text-[var(--cv-text)]',
+                      'relative flex w-full cursor-pointer select-none items-center rounded-gm-sm px-2 py-1.5 text-gm-sm outline-none transition-colors text-left',
+                      'hover:bg-[var(--gm-surface)] hover:text-[var(--gm-text)] focus:bg-[var(--gm-surface)]',
+                      isSelected ? 'text-[var(--gm-accent-strong)] font-medium' : 'text-[var(--gm-text)]',
                       opt.disabled && 'pointer-events-none opacity-50',
                     )}
                   >
                     <span className="flex-1 truncate">{opt.label}</span>
                     {isSelected && (
-                      <Check className="ml-2 h-4 w-4 text-[var(--cv-accent-strong)] shrink-0" />
+                      <Check className="ml-2 h-4 w-4 text-[var(--gm-accent-strong)] shrink-0" />
                     )}
                   </button>
                 );

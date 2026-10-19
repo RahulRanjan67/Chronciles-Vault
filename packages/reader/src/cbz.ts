@@ -1,6 +1,6 @@
 import { CBZ_ZIP_LIMITS, SafeZipArchive, ZipSecurityError } from "./safe-zip.js";
 import type { ZipEntry, ZipLimits } from "./safe-zip.js";
-import type { PageAnchor, ProgressAnchor } from "@chronicles-vault/domain";
+import type { PageAnchor, ProgressAnchor } from "@grimoire/domain";
 
 export interface CbzImageDimensions {
   readonly width: number;

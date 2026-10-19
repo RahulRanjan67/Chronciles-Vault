@@ -10,8 +10,8 @@ import {
   PrivacyState,
   ProgressMethod,
   SpoilerLevel,
-} from "@chronicles-vault/domain";
-import type { MemoryAssetId } from "@chronicles-vault/shared";
+} from "@grimoire/domain";
+import type { MemoryAssetId } from "@grimoire/shared";
 import { clientRepository } from "../src/client-repository";
 
 describe("State Package Stores", () => {

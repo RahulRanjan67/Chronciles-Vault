@@ -1,12 +1,12 @@
 import { create } from 'zustand';
-import { WorkId } from '@chronicles-vault/shared';
+import { WorkId } from '@grimoire/shared';
 import {
   ReturnSignal,
   ReturnSignalType,
   computeReturnSignals,
   ReadingRelationship,
   UpdateEntry,
-} from '@chronicles-vault/domain';
+} from '@grimoire/domain';
 import {
   clientRepository,
   HydratedWorkItem,
