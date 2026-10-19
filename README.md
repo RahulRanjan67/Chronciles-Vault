@@ -1,8 +1,8 @@
-# Chronicles Vault
+# Grimoire
 
 > Your personal reading intelligence system — own your library, understand your reading, protect your privacy.
 
-Chronicles Vault is a **local-first**, **privacy-respecting** application that unifies your entire reading life: books, articles, papers, manga, comics, and more. It tracks what you read, captures your thoughts, surfaces connections between works, and keeps everything encrypted in a vault only you can open.
+Grimoire is a **local-first**, **privacy-respecting** application that unifies your entire reading life: books, articles, papers, manga, comics, and more. It tracks what you read, captures your thoughts, surfaces connections between works, and keeps everything encrypted in a vault only you can open.
 
 ---
 
@@ -25,7 +25,7 @@ Chronicles Vault is a **local-first**, **privacy-respecting** application that u
 This is a **pnpm monorepo** orchestrated by **Turborepo**:
 
 ```
-chronicles-vault/
+grimoire/
   apps/
     client/        → React + Vite main UI (web application & planned Capacitor native shell)
     browser/
@@ -75,7 +75,7 @@ pnpm install
 
 ```bash
 # Client only (web application)
-pnpm --filter @chronicles-vault/client dev
+pnpm --filter @grimoire/client dev
 
 # Full workspace build
 pnpm build
@@ -142,4 +142,4 @@ import { Button } from "@cv/ui";
 
 ## 📜 License
 
-Private — All Rights Reserved © Chronicles Vault Contributors
+Private — All Rights Reserved © Grimoire Contributors

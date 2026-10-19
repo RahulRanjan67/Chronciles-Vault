@@ -27,6 +27,7 @@ export interface UserPersonalList {
   items: UserPersonalListItem[];
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null;
 }
 
 export interface CommunityWorkEntry {
@@ -84,6 +85,10 @@ export interface ListsState {
     patch: Partial<Omit<UserPersonalList, "id" | "createdAt">>
   ) => void;
   deleteList: (id: string) => void;
+  softDeleteList: (id: string) => void;
+  restoreList: (id: string) => void;
+  purgeList: (id: string) => void;
+  getDeletedLists: () => UserPersonalList[];
   addWorkToList: (listId: string, workId: string, note?: string) => void;
   removeWorkFromList: (listId: string, workId: string) => void;
   isWorkInList: (listId: string, workId: string) => boolean;
@@ -538,13 +543,35 @@ export const useListsStore = create<ListsState>((set, get) => {
     },
 
     deleteList: (id) => {
-      const current = get().myLists;
-      const updated = current.filter((l) => l.id !== id);
+      get().softDeleteList(id);
+    },
+
+    softDeleteList: (id) => {
+      const now = new Date().toISOString();
+      const updated = get().myLists.map((l) => (l.id === id ? { ...l, deletedAt: now, updatedAt: now } : l));
       persistPersonalLists(updated);
-      const nextSelected = get().selectedListId === id
-        ? (updated[0]?.id ?? null)
-        : get().selectedListId;
+      const activeLists = updated.filter((l) => !l.deletedAt);
+      const nextSelected = get().selectedListId === id ? (activeLists[0]?.id ?? null) : get().selectedListId;
       set({ myLists: updated, selectedListId: nextSelected });
+    },
+
+    restoreList: (id) => {
+      const now = new Date().toISOString();
+      const updated = get().myLists.map((l) => (l.id === id ? { ...l, deletedAt: null, updatedAt: now } : l));
+      persistPersonalLists(updated);
+      set({ myLists: updated });
+    },
+
+    purgeList: (id) => {
+      const updated = get().myLists.filter((l) => l.id !== id);
+      persistPersonalLists(updated);
+      const activeLists = updated.filter((l) => !l.deletedAt);
+      const nextSelected = get().selectedListId === id ? (activeLists[0]?.id ?? null) : get().selectedListId;
+      set({ myLists: updated, selectedListId: nextSelected });
+    },
+
+    getDeletedLists: () => {
+      return get().myLists.filter((l) => Boolean(l.deletedAt));
     },
 
     addWorkToList: (listId, workId, note) => {

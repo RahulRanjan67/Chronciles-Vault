@@ -16,6 +16,7 @@ import {
   Settings,
   Sparkles,
   Tag,
+  Trash2,
   Users,
 } from 'lucide-react';
 
@@ -41,6 +42,7 @@ export const SECONDARY_NAV_ITEMS: NavItem[] = [
   { id: 'categories', label: 'My Categories', href: '/categories', icon: Tag },
   { id: 'lists', label: 'Lists', href: '/lists', icon: ListFilter },
   { id: 'archive', label: 'Archive', href: '/archive', icon: Archive },
+  { id: 'trash', label: 'Trash Bin', href: '/trash', icon: Trash2 },
   { id: 'discover', label: 'Discover', href: '/discover', icon: Compass },
 ];
 

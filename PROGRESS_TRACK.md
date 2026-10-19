@@ -1,4 +1,4 @@
-# Chronicles Vault Progress Track
+# Grimoire Progress Track
 
 ## Domain Fixes (Cycle 11 Rating Field)
 - [x] Add rating field to Work entity
@@ -94,7 +94,7 @@
 - [ ] Separate demouser from default account
 - [ ] Demouser should exist as one of users (not hardcoded default)
 - [ ] Create new user demo_user2
-- [ ] Add demo_user2 renamed as "Raj Mourya"
+- [ ] Add demo_user2 renamed as "DemoUser2"
 - [ ] Add all mangago weblinks to private vault of demo_user2
 
 ### Work Creation & URL Support
@@ -114,10 +114,37 @@
 - [ ] Add option to opt out syncing particular memory
 - [ ] Ensure vault syncs only when vault is open
 
+### Accepted v1.0 Feature Sprints
+- [ ] **Bin/Trash Feature**: Add trash bin for soft-deleted works
+  - Soft delete moves works to bin instead of permanent deletion
+  - Bin page shows all soft-deleted works with restore option
+  - Permanent delete option from bin (irreversible)
+  - Auto-empty bin after configurable time (30 days default)
+  - Bin count badge in sidebar
+- [ ] **Bulk Operations**: Multi-select works in Library to bulk tag, bulk archive, bulk move to list, or bulk delete
+- [ ] **Keyboard Navigation**: Arrow key navigation in grid/list, Enter to open, Esc to dismiss modals, `/` quick search
+- [ ] **User-Defined Custom Tags**: Custom color tags and badges per work beyond default categories
+- [ ] **Quick Capture from URL**: One-click URL metadata parser for instant work creation
+- [ ] **Desktop & Mobile Notifications**: Local notifications in PC Windows app (`installer.exe`) and Android app (`.apk`)
+- [ ] **Custom Cover Image Upload**: Allow uploading custom local image files / cropping covers for works
+- [ ] **Pinned Works**: Rename "High Priority" to "Pinned Works" with visual pin badge and top-shelf sorting
+- [ ] **Social Sharing Cards**: Architectural editorial cards (Book Jacket, Washi Hanko Ticket, Holographic Spec Sheet, Scroll) with custom quote, stats, and QR export (no cheap AI aesthetic)
+- [ ] **In-App Text Translator**: Translation engine for Spanish, Korean, Chinese, and Japanese normal text
+- [ ] **Reader Annotations to Memory**: Highlight text in reader and save one-click quote to Memory
+- [ ] **Google Drive Backup**: Zero-knowledge encrypted backup export to Google Drive
+- [ ] **Enrich Local Seed Data**: Seed data is strictly local to this device; hydrate Archive with 4-5 sample records, add memories and multi-source access paths for screenshots
+
+### Version 3.0 Scheduled Roadmap
+- [ ] **Local-First AI Assistant (A+B+C)**:
+  - Feature A: Smart "What to Read Next" recommender based on library taste & mood
+  - Feature B: Natural Language Query search parser ("manhwa I paused last month")
+  - Feature C: Memory Recap Briefing Bot (spoiler-free plot recap from saved memories)
+
 ### Testing & Guides
 - [ ] Test run application
 - [ ] Identify features and UI components needing improvement
-- [ ] Improve guides (currently confusing for demo users)
+- [ ] Overhaul Help & Feature Guide UI (clean, simplified editorial layout)
+- [ ] Prepare screenshot checklist for Help Guide showcase
 
 ### URL List for demo_user2
 The following 60 URLs need to be added to demo_user2's private vault:

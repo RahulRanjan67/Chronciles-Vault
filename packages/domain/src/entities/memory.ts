@@ -110,6 +110,7 @@ export interface Memory {
   readonly tags: readonly string[];
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly deletedAt?: string | null;
 }
 
 // ---------------------------------------------------------------------------

@@ -7,6 +7,7 @@ import {
   clientRepository,
   useLibraryStore,
   useRadarStore,
+  useTrashStore,
   useUpdatesStore,
 } from "@grimoire/state";
 import { useVaultAutoLock, useVaultStore } from "@grimoire/vault";
@@ -136,6 +137,8 @@ export function WorkspaceShell({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const totalTrashCount = useTrashStore((state) => state.totalTrashCount);
+
   const matched = React.useMemo(() => {
     return matchRoute(currentPath, APP_ROUTES);
   }, [currentPath]);
@@ -154,6 +157,7 @@ export function WorkspaceShell({
         badgeCounts={{
           radar: radarStore.pendingCount,
           updates: updatesUnreadCount,
+          trash: totalTrashCount,
         }}
         headerSlot={
           <div className="flex items-center gap-1.5 sm:gap-2">

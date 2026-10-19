@@ -16,6 +16,7 @@ import {
   Settings,
   Sparkles,
   Tag,
+  Trash2,
 } from 'lucide-react';
 
 export interface BottomNavItem {
@@ -47,6 +48,7 @@ export const MORE_NAV_ITEMS: BottomNavItem[] = [
   { id: 'categories', label: 'My Categories', href: '/categories', icon: Tag },
   { id: 'lists', label: 'Lists', href: '/lists', icon: ListFilter },
   { id: 'archive', label: 'Archive', href: '/archive', icon: Archive },
+  { id: 'trash', label: 'Trash Bin', href: '/trash', icon: Trash2 },
   { id: 'discover', label: 'Discover', href: '/discover', icon: Compass },
   { id: 'settings', label: 'Settings', href: '/settings', icon: Settings },
   { id: 'help', label: 'Help & Guide', href: '/help', icon: HelpCircle },

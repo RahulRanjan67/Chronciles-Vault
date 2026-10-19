@@ -110,6 +110,9 @@ export interface IMemoryRepository {
     >,
   ): Memory;
   deleteMemory(memoryId: MemoryId): boolean;
+  softDeleteMemory(memoryId: MemoryId): boolean;
+  restoreMemory(memoryId: MemoryId): boolean;
+  purgeMemory(memoryId: MemoryId): boolean;
 }
 
 export interface IUpdateRepository {
@@ -129,6 +132,14 @@ export interface IArchiveRepository {
     record?: ArchiveRecord;
     relationship?: ReadingRelationship;
   }>;
+}
+
+export interface ITrashRepository {
+  getDeletedWorks(): HydratedWorkItem[];
+  getDeletedMemories(): Array<{ memory: Memory; workTitle: string; workId: WorkId }>;
+  getTrashCount(): number;
+  purgeExpiredTrash(retentionDays?: number): { worksPurged: number; memoriesPurged: number };
+  purgeAllTrash(): { worksPurged: number; memoriesPurged: number };
 }
 
 export interface IWorkRelationRepository {
@@ -153,6 +164,7 @@ export interface IChroniclesRepository
     IMemoryRepository,
     IUpdateRepository,
     IArchiveRepository,
+    ITrashRepository,
     IWorkRelationRepository {}
 
 /** Unified alias for `IChroniclesRepository`. */

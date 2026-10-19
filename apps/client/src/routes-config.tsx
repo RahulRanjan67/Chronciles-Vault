@@ -61,6 +61,9 @@ const FeaturesGuide = React.lazy(() =>
 const Friends = React.lazy(() =>
   import("./routes/Friends").then((module) => ({ default: module.Friends })),
 );
+const TrashBin = React.lazy(() =>
+  import("./routes/TrashBin").then((module) => ({ default: module.TrashBin })),
+);
 
 export { CommandPalette };
 
@@ -82,6 +85,7 @@ export const APP_ROUTES: RouteDefinition[] = [
   { path: "/discover", name: "Discover", tier: 2, component: Discover },
   { path: "/vault", name: "Private Vault", tier: 3, component: Vault },
   { path: "/archive", name: "Archive", tier: 3, component: Archive },
+  { path: "/trash", name: "Trash Bin", tier: 3, component: TrashBin },
   { path: "/settings", name: "Settings", tier: 3, component: Settings },
   { path: "/help", name: "Help & Guide", tier: 3, component: Help },
   { path: "/features-guide", name: "Features Encyclopedia", tier: 3, component: FeaturesGuide },

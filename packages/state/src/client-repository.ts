@@ -580,7 +580,11 @@ export class ClientRepository {
   public listMemories(): MemoryGalleryRecord[] {
     return Array.from(this.items.values())
       .filter((item) => !item.work.deletedAt)
-      .flatMap((item) => item.memories.map((memory) => ({ memory, workTitle: item.work.title })))
+      .flatMap((item) =>
+        item.memories
+          .filter((memory) => !memory.deletedAt)
+          .map((memory) => ({ memory, workTitle: item.work.title }))
+      )
       .sort((a, b) => b.memory.createdAt.localeCompare(a.memory.createdAt));
   }
 
@@ -648,6 +652,44 @@ export class ClientRepository {
   }
 
   public deleteMemory(memoryId: MemoryId): boolean {
+    return this.softDeleteMemory(memoryId);
+  }
+
+  public softDeleteMemory(memoryId: MemoryId): boolean {
+    for (const item of this.items.values()) {
+      const index = item.memories.findIndex((memory) => memory.id === memoryId);
+      if (index < 0) continue;
+      const mem = item.memories[index];
+      if (!mem) break;
+      item.memories[index] = {
+        ...mem,
+        deletedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      this.saveToStorage();
+      return true;
+    }
+    return false;
+  }
+
+  public restoreMemory(memoryId: MemoryId): boolean {
+    for (const item of this.items.values()) {
+      const index = item.memories.findIndex((memory) => memory.id === memoryId);
+      if (index < 0) continue;
+      const mem = item.memories[index];
+      if (!mem) break;
+      item.memories[index] = {
+        ...mem,
+        deletedAt: null,
+        updatedAt: new Date().toISOString(),
+      };
+      this.saveToStorage();
+      return true;
+    }
+    return false;
+  }
+
+  public purgeMemory(memoryId: MemoryId): boolean {
     for (const item of this.items.values()) {
       const index = item.memories.findIndex((memory) => memory.id === memoryId);
       if (index < 0) continue;
@@ -741,6 +783,91 @@ export class ClientRepository {
           relationship: item.relationship,
         };
       });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Trash Bin & Soft Delete Operations
+  // ---------------------------------------------------------------------------
+
+  public getDeletedWorks(): HydratedWorkItem[] {
+    return Array.from(this.items.values())
+      .filter((item) => Boolean(item.work.deletedAt))
+      .sort((a, b) => (b.work.deletedAt ?? "").localeCompare(a.work.deletedAt ?? ""));
+  }
+
+  public getDeletedMemories(): Array<{ memory: Memory; workTitle: string; workId: WorkId }> {
+    const list: Array<{ memory: Memory; workTitle: string; workId: WorkId }> = [];
+    for (const item of this.items.values()) {
+      for (const mem of item.memories) {
+        if (mem.deletedAt) {
+          list.push({
+            memory: mem,
+            workTitle: item.work.title,
+            workId: item.work.id,
+          });
+        }
+      }
+    }
+    return list.sort((a, b) => (b.memory.deletedAt ?? "").localeCompare(a.memory.deletedAt ?? ""));
+  }
+
+  public getTrashCount(): number {
+    const deletedWorks = Array.from(this.items.values()).filter((item) => Boolean(item.work.deletedAt)).length;
+    let deletedMemories = 0;
+    for (const item of this.items.values()) {
+      for (const mem of item.memories) {
+        if (mem.deletedAt) deletedMemories++;
+      }
+    }
+    return deletedWorks + deletedMemories;
+  }
+
+  public purgeExpiredTrash(retentionDays = 30): { worksPurged: number; memoriesPurged: number } {
+    const cutoffMs = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+    let worksPurged = 0;
+    let memoriesPurged = 0;
+
+    for (const [id, item] of Array.from(this.items.entries())) {
+      if (item.work.deletedAt && new Date(item.work.deletedAt).getTime() < cutoffMs) {
+        this.items.delete(id);
+        worksPurged++;
+      } else {
+        const initialCount = item.memories.length;
+        item.memories = item.memories.filter((m) => {
+          if (m.deletedAt && new Date(m.deletedAt).getTime() < cutoffMs) {
+            return false;
+          }
+          return true;
+        });
+        memoriesPurged += initialCount - item.memories.length;
+      }
+    }
+
+    if (worksPurged > 0 || memoriesPurged > 0) {
+      this.saveToStorage();
+    }
+    return { worksPurged, memoriesPurged };
+  }
+
+  public purgeAllTrash(): { worksPurged: number; memoriesPurged: number } {
+    let worksPurged = 0;
+    let memoriesPurged = 0;
+
+    for (const [id, item] of Array.from(this.items.entries())) {
+      if (item.work.deletedAt) {
+        this.items.delete(id);
+        worksPurged++;
+      } else {
+        const initialCount = item.memories.length;
+        item.memories = item.memories.filter((m) => !m.deletedAt);
+        memoriesPurged += initialCount - item.memories.length;
+      }
+    }
+
+    if (worksPurged > 0 || memoriesPurged > 0) {
+      this.saveToStorage();
+    }
+    return { worksPurged, memoriesPurged };
   }
 
   // ---------------------------------------------------------------------------

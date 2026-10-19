@@ -21,3 +21,4 @@ export * from "./publication/publication-engine";
 export * from "./transfer/zip-store";
 export * from "./transfer/transfer";
 export * from "./transfer/apply-import";
+export * from "./stores/use-trash-store";

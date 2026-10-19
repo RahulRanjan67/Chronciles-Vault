@@ -33,6 +33,7 @@ export interface UserList {
   readonly items: readonly ListItem[];
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly deletedAt?: string | null;
 }
 
 // ---------------------------------------------------------------------------

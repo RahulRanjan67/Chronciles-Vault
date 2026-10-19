@@ -297,15 +297,15 @@ export function Library({ onNavigateWork }: LibraryProps) {
   const handleBulkDelete = () => {
     if (selectedIds.length === 0) return;
     const count = selectedIds.length;
-    if (typeof window !== "undefined" && !window.confirm(`Move ${count} selected work(s) to Return Desk / Discarded?`)) return;
+    if (typeof window !== "undefined" && !window.confirm(`Move ${count} selected work(s) to Trash Bin?`)) return;
     for (const id of selectedIds) {
       clientRepository.deleteWork(id as WorkId);
     }
     storeState.refresh();
     setSelectedIds([]);
     toast({
-      title: 'Works deleted',
-      description: `Moved ${count} work(s) to Return Desk.`,
+      title: 'Moved to Trash Bin',
+      description: `Moved ${count} work(s) to Trash Bin. Recoverable for 30 days.`,
     });
   };
 

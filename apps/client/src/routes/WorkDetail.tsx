@@ -2221,9 +2221,12 @@ export function WorkDetail({
                         onClick={() => {
                           clientRepository.deleteMemory(m.id as MemoryId);
                           loadWork(work.id);
-                          toast({ title: "Memory deleted" });
+                          toast({
+                            title: "Memory moved to Trash Bin",
+                            description: "You can restore this memory from the Trash Bin within 30 days.",
+                          });
                         }}
-                        title="Delete memory"
+                        title="Move memory to Trash Bin"
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
