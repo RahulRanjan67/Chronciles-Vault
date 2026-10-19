@@ -279,29 +279,43 @@ export function Vault({ onNavigateWork }: VaultProps) {
             </div>
             <div className="text-left">
               <h1 className="text-gm-xl font-extrabold text-[var(--gm-text)]">
-                Vault Is Locked
+                {keyRecord
+                  ? "Vault Is Locked"
+                  : hiddenWorks.length > 0
+                    ? "Unlock Imported Vault"
+                    : "Setup Private Vault"}
               </h1>
               <p className="mt-1 text-gm-xs leading-relaxed text-[var(--gm-text-muted)]">
-                Enter your passphrase to reveal your hidden works and private notes for this session.
+                {keyRecord
+                  ? `Enter your master passphrase to reveal ${hiddenWorks.length > 0 ? `${hiddenWorks.length} hidden works` : "your private sanctum"} and notes for this session.`
+                  : hiddenWorks.length > 0
+                    ? `Your imported archive contains ${hiddenWorks.length} vault-sealed works. Because Grimoire uses zero-knowledge encryption, your master key remains strictly local. Enter your master passphrase (sample packs use "GrimoireVault#2026") to unlock your sealed collection.`
+                    : "Create a master passphrase to isolate sensitive fiction titles, private notes, and credentials behind hardware-accelerated zero-knowledge encryption."}
               </p>
             </div>
           </div>
 
           <form onSubmit={handleAccess} className="space-y-3">
             <label className="block text-left font-mono text-[11px] font-bold uppercase text-[var(--gm-text-subtle)]">
-              {keyRecord ? "Passphrase" : "Create a Passphrase"}
+              {keyRecord || hiddenWorks.length > 0 ? "Master Passphrase" : "Create Master Passphrase"}
             </label>
             <Input
               type="password"
-              placeholder="Enter your master passphrase"
+              placeholder={
+                keyRecord
+                  ? "Enter your master passphrase"
+                  : hiddenWorks.length > 0
+                    ? "Enter vault master passphrase (e.g. GrimoireVault#2026)"
+                    : "Enter a secure master passphrase"
+              }
               value={passphrase}
               onChange={(event) => setPassphrase(event.target.value)}
-              autoComplete={keyRecord ? "current-password" : "new-password"}
+              autoComplete={keyRecord || hiddenWorks.length > 0 ? "current-password" : "new-password"}
             />
-            {!keyRecord && (
+            {!keyRecord && hiddenWorks.length === 0 && (
               <Input
                 type="password"
-                placeholder="Confirm passphrase"
+                placeholder="Confirm master passphrase"
                 value={confirmation}
                 onChange={(event) => setConfirmation(event.target.value)}
                 autoComplete="new-password"
@@ -319,12 +333,20 @@ export function Vault({ onNavigateWork }: VaultProps) {
               disabled={busy || status === "unlocking"}
             >
               <KeyRound className="h-4 w-4" />
-              <span>{busy ? "Unlocking…" : keyRecord ? "Unlock Vault" : "Create & Unlock Vault"}</span>
+              <span>
+                {busy
+                  ? "Unlocking…"
+                  : keyRecord
+                    ? "Unlock Vault"
+                    : hiddenWorks.length > 0
+                      ? `Unlock Sealed Vault (${hiddenWorks.length} Works)`
+                      : "Create & Unlock Vault"}
+              </span>
             </Button>
           </form>
 
           <div className="mt-5 border-t border-[var(--gm-border)] pt-3 text-center text-[11px] font-mono text-[var(--gm-text-subtle)]">
-            <span>Zero-knowledge encryption · auto-locks on exit</span>
+            <span>Zero-knowledge client-side encryption · master key never touches the network</span>
           </div>
         </div>
       </PageContainer>

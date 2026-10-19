@@ -1,0 +1,18 @@
+name = "grimoire"
+main = "server/worker.ts"
+compatibility_date = "2024-04-05"
+compatibility_flags = ["nodejs_compat"]
+
+[site]
+bucket = "./apps/client/dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "grimoire_d1_production"
+database_id = "grimoire-d1-prod-001"
+migrations_dir = "./migrations"
+
+[vars]
+ENVIRONMENT = "production"
+API_VERSION = "v1"
+CORS_ALLOW_ORIGIN = "*"

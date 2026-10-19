@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
 """
 Master Sample Pack Synthesizer for Grimoire.
-Produces all 3 rich sample pack ZIP archives in Chronicles Vault root:
-1. grimoire_sample_pack_1_xianxia_progression.zip
-2. grimoire_sample_pack_2_manga_anime_chronicles.zip
-3. grimoire_sample_pack_3_cyberpunk_scifi_omniscient.zip
+Produces all 3 rich sample pack ZIP archives and standalone .gca files in Chronicles Vault root:
+1. grimoire_sample_pack_1_xianxia_progression.zip (& xianxia.gca / xianxia.json)
+2. grimoire_sample_pack_2_manga_anime_chronicles.zip (& manga.gca / manga.json)
+3. grimoire_sample_pack_3_cyberpunk_scifi_omniscient.zip (& scifi.gca / scifi.json)
 
 Fulfills all requirements:
-- >= 25 works per pack
+- >= 25 active works + 2 soft-deleted works (for Trash Bin) per pack
 - >= 8 works in Vault (privacyState: 'vault')
 - >= 15 works with > 1 access paths
-- At least 1 work with both novel and manhwa/anime representations linked via WorkRelation
-- >= 3 custom tags & 3 custom categories
-- >= 2 fake website login credentials in the archive payload
-- >= 20 text memories
-- >= 10 screenshot memories
-- >= 3 memories in Vault
-- >= 3 actual 10-15 page readable PDF/EPUB books
-- >= 1 local playable audio file (.wav)
-- >= 1 local playable video file (.mp4)
-- Full README.md guide mapping seed data to all Grimoire features.
+- Cross-medium adaptation linked via WorkRelation
+- Active category schemas with valid color and explicit workIds
+- Normalized website login credentials (siteName, siteUrl, username, password, notes)
+- Active chapter updates feed on works for Updates Inbox
+- Completed archive records for Cold Storage
+- 22 text memories (showInGlobalGallery: True) + 10 screenshot memories in archive payload
+- 3 actual 10-15 page readable PDF/EPUB books
+- 1 local playable audio file (.wav)
+- 1 local playable video file (.mp4)
+- Master passphrase: GrimoireVault#2026 prominently documented in README.md
 """
 
 import os
@@ -42,16 +42,18 @@ from media_generator import (
 ROOT_DIR = r"c:\Users\67rah\Desktop\Chronciles Vault"
 os.makedirs(ROOT_DIR, exist_ok=True)
 
+MASTER_PASSPHRASE = "GrimoireVault#2026"
+
 def create_sample_chapters(book_title, num_chapters=11):
     chapters = []
     for i in range(1, num_chapters + 1):
         paragraphs = [
-            f"The heavenly Dao resonated through the celestial pillars as chapter {i} opened upon the realm.",
-            f"Wei Shi and the disciples gathered around the ancestral spiritual furnace, observing the primordial runes glowing with ethereal luminescent blue energy.",
-            f"Every step along this cultivation pathway tested the spirit, demanding unyielding discipline and mastery over the five elemental meridians.",
-            f"As the sun dipped behind the jagged peaks of the dragon mountain range, a profound realization struck the wandering cultivator: true mastery is not conquering the heavens, but harmonizing with their silent wisdom."
+            f"The celestial Dao resonated through the pillars of eternity as chapter {i} opened upon the realm.",
+            f"Wei Shi and the elders stood before the spirit furnace, watching the primordial runes pulse with luminescent celestial energy.",
+            f"Every single step along this pathway tested the disciple's resolve, demanding harmony between mind, intent, and earthly meridians.",
+            f"As the twin moons rose above the mist-shrouded mountain range, a profound truth dawned: the highest power is not mastery over others, but transcendence of self."
         ]
-        chapters.append((f"The Awakening of the Meridian Core (Part {i})", paragraphs))
+        chapters.append((f"The Awakening of the Dao Core (Part {i})", paragraphs))
     return chapters
 
 # ==============================================================================
@@ -59,9 +61,8 @@ def create_sample_chapters(book_title, num_chapters=11):
 # ==============================================================================
 def build_pack_1():
     print("Building Pack 1: Xianxia & Progression Fantasy...")
+    pack_prefix = "xianxia"
     
-    works = []
-    # 26 Works
     titles = [
         ("Lord of the Mysteries", "web_novel", "chinese", False, [
             ("Webnovel Official", "https://www.webnovel.com/book/lord-of-mysteries_11022733006234505"),
@@ -163,6 +164,7 @@ def build_pack_1():
         ])
     ]
 
+    works = []
     for idx, (title, ctype, origin, is_vault, paths) in enumerate(titles, 1):
         work_id = f"work-xianxia-{idx:02d}"
         access_paths = []
@@ -175,6 +177,19 @@ def build_pack_1():
                 "isPreferred": (p_idx == 1)
             })
         
+        # Populate live chapter updates for the Updates Inbox
+        chapter_num = 120 + idx * 4
+        updates = [
+            {
+                "id": f"upd-{work_id}-1",
+                "chapterNumber": chapter_num,
+                "title": f"Chapter {chapter_num}: Breaking of the Ninefold Meridian",
+                "releasedAt": "2026-10-18T18:30:00Z",
+                "url": paths[0][1] if paths else "https://wuxiaworld.com",
+                "read": False
+            }
+        ]
+
         works.append({
             "id": work_id,
             "title": title,
@@ -185,8 +200,37 @@ def build_pack_1():
             "genres": ["Xianxia", "Progression Fantasy", "Cultivation", "Adventure"],
             "tags": ["dao-heart-ascension", "pill-refining-art", "heavenly-tribulation", f"realm-stage-{idx}"],
             "description": f"An authoritative chronicle in the Xianxia and progression fantasy canon: {title}.",
-            "accessPaths": access_paths
+            "accessPaths": access_paths,
+            "updates": updates
         })
+
+    # Add 2 soft-deleted works for Trash Bin
+    works.append({
+        "id": "work-xianxia-trash-01",
+        "title": "Discarded Meridian Draft (Ch. 1-15)",
+        "contentType": "web_novel",
+        "origin": "chinese",
+        "publicationState": "dropped",
+        "privacyState": "public",
+        "deletedAt": "2026-10-17T09:00:00Z",
+        "genres": ["Xianxia"],
+        "tags": ["rough-draft"],
+        "description": "Moved to Trash Bin during vault spring cleaning.",
+        "accessPaths": []
+    })
+    works.append({
+        "id": "work-xianxia-trash-02",
+        "title": "Duplicate Wuxia Bookmark Mirror",
+        "contentType": "web_novel",
+        "origin": "chinese",
+        "publicationState": "dropped",
+        "privacyState": "public",
+        "deletedAt": "2026-10-18T11:20:00Z",
+        "genres": ["Cultivation"],
+        "tags": ["stale-mirror"],
+        "description": "Moved to Trash Bin during vault spring cleaning.",
+        "accessPaths": []
+    })
 
     # Work relation connecting Novel and Donghua adaptation
     relations = [
@@ -205,17 +249,18 @@ def build_pack_1():
         is_vault_mem = (i in [3, 7, 14, 21])
         memories.append({
             "id": f"mem-xianxia-{i:02d}",
-            "workId": f"work-xianxia-{(i % len(works)) + 1:02d}",
+            "workId": f"work-xianxia-{(i % len(titles)) + 1:02d}",
             "type": "quote" if i % 2 == 1 else "reflection",
             "title": f"Epiphany of the Nine Heavens #{i}",
             "body": f"\"The Dao that can be trodden is not the enduring and unchanging Dao.\" Milestone reflection #{i}: The cultivator pierced the celestial barrier, shattering mortal shackles.",
             "spoilerLevel": "minor" if i % 3 == 0 else "none",
             "privacyState": "vault" if is_vault_mem else "public",
+            "showInGlobalGallery": True,
             "tags": ["dao-heart-ascension", "cultivation-epiphany", "milestone"],
             "createdAt": "2026-10-18T10:00:00Z"
         })
 
-    # Screenshot memories (10 screenshot memories)
+    # Screenshot memory definitions & insertion
     screenshot_memory_defs = [
         ("Lord of the Mysteries", "Divination in the Gray Fog", "Lord of the Mysteries", "The fool that doesn't belong to this era; The mysterious ruler above the gray fog.", "Ch. 1 · Gray Fog Divination", (129, 140, 248)),
         ("Reverend Insanity", "Spring Autumn Cicada Awakening", "Reverend Insanity", "The river of time rushed past. Fang Yuan smiled calmly: 'I have no regrets.'", "Ch. 1 · Qing Mao Mountain", (239, 68, 68)),
@@ -229,16 +274,87 @@ def build_pack_1():
         ("Battle Through the Heavens", "Heavenly Flame Lotus Fusion", "Battle Through the Heavens", "Xiao Yan converged the green lotus flame with the bone chilling flame into a lotus.", "Ch. 210 · Desert of Tagore", (234, 179, 8))
     ]
 
-    # Categories & Lists
+    for idx, (win_t, sec_t, hl, q, prog, acc) in enumerate(screenshot_memory_defs, 1):
+        memories.append({
+            "id": f"mem-xianxia-ss-{idx:02d}",
+            "workId": f"work-xianxia-{(idx % 10) + 1:02d}",
+            "type": "screenshot",
+            "title": sec_t,
+            "body": q,
+            "mediaUrl": f"screenshots/ss_{idx:02d}.png",
+            "mediaMimeType": "image/png",
+            "chapterContext": prog,
+            "privacyState": "public",
+            "showInGlobalGallery": True,
+            "tags": ["screenshot", "pivotal-scene"],
+            "createdAt": "2026-10-18T12:00:00Z"
+        })
+
+    # Normalized Categories with explicit workIds
     categories = [
-        {"id": "cat-primordial", "name": "Primordial Cultivation", "accentColor": "#6366f1", "description": "High-tier classical Daoist cultivation classics."},
-        {"id": "cat-sect-politics", "name": "Sect Politics & Alchemy", "accentColor": "#10b981", "description": "Resource wars, pill making, and elder intrigues."},
-        {"id": "cat-regression", "name": "Regression Heavens", "accentColor": "#f59e0b", "description": "Time travel, second chances, and rebirth epics."}
+        {
+            "id": "cat-primordial",
+            "name": "Primordial Cultivation",
+            "color": "indigo",
+            "workIds": ["work-xianxia-01", "work-xianxia-02", "work-xianxia-03", "work-xianxia-06", "work-xianxia-07", "work-xianxia-08", "work-xianxia-09", "work-xianxia-10"],
+            "description": "High-tier classical Daoist cultivation classics."
+        },
+        {
+            "id": "cat-sect-politics",
+            "name": "Sect Politics & Alchemy",
+            "color": "emerald",
+            "workIds": ["work-xianxia-04", "work-xianxia-05", "work-xianxia-11", "work-xianxia-12", "work-xianxia-13", "work-xianxia-14", "work-xianxia-15", "work-xianxia-16"],
+            "description": "Resource wars, pill making, and elder intrigues."
+        },
+        {
+            "id": "cat-regression",
+            "name": "Regression Heavens",
+            "color": "amber",
+            "workIds": ["work-xianxia-17", "work-xianxia-18", "work-xianxia-19", "work-xianxia-20", "work-xianxia-21", "work-xianxia-22", "work-xianxia-23", "work-xianxia-24", "work-xianxia-25", "work-xianxia-26"],
+            "description": "Time travel, second chances, and rebirth epics."
+        }
     ]
 
+    # Normalized Credentials
     credentials = [
-        {"id": "cred-rr-1", "name": "Royal Road", "domain": "royalroad.com", "username": "DaoistSeeker99", "password": "NinePillars#2026", "searchUrl": "https://www.royalroad.com/fictions/search?title={query}"},
-        {"id": "cred-wx-1", "name": "Wuxiaworld", "domain": "wuxiaworld.com", "username": "ImmortalAscendant", "password": "GoldenCore@888", "searchUrl": "https://www.wuxiaworld.com/search?keyword={query}"}
+        {
+            "id": "cred-rr-1",
+            "siteName": "Royal Road",
+            "siteUrl": "https://www.royalroad.com",
+            "username": "DaoistSeeker99",
+            "password": "NinePillars#2026",
+            "searchUrl": "https://www.royalroad.com/fictions/search?title={query}",
+            "notes": "Verified reading account. Use for Fiction search."
+        },
+        {
+            "id": "cred-wx-1",
+            "siteName": "Wuxiaworld",
+            "siteUrl": "https://www.wuxiaworld.com",
+            "username": "ImmortalAscendant",
+            "password": "GoldenCore@888",
+            "searchUrl": "https://www.wuxiaworld.com/search?keyword={query}",
+            "notes": "Premium unlocked VIP tier for early chapter releases."
+        }
+    ]
+
+    # Archive Records (Cold Storage)
+    archive_records = [
+        {
+            "id": "arc-xianxia-01",
+            "workId": "work-xianxia-01",
+            "archivedAt": "2026-10-15T12:00:00Z",
+            "reason": "Completed first complete reading run",
+            "snapshotProgress": "100%",
+            "notes": "Archived for annual reread."
+        },
+        {
+            "id": "arc-xianxia-02",
+            "workId": "work-xianxia-03",
+            "archivedAt": "2026-10-16T14:00:00Z",
+            "reason": "Completed book 1-12 run",
+            "snapshotProgress": "Book 12 End",
+            "notes": "Waiting for Waybound release."
+        }
     ]
 
     archive_payload = {
@@ -251,8 +367,17 @@ def build_pack_1():
         "memories": memories,
         "categories": categories,
         "credentials": credentials,
+        "archiveRecords": archive_records,
         "customTags": ["dao-heart-ascension", "pill-refining-art", "heavenly-tribulation"]
     }
+
+    # Also write standalone files directly to root
+    standalone_gca_path = os.path.join(ROOT_DIR, "xianxia.gca")
+    standalone_json_path = os.path.join(ROOT_DIR, "xianxia.json")
+    with open(standalone_gca_path, "w", encoding="utf-8") as f:
+        json.dump(archive_payload, f, indent=2)
+    with open(standalone_json_path, "w", encoding="utf-8") as f:
+        json.dump(archive_payload, f, indent=2)
 
     # Assemble ZIP
     zip_path = os.path.join(ROOT_DIR, "grimoire_sample_pack_1_xianxia_progression.zip")
@@ -283,43 +408,56 @@ def build_pack_1():
         # 1 Playable local video file
         z.writestr("video/a_will_eternal_donghua_pv.mp4", generate_video_file(duration_ms=2500))
 
-        # Comprehensive README Navigation Guide
-        readme_text = """# Grimoire Sample Pack 1: Xianxia & Progression Fantasy Chronicles
+        # Comprehensive README Navigation Guide with Prominent Master Passphrase
+        readme_text = f"""# Grimoire Sample Pack 1: Xianxia & Progression Fantasy Chronicles
 
-Welcome to the **Xianxia & Progression Fantasy Sample Pack** for **Grimoire (Chronicles Vault)**!
+Welcome to the **Xianxia & Progression Fantasy Sample Pack** for **Grimoire**!
 
-This archive contains a rich, authentic dataset designed to showcase and test 100% of Grimoire's capabilities.
+---
+
+## 🗝️ Private Vault Master Passphrase
+
+> **Master Passphrase:** `{MASTER_PASSPHRASE}`
+>
+> Use this master passphrase to unlock the **9 sealed Vault works** (*Reverend Insanity, Renegade Immortal, RMJI, MDZS, TGCF, DCC, Demon Emperor, Way of Choices, World of Cultivation*), confidential epiphanies, and encrypted portal notes.
 
 ---
 
 ## 📦 What is inside this Sample Pack?
 
-- **26 Fully Configured Works**:
-  - **9 Works secured in Private Vault** (`privacyState: "vault"`) — *Reverend Insanity, Renegade Immortal, RMJI, MDZS, TGCF, DCC, Demon Emperor, Way of Choices, World of Cultivation*.
-  - **16 Works with Multi-Source Access Paths** — Providing official web links, fandom lore wikis, and offline local media files.
+- **26 Active Works + 2 Trash Bin Works**:
+  - **9 Works secured in Private Vault** (`privacyState: "vault"`).
+  - **16 Multi-Source Works** with official web links, fandom lore wikis, and offline local media files.
   - **Cross-Medium Adaptation Linked**:
-    - **A Will Eternal (Web Novel)** linked to **A Will Eternal (Donghua Anime & Manhua)** with transition notes detailing Season 1 & Season 2 chapter mappings.
-- **22 Curated Text Memories** (with 4 emotional milestones stored securely in the Private Vault).
-- **10 High-Resolution Screenshot Memories** (`screenshots/ss_01.png` to `screenshots/ss_10.png`).
+    - **A Will Eternal (Web Novel)** $\\leftrightarrow$ **A Will Eternal (Donghua Anime & Manhua)** with transition notes detailing Season 1 & Season 2 chapter mappings.
+- **32 Curated Memories**:
+  - **22 Text Memories** (with 4 emotional milestones stored securely in the Private Vault).
+  - **10 High-Resolution Screenshot Memories** (`screenshots/ss_01.png` to `screenshots/ss_10.png`) visible in the global gallery.
+- **Live Chapter Updates Feed**: Every work has unread chapter alerts populating `/inbox`.
+- **Cold Storage Archive Records**: 2 volume records documenting completed runs.
+- **Trash Bin Pre-Populated**: 2 soft-deleted draft entries ready to test restoration or permanent purge.
 - **3 Actual 10–15 Page Readable Offline Books**:
-  - `books/cradle_unsouled_ch1_12.pdf`: 12-page PDF with chapter TOC, headers, and running page numbers readable in Grimoire's built-in PDF viewer.
+  - `books/cradle_unsouled_ch1_12.pdf`: 12-page PDF with chapter TOC, headers, and running page numbers readable in Grimoire's built-in PDF viewer with 1-page/2-page spread toggle.
   - `books/lord_of_mysteries_vol1_sampler.pdf`: 12-page PDF sampler.
-  - `books/a_will_eternal_preview.epub`: 12-chapter valid EPUB book readable in Grimoire's built-in EPUB reader.
+  - `books/a_will_eternal_preview.epub`: 12-chapter valid EPUB book readable in Grimoire's built-in EPUB reader with physical right-to-left page sweep.
 - **1 Playable Local Audiobook File**:
-  - `audio/cradle_audiobook_sample.wav`: Playable with Grimoire's native audiobook player, speed controls, and sleep timer.
+  - `audio/cradle_audiobook_sample.wav`: Playable with Grimoire's native audiobook player.
 - **1 Playable Local Video File**:
   - `video/a_will_eternal_donghua_pv.mp4`: Playable with Grimoire's native video player with theater mode.
-- **2 Encrypted Reading Website Logins** for Royal Road and Wuxiaworld.
-- **3 Custom Categories** and **3 Custom Trope Tags**.
+- **2 Encrypted Reading Website Logins**: Royal Road and Wuxiaworld.
+- **3 Custom Categories with Explicit Work Assignments**:
+  - *Primordial Cultivation* (8 works)
+  - *Sect Politics & Alchemy* (8 works)
+  - *Regression Heavens* (10 works)
 
 ---
 
 ## 🚀 How to Import into Grimoire
 
-1. **Option A (From Landing Screen)**:
+1. **Option A (From Title Screen)**:
    - On the Sanctum Title Screen, click the **Import .gca File** card.
-   - Select `archive.gca` from this zip file.
-   - Your library immediately hydrates with all 26 works, relations, and memories!
+   - Select either `archive.gca`, `xianxia.gca`, or this `.zip` file directly.
+   - Your library immediately hydrates and transitions directly into your reading room!
 
 2. **Option B (From Inside the App)**:
    - Navigate to **Settings → Data Transfer & Portability**.
@@ -330,22 +468,22 @@ This archive contains a rich, authentic dataset designed to showcase and test 10
 ## 🗺️ Step-by-Step Feature Exploration Guide
 
 1. **Library Perspectives (`/library`)**:
-   - Press `Ctrl+1` for **Grid View** and `Ctrl+2` for **Bookshelf View** with realistic spine heights.
-   - Press `Ctrl+3` for the **Dense Metadata Table** view.
-   - Filter by custom tags: `dao-heart-ascension`, `pill-refining-art`, `heavenly-tribulation`.
+   - Press `Ctrl+1` for **Grid View**, `Ctrl+2` for **Bookshelf View**, and `Ctrl+3` for the **Dense Metadata Table**.
+   - Click on Categories to see works partitioned cleanly into Primordial Cultivation, Sect Politics, and Regression Heavens.
 2. **Private Vault (`/vault`)**:
-   - Notice that the 9 vault works (*Reverend Insanity, Renegade Immortal, etc.*) are completely hidden until you unlock the Vault with your passphrase.
-   - Press `Ctrl+Shift+L` to test instant Panic Lock.
+   - Click the Lock icon in the header or visit `/vault`.
+   - Enter `{MASTER_PASSPHRASE}` to unlock all 9 hidden titles and private notes.
+   - Press `Ctrl+Shift+L` to trigger instant Panic Lock.
 3. **Cross-Medium Adaptation Graph**:
-   - Open **A Will Eternal (Web Novel)** and click the **Relations** tab.
-   - See the visual connection to **A Will Eternal (Donghua Anime)** with chapter transition notes.
+   - Open **A Will Eternal (Web Novel)** and switch to the **Relations** tab to inspect the interactive link to the Donghua adaptation.
 4. **Offline Built-in Readers**:
-   - Open *Cradle: Unsouled* and launch the local PDF viewer (`/reader/pdf`).
-   - Open *A Will Eternal* and launch the built-in EPUB reader (`/reader/epub`).
-   - Play the local audio track (`/reader/audio`) or local video PV (`/reader/video`).
-5. **Website Credential Keyring**:
-   - Open **Settings → Website Credential Keyring** (or inside Vault).
-   - See Royal Road and Wuxiaworld logins with 1-click password copy and search integration.
+   - Open *Cradle: Unsouled* and launch the local PDF viewer (`/reader/pdf`). Toggle between 1-page and 2-page view.
+   - Open *A Will Eternal* and launch the built-in EPUB reader (`/reader/epub`). Notice the silky right-to-left page sweep.
+5. **Keyring & Portals (`/keyring`)**:
+   - View stored Royal Road and Wuxiaworld credentials with 1-click password copy and search launching.
+6. **Updates Inbox (`/inbox`) & Trash Bin (`/trash`)**:
+   - Check `/inbox` for live unread chapter releases.
+   - Check `/trash` to test restoring or purging soft-deleted drafts.
 """
         z.writestr("README.md", readme_text)
 
@@ -357,6 +495,7 @@ This archive contains a rich, authentic dataset designed to showcase and test 10
 # ==============================================================================
 def build_pack_2():
     print("Building Pack 2: Manga & Anime Chronicles...")
+    pack_prefix = "manga"
     
     titles = [
         ("Solo Leveling (Original Web Novel)", "web_novel", "korean", False, [
@@ -461,6 +600,7 @@ def build_pack_2():
 
     works = []
     for idx, (title, ctype, origin, is_vault, paths) in enumerate(titles, 1):
+        work_id = f"work-manga-{idx:02d}"
         access_paths = []
         for p_idx, (label, url) in enumerate(paths, 1):
             access_paths.append({
@@ -471,8 +611,20 @@ def build_pack_2():
                 "isPreferred": (p_idx == 1)
             })
         
+        chapter_num = 90 + idx * 5
+        updates = [
+            {
+                "id": f"upd-{work_id}-1",
+                "chapterNumber": chapter_num,
+                "title": f"Chapter {chapter_num}: Climax of the Double Dungeon Arc",
+                "releasedAt": "2026-10-18T19:00:00Z",
+                "url": paths[0][1] if paths else "https://mangadex.org",
+                "read": False
+            }
+        ]
+
         works.append({
-            "id": f"work-manga-{idx:02d}",
+            "id": work_id,
             "title": title,
             "contentType": ctype,
             "origin": origin,
@@ -481,8 +633,37 @@ def build_pack_2():
             "genres": ["Action", "Psychological", "Supernatural", "Seinen" if is_vault else "Shonen"],
             "tags": ["shadow-monarch-awakening", "dungeon-break-rank-s", "hunter-association", f"manga-arc-{idx}"],
             "description": f"An iconic title in the manga, manhwa, and graphic fiction hall of fame: {title}.",
-            "accessPaths": access_paths
+            "accessPaths": access_paths,
+            "updates": updates
         })
+
+    # Add 2 soft-deleted works for Trash Bin
+    works.append({
+        "id": "work-manga-trash-01",
+        "title": "Low-Resolution Scans Archive (Ch. 1-10)",
+        "contentType": "manga",
+        "origin": "japanese",
+        "publicationState": "dropped",
+        "privacyState": "public",
+        "deletedAt": "2026-10-17T14:00:00Z",
+        "genres": ["Action"],
+        "tags": ["superseded-scan"],
+        "description": "Moved to Trash Bin after upgrading to official high-res digital release.",
+        "accessPaths": []
+    })
+    works.append({
+        "id": "work-manga-trash-02",
+        "title": "Stale MangaDex Mirror Link",
+        "contentType": "manhwa",
+        "origin": "korean",
+        "publicationState": "dropped",
+        "privacyState": "public",
+        "deletedAt": "2026-10-18T16:45:00Z",
+        "genres": ["Webtoon"],
+        "tags": ["broken-mirror"],
+        "description": "Moved to Trash Bin during vault spring cleaning.",
+        "accessPaths": []
+    })
 
     # Novel to Manhwa cross-medium adaptation
     relations = [
@@ -501,12 +682,13 @@ def build_pack_2():
         is_vault_mem = (i in [3, 8, 15])
         memories.append({
             "id": f"mem-manga-{i:02d}",
-            "workId": f"work-manga-{(i % len(works)) + 1:02d}",
+            "workId": f"work-manga-{(i % len(titles)) + 1:02d}",
             "type": "quote" if i % 2 == 1 else "milestone",
             "title": f"Manga Narrative Revelation #{i}",
             "body": f"\"Arise.\" Milestone quote #{i}: The monarch extended a hand, and shadows rose from the fallen battlefield.",
             "spoilerLevel": "major" if i % 4 == 0 else "none",
             "privacyState": "vault" if is_vault_mem else "public",
+            "showInGlobalGallery": True,
             "tags": ["shadow-monarch-awakening", "epic-revelation", "manga-chronicle"],
             "createdAt": "2026-10-18T14:30:00Z"
         })
@@ -524,15 +706,76 @@ def build_pack_2():
         ("The Boxer", "The Light in the Darkness", "The Boxer", "Yu stood motionless in the center of the ring, waiting for a single ray of sunlight.", "Ch. 104 · Championship Bout", (16, 185, 129))
     ]
 
+    for idx, (win_t, sec_t, hl, q, prog, acc) in enumerate(screenshot_defs, 1):
+        memories.append({
+            "id": f"mem-manga-ss-{idx:02d}",
+            "workId": f"work-manga-{(idx % 10) + 1:02d}",
+            "type": "screenshot",
+            "title": sec_t,
+            "body": q,
+            "mediaUrl": f"screenshots/ss_{idx:02d}.png",
+            "mediaMimeType": "image/png",
+            "chapterContext": prog,
+            "privacyState": "public",
+            "showInGlobalGallery": True,
+            "tags": ["screenshot", "pivotal-scene"],
+            "createdAt": "2026-10-18T12:00:00Z"
+        })
+
     categories = [
-        {"id": "cat-tower-climbers", "name": "Tower & Gate Climbers", "accentColor": "#3b82f6", "description": "Hunter dungeons, level systems, and ascension towers."},
-        {"id": "cat-dark-seinen", "name": "Dark Fantasy Seinen", "accentColor": "#ef4444", "description": "Gritty, philosophical masterpieces with mature themes."},
-        {"id": "cat-reincarnated-villains", "name": "Reincarnated Villains", "accentColor": "#a855f7", "description": "Otome isekai and anti-hero redemption arcs."}
+        {
+            "id": "cat-tower-climbers",
+            "name": "Tower & Gate Climbers",
+            "color": "sky",
+            "workIds": ["work-manga-01", "work-manga-02", "work-manga-11", "work-manga-12", "work-manga-15", "work-manga-16", "work-manga-17"],
+            "description": "Hunter dungeons, level systems, and ascension towers."
+        },
+        {
+            "id": "cat-dark-seinen",
+            "name": "Dark Fantasy Seinen",
+            "color": "rose",
+            "workIds": ["work-manga-03", "work-manga-06", "work-manga-07", "work-manga-08", "work-manga-13", "work-manga-14", "work-manga-21", "work-manga-22"],
+            "description": "Gritty, philosophical masterpieces with mature themes."
+        },
+        {
+            "id": "cat-reincarnated-villains",
+            "name": "Reincarnated Villains & Anti-Heroes",
+            "color": "purple",
+            "workIds": ["work-manga-04", "work-manga-05", "work-manga-09", "work-manga-10", "work-manga-18", "work-manga-19", "work-manga-20", "work-manga-23", "work-manga-24", "work-manga-25", "work-manga-26"],
+            "description": "Otome isekai and anti-hero redemption arcs."
+        }
     ]
 
     credentials = [
-        {"id": "cred-md-1", "name": "MangaDex", "domain": "mangadex.org", "username": "ShadowReaderX", "password": "DungeonGate!404", "searchUrl": "https://mangadex.org/search?q={query}"},
-        {"id": "cred-wt-1", "name": "Webtoons", "domain": "webtoons.com", "username": "SoloHunter_Sung", "password": "AriseShadow#77", "searchUrl": "https://www.webtoons.com/en/search?keyword={query}"}
+        {
+            "id": "cred-md-1",
+            "siteName": "MangaDex",
+            "siteUrl": "https://mangadex.org",
+            "username": "ShadowReaderX",
+            "password": "DungeonGate!404",
+            "searchUrl": "https://mangadex.org/search?q={query}",
+            "notes": "Ad-free community reader account."
+        },
+        {
+            "id": "cred-wt-1",
+            "siteName": "Webtoons",
+            "siteUrl": "https://www.webtoons.com",
+            "username": "SoloHunter_Sung",
+            "password": "AriseShadow#77",
+            "searchUrl": "https://www.webtoons.com/en/search?keyword={query}",
+            "notes": "Fast-pass coins loaded for weekly chapters."
+        }
+    ]
+
+    archive_records = [
+        {
+            "id": "arc-manga-01",
+            "workId": "work-manga-02",
+            "archivedAt": "2026-10-12T15:00:00Z",
+            "reason": "Completed season 1 binge",
+            "snapshotProgress": "Ch. 135",
+            "notes": "Preserved prior to official physical release."
+        }
     ]
 
     archive_payload = {
@@ -545,8 +788,15 @@ def build_pack_2():
         "memories": memories,
         "categories": categories,
         "credentials": credentials,
+        "archiveRecords": archive_records,
         "customTags": ["shadow-monarch-awakening", "dungeon-break-rank-s", "hunter-association"]
     }
+
+    # Standalone root files
+    with open(os.path.join(ROOT_DIR, "manga.gca"), "w", encoding="utf-8") as f:
+        json.dump(archive_payload, f, indent=2)
+    with open(os.path.join(ROOT_DIR, "manga.json"), "w", encoding="utf-8") as f:
+        json.dump(archive_payload, f, indent=2)
 
     zip_path = os.path.join(ROOT_DIR, "grimoire_sample_pack_2_manga_anime_chronicles.zip")
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
@@ -569,36 +819,48 @@ def build_pack_2():
         z.writestr("audio/solo_leveling_audio_prologue.wav", generate_audio_file(duration_sec=3.5, base_freq=400.0))
         z.writestr("video/solo_leveling_anime_trailer.mp4", generate_video_file(duration_ms=2500))
 
-        readme_text = """# Grimoire Sample Pack 2: Manga & Anime Chronicles
+        readme_text = f"""# Grimoire Sample Pack 2: Manga & Anime Chronicles
 
 Welcome to the **Manga & Anime Chronicles Sample Pack** for **Grimoire**!
 
-This pack contains 26 essential manga, manhwa, and light novel masterpieces with full relational links, screenshot moments, and built-in offline reading media.
+---
+
+## 🗝️ Private Vault Master Passphrase
+
+> **Master Passphrase:** `{MASTER_PASSPHRASE}`
+>
+> Use this master passphrase to unlock the **8 sealed Vault works** (*Berserk, Vinland Saga, Vagabond, Monster, Bastard, Sweet Home, Goodnight Punpun, Homunculus*), classified notes, and confidential memories.
 
 ---
 
 ## 📦 What is inside this Sample Pack?
 
-- **26 Curated Manga & Graphic Fiction Works**:
-  - **8 Works in Private Vault** (`privacyState: "vault"`) — *Berserk, Vinland Saga, Vagabond, Monster, Bastard, Sweet Home, Goodnight Punpun, Homunculus*.
+- **26 Curated Manga & Graphic Fiction Works + 2 Trash Bin Drafts**:
+  - **8 Works in Private Vault** (`privacyState: "vault"`).
   - **16 Multi-Path Works** with primary web reading links, local offline files, and anime trailers.
   - **Cross-Medium Adaptation Linked**:
-    - **Solo Leveling (Original Web Novel)** $\leftrightarrow$ **Solo Leveling (Webtoon / Manhwa)** with chapter pacing breakdown.
-- **21 Text Memories** with 3 vault secrets.
-- **10 Screenshot Memories** capturing pivotal double-page spreads.
+    - **Solo Leveling (Original Web Novel)** $\\leftrightarrow$ **Solo Leveling (Webtoon / Manhwa)** with chapter pacing breakdown.
+- **31 Curated Memories**:
+  - **21 Text Memories** with 3 vault secrets.
+  - **10 Screenshot Memories** capturing pivotal double-page spreads.
+- **Live Chapter Updates**: Real-time chapter alerts ready in `/inbox`.
+- **Trash Bin**: 2 soft-deleted draft scans in `/trash`.
 - **3 Actual 10–15 Page Readable Offline Books** (`solo_leveling_novel_ch1_12.epub`, `berserk_chronicles_tome1.pdf`, `frieren_journey_ch1_12.pdf`).
 - **1 Playable Local Audiobook File** (`audio/solo_leveling_audio_prologue.wav`).
 - **1 Playable Local Video File** (`video/solo_leveling_anime_trailer.mp4`).
 - **2 Encrypted Portal Logins** for MangaDex and Webtoons.
-- **3 Custom Categories & Tags**.
+- **3 Custom Categories with Explicit Work Assignments**:
+  - *Tower & Gate Climbers* (7 works)
+  - *Dark Fantasy Seinen* (8 works)
+  - *Reincarnated Villains & Anti-Heroes* (11 works)
 
 ---
 
 ## 🚀 How to Import into Grimoire
 
 1. On the Sanctum Title Screen, click **Import .gca File**.
-2. Select `archive.gca` from this zip.
-3. Your library loads instantly with 0 demo user relics and full relational data.
+2. Select either `archive.gca`, `manga.gca`, or this `.zip` file directly.
+3. Your library loads instantly with 0 demo relics and full relational data.
 """
         z.writestr("README.md", readme_text)
 
@@ -610,6 +872,7 @@ This pack contains 26 essential manga, manhwa, and light novel masterpieces with
 # ==============================================================================
 def build_pack_3():
     print("Building Pack 3: Cyberpunk, Sci-Fi & Meta-Fiction...")
+    pack_prefix = "scifi"
 
     titles = [
         ("Omniscient Reader's Viewpoint (Web Novel)", "web_novel", "korean", False, [
@@ -718,6 +981,7 @@ def build_pack_3():
 
     works = []
     for idx, (title, ctype, origin, is_vault, paths) in enumerate(titles, 1):
+        work_id = f"work-scifi-{idx:02d}"
         access_paths = []
         for p_idx, (label, url) in enumerate(paths, 1):
             access_paths.append({
@@ -728,8 +992,20 @@ def build_pack_3():
                 "isPreferred": (p_idx == 1)
             })
         
+        chapter_num = 140 + idx * 3
+        updates = [
+            {
+                "id": f"upd-{work_id}-1",
+                "chapterNumber": chapter_num,
+                "title": f"Scenario {chapter_num}: Constellation Encounter",
+                "releasedAt": "2026-10-18T21:00:00Z",
+                "url": paths[0][1] if paths else "https://munpia.com",
+                "read": False
+            }
+        ]
+
         works.append({
-            "id": f"work-scifi-{idx:02d}",
+            "id": work_id,
             "title": title,
             "contentType": ctype,
             "origin": origin,
@@ -738,8 +1014,37 @@ def build_pack_3():
             "genres": ["Sci-Fi", "Cyberpunk", "Meta-Fiction", "Dystopian"],
             "tags": ["constellation-star-stream", "fable-weaving-meta", "fourth-wall-shattered", f"sector-matrix-{idx}"],
             "description": f"A foundational pillar of cyberpunk and speculative meta-fiction: {title}.",
-            "accessPaths": access_paths
+            "accessPaths": access_paths,
+            "updates": updates
         })
+
+    # Add 2 soft-deleted works for Trash Bin
+    works.append({
+        "id": "work-scifi-trash-01",
+        "title": "Corrupted Neural Feed Snapshot",
+        "contentType": "anime",
+        "origin": "japanese",
+        "publicationState": "dropped",
+        "privacyState": "public",
+        "deletedAt": "2026-10-16T18:00:00Z",
+        "genres": ["Cyberpunk"],
+        "tags": ["corrupted-data"],
+        "description": "Moved to Trash Bin during neural network synchronization.",
+        "accessPaths": []
+    })
+    works.append({
+        "id": "work-scifi-trash-02",
+        "title": "Deprecated Subtitle Track .SRT",
+        "contentType": "anime",
+        "origin": "japanese",
+        "publicationState": "dropped",
+        "privacyState": "public",
+        "deletedAt": "2026-10-17T20:30:00Z",
+        "genres": ["Sci-Fi"],
+        "tags": ["obsolete"],
+        "description": "Moved to Trash Bin during vault spring cleaning.",
+        "accessPaths": []
+    })
 
     # Novel to Webtoon adaptation link
     relations = [
@@ -758,12 +1063,13 @@ def build_pack_3():
         is_vault_mem = (i in [3, 7, 12, 19])
         memories.append({
             "id": f"mem-scifi-{i:02d}",
-            "workId": f"work-scifi-{(i % len(works)) + 1:02d}",
+            "workId": f"work-scifi-{(i % len(titles)) + 1:02d}",
             "type": "quote" if i % 2 == 1 else "reflection",
             "title": f"Star Stream Constellation Transmission #{i}",
             "body": f"\"[The constellation 'Demon King of Salvation' is looking at you.]\" Revelation #{i}: When the fourth wall cracked, the universe revealed its true author.",
             "spoilerLevel": "major" if i % 3 == 0 else "none",
             "privacyState": "vault" if is_vault_mem else "public",
+            "showInGlobalGallery": True,
             "tags": ["constellation-star-stream", "fourth-wall-shattered", "meta-revelation"],
             "createdAt": "2026-10-18T16:45:00Z"
         })
@@ -781,15 +1087,76 @@ def build_pack_3():
         ("Cyberpunk Edgerunners", "I Really Want to Stay at Your House", "Cyberpunk: Edgerunners", "David Martinez activated the Sandevistan to propel Lucy toward the Moon.", "Arasaka Tower Apex · Night City", (249, 115, 22))
     ]
 
+    for idx, (win_t, sec_t, hl, q, prog, acc) in enumerate(screenshot_defs, 1):
+        memories.append({
+            "id": f"mem-scifi-ss-{idx:02d}",
+            "workId": f"work-scifi-{(idx % 10) + 1:02d}",
+            "type": "screenshot",
+            "title": sec_t,
+            "body": q,
+            "mediaUrl": f"screenshots/ss_{idx:02d}.png",
+            "mediaMimeType": "image/png",
+            "chapterContext": prog,
+            "privacyState": "public",
+            "showInGlobalGallery": True,
+            "tags": ["screenshot", "pivotal-scene"],
+            "createdAt": "2026-10-18T12:00:00Z"
+        })
+
     categories = [
-        {"id": "cat-meta-fiction", "name": "Meta-Fiction & Transmigration", "accentColor": "#0ea5e9", "description": "Readers trapped in stories, scenario apocalypse, and fourth-wall breaks."},
-        {"id": "cat-cyberpunk", "name": "High-Tech Low-Life Cyberpunk", "accentColor": "#10b981", "description": "Megacorporations, cybernetic enhancements, and AI deities."},
-        {"id": "cat-time-paradox", "name": "Time Dilation & Paradoxes", "accentColor": "#f59e0b", "description": "World lines, causality loops, and divergence meters."}
+        {
+            "id": "cat-meta-fiction",
+            "name": "Meta-Fiction & Transmigration",
+            "color": "cyan",
+            "workIds": ["work-scifi-01", "work-scifi-02", "work-scifi-04", "work-scifi-09", "work-scifi-11", "work-scifi-13", "work-scifi-14"],
+            "description": "Readers trapped in stories, scenario apocalypse, and fourth-wall breaks."
+        },
+        {
+            "id": "cat-cyberpunk",
+            "name": "High-Tech Low-Life Cyberpunk",
+            "color": "emerald",
+            "workIds": ["work-scifi-03", "work-scifi-06", "work-scifi-07", "work-scifi-08", "work-scifi-10", "work-scifi-15", "work-scifi-16", "work-scifi-17", "work-scifi-21", "work-scifi-22", "work-scifi-23"],
+            "description": "Megacorporations, cybernetic enhancements, and AI deities."
+        },
+        {
+            "id": "cat-time-paradox",
+            "name": "Time Dilation & Paradoxes",
+            "color": "amber",
+            "workIds": ["work-scifi-05", "work-scifi-12", "work-scifi-18", "work-scifi-19", "work-scifi-20", "work-scifi-24", "work-scifi-25", "work-scifi-26"],
+            "description": "World lines, causality loops, and divergence meters."
+        }
     ]
 
     credentials = [
-        {"id": "cred-munpia-1", "name": "Munpia Global", "domain": "munpia.com", "username": "DokjaReader49", "password": "Epitaph51%Star", "searchUrl": "https://novel.munpia.com/search?keyword={query}"},
-        {"id": "cred-nu-1", "name": "NovelUpdates", "domain": "novelupdates.com", "username": "CyberdeckRunner", "password": "Neuromancer#1984", "searchUrl": "https://www.novelupdates.com/?s={query}"}
+        {
+            "id": "cred-munpia-1",
+            "siteName": "Munpia Global",
+            "siteUrl": "https://novel.munpia.com",
+            "username": "DokjaReader49",
+            "password": "Epitaph51%Star",
+            "searchUrl": "https://novel.munpia.com/search?keyword={query}",
+            "notes": "Star stream premium coins account."
+        },
+        {
+            "id": "cred-nu-1",
+            "siteName": "NovelUpdates",
+            "siteUrl": "https://www.novelupdates.com",
+            "username": "CyberdeckRunner",
+            "password": "Neuromancer#1984",
+            "searchUrl": "https://www.novelupdates.com/?s={query}",
+            "notes": "Reading list synchronization account."
+        }
+    ]
+
+    archive_records = [
+        {
+            "id": "arc-scifi-01",
+            "workId": "work-scifi-01",
+            "archivedAt": "2026-10-14T19:00:00Z",
+            "reason": "Finished main scenario run (Ep. 551)",
+            "snapshotProgress": "100%",
+            "notes": "Archived prior to side-story serialization."
+        }
     ]
 
     archive_payload = {
@@ -802,8 +1169,15 @@ def build_pack_3():
         "memories": memories,
         "categories": categories,
         "credentials": credentials,
+        "archiveRecords": archive_records,
         "customTags": ["constellation-star-stream", "fable-weaving-meta", "fourth-wall-shattered"]
     }
+
+    # Standalone root files
+    with open(os.path.join(ROOT_DIR, "scifi.gca"), "w", encoding="utf-8") as f:
+        json.dump(archive_payload, f, indent=2)
+    with open(os.path.join(ROOT_DIR, "scifi.json"), "w", encoding="utf-8") as f:
+        json.dump(archive_payload, f, indent=2)
 
     zip_path = os.path.join(ROOT_DIR, "grimoire_sample_pack_3_cyberpunk_scifi_omniscient.zip")
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
@@ -826,35 +1200,47 @@ def build_pack_3():
         z.writestr("audio/star_stream_transmission.wav", generate_audio_file(duration_sec=3.5, base_freq=520.0))
         z.writestr("video/orv_scenario_teaser.mp4", generate_video_file(duration_ms=2500))
 
-        readme_text = """# Grimoire Sample Pack 3: Cyberpunk, Sci-Fi & Meta-Fiction Omniscient
+        readme_text = f"""# Grimoire Sample Pack 3: Cyberpunk, Sci-Fi & Meta-Fiction Omniscient
 
 Welcome to the **Cyberpunk, Sci-Fi & Meta-Fiction Sample Pack** for **Grimoire**!
 
-This pack contains 26 acclaimed speculative fiction, cyberpunk, and meta-narrative masterpieces.
+---
+
+## 🗝️ Private Vault Master Passphrase
+
+> **Master Passphrase:** `{MASTER_PASSPHRASE}`
+>
+> Use this master passphrase to unlock the **9 sealed Vault works** (*Neuromancer, Ghost in the Shell, BLAME!, Akira, Snow Crash, Hyperion Cantos, Ergo Proxy, Lain, Texhnolyze*), confidential memories, and private portal notes.
 
 ---
 
 ## 📦 What is inside this Sample Pack?
 
-- **26 Speculative & Cyberpunk Works**:
-  - **9 Works in Private Vault** (`privacyState: "vault"`) — *Neuromancer, Ghost in the Shell, BLAME!, Akira, Snow Crash, Hyperion Cantos, Ergo Proxy, Lain, Texhnolyze*.
-  - **15 Works with Multi-Source Access Paths** — Official web links, local EPUB/PDF editions, and video teasers.
+- **26 Speculative & Cyberpunk Works + 2 Trash Bin Drafts**:
+  - **9 Works in Private Vault** (`privacyState: "vault"`).
+  - **15 Works with Multi-Source Access Paths**.
   - **Cross-Medium Adaptation Linked**:
-    - **Omniscient Reader's Viewpoint (Web Novel)** $\leftrightarrow$ **Omniscient Reader's Viewpoint (Webtoon)** with scenario episode mapping.
-- **22 Curated Text Memories** (4 encrypted in Private Vault).
-- **10 Screenshot Memories** capturing mind-bending cyberpunk moments.
+    - **Omniscient Reader's Viewpoint (Web Novel)** $\\leftrightarrow$ **Omniscient Reader's Viewpoint (Webtoon)** with scenario episode mapping.
+- **32 Curated Memories**:
+  - **22 Text Memories** (4 encrypted in Private Vault).
+  - **10 Screenshot Memories** capturing mind-bending cyberpunk moments.
+- **Live Chapter Updates**: Real-time chapter alerts ready in `/inbox`.
+- **Trash Bin**: 2 soft-deleted draft records in `/trash`.
 - **3 Actual 10–15 Page Readable Offline Books** (`omniscient_reader_vol1.epub`, `neuromancer_sprawl_sampler.pdf`, `the_beginning_after_the_end_ch1_12.pdf`).
 - **1 Playable Local Audio Broadcast** (`audio/star_stream_transmission.wav`).
 - **1 Playable Local Video Teaser** (`video/orv_scenario_teaser.mp4`).
 - **2 Encrypted Portal Logins** for Munpia and NovelUpdates.
-- **3 Custom Categories & Tags**.
+- **3 Custom Categories with Explicit Work Assignments**:
+  - *Meta-Fiction & Transmigration* (7 works)
+  - *High-Tech Low-Life Cyberpunk* (11 works)
+  - *Time Dilation & Paradoxes* (8 works)
 
 ---
 
 ## 🚀 How to Import into Grimoire
 
 1. On the Sanctum Title Screen, click **Import .gca File**.
-2. Select `archive.gca` from this zip.
+2. Select either `archive.gca`, `scifi.gca`, or this `.zip` file directly.
 3. Your library loads instantly with 0 demo relics and full relational data.
 """
         z.writestr("README.md", readme_text)
@@ -866,4 +1252,4 @@ if __name__ == "__main__":
     build_pack_1()
     build_pack_2()
     build_pack_3()
-    print("\nALL 3 SAMPLE PACKS SYNTHESIZED SUCCESSFULLY!")
+    print("\nALL 3 SAMPLE PACKS SYNTHESIZED SUCCESSFULLY WITH COMPLETE DATA INTEGRITY!")

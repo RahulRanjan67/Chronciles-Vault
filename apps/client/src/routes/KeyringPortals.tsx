@@ -259,23 +259,23 @@ export function KeyringPortals() {
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
-        <TabsList className="bg-[var(--gm-surface)] border border-[var(--gm-border)]">
-          <TabsTrigger value="portals" className="gap-2">
-            <Globe className="h-4 w-4" />
-            <span>Frequent Websites &amp; Portals</span>
+        <TabsList className="bg-[var(--gm-surface)] border border-[var(--gm-border)] h-auto min-h-11 px-3 py-1.5 gap-3 flex-wrap">
+          <TabsTrigger value="portals" className="gap-2 px-3 py-1.5">
+            <Globe className="h-4 w-4 shrink-0 text-[var(--gm-accent-strong)]" />
+            <span>Frequent Portals</span>
             {frequentWebsites.length > 0 && (
-              <Badge variant="accent" size="sm" className="ml-1 px-1.5 py-0 font-mono text-[10px]">
-                {frequentWebsites.length} frequent
+              <Badge variant="accent" size="sm" className="ml-1 px-1.5 py-0 font-mono text-[10px] shrink-0">
+                {frequentWebsites.length}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="credentials" className="gap-2">
-            <ShieldCheck className="h-4 w-4" />
+          <TabsTrigger value="credentials" className="gap-2 px-3 py-1.5">
+            <ShieldCheck className="h-4 w-4 shrink-0 text-[var(--gm-accent-strong)]" />
             <span>Saved Credentials ({credentials.length})</span>
           </TabsTrigger>
-          <TabsTrigger value="search" className="gap-2">
-            <Search className="h-4 w-4" />
-            <span>Search Portals Launcher</span>
+          <TabsTrigger value="search" className="gap-2 px-3 py-1.5">
+            <Search className="h-4 w-4 shrink-0 text-[var(--gm-accent-strong)]" />
+            <span>Search Portals</span>
           </TabsTrigger>
         </TabsList>
 

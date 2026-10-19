@@ -205,27 +205,34 @@ export function applyBackupImport(
   for (const memory of snapshot.memories) {
     const workId = idMap.get(memory.workId);
     if (!workId) continue;
-    repo.addMemory(workId, {
-      type: oneOf(MemoryType, memory.type, MemoryType.Note),
-      title: memory.title,
-      body: memory.body,
-      privacyState:
-        memory.privacyState === "vault"
-          ? PrivacyState.Vault
-          : memory.privacyState === "private"
-            ? PrivacyState.Private
-            : PrivacyState.Public,
-      spoilerLevel: oneOf(
-        SpoilerLevel,
-        memory.spoilerLevel,
-        SpoilerLevel.SpoilerFree,
-      ),
-      showInGlobalGallery: false,
-      accessPathId: null,
-      progressAnchor: null,
-      tags: [...memory.tags],
-    });
-    memoriesCreated++;
+    try {
+      const isVault = memory.privacyState === "vault";
+      // If repo does not support unencrypted vault memories, store as Private
+      const privacy = isVault
+        ? PrivacyState.Private
+        : memory.privacyState === "private"
+          ? PrivacyState.Private
+          : PrivacyState.Public;
+
+      repo.addMemory(workId, {
+        type: oneOf(MemoryType, memory.type, MemoryType.Note),
+        title: memory.title,
+        body: memory.body,
+        privacyState: privacy,
+        spoilerLevel: oneOf(
+          SpoilerLevel,
+          memory.spoilerLevel,
+          SpoilerLevel.SpoilerFree,
+        ),
+        showInGlobalGallery: (memory as any).showInGlobalGallery ?? true,
+        accessPathId: null,
+        progressAnchor: null,
+        tags: [...memory.tags],
+      });
+      memoriesCreated++;
+    } catch {
+      // Continue importing remaining memories if one fails
+    }
   }
 
   for (const relation of snapshot.relations) {

@@ -133,42 +133,28 @@
 
 @keyframes cvPageTurn {
   0% {
-    opacity: 0.82;
-    transform: perspective(1400px) rotateY(-18deg) scale(0.985);
-    box-shadow: -15px 0 30px rgba(0, 0, 0, 0.4);
-  }
-  50% {
-    opacity: 0.94;
-    transform: perspective(1400px) rotateY(-6deg) scale(0.995);
-    box-shadow: -8px 0 20px rgba(0, 0, 0, 0.25);
+    transform: translateX(36px) perspective(1200px) rotateY(-6deg);
+    box-shadow: -18px 0 30px rgba(0, 0, 0, 0.35);
   }
   100% {
-    opacity: 1;
-    transform: perspective(1400px) rotateY(0deg) scale(1);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    transform: translateX(0px) perspective(1200px) rotateY(0deg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   }
 }
 
 @keyframes cvPageTurnReverse {
   0% {
-    opacity: 0.82;
-    transform: perspective(1400px) rotateY(18deg) scale(0.985);
-    box-shadow: 15px 0 30px rgba(0, 0, 0, 0.4);
-  }
-  50% {
-    opacity: 0.94;
-    transform: perspective(1400px) rotateY(6deg) scale(0.995);
-    box-shadow: 8px 0 20px rgba(0, 0, 0, 0.25);
+    transform: translateX(-36px) perspective(1200px) rotateY(6deg);
+    box-shadow: 18px 0 30px rgba(0, 0, 0, 0.35);
   }
   100% {
-    opacity: 1;
-    transform: perspective(1400px) rotateY(0deg) scale(1);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    transform: translateX(0px) perspective(1200px) rotateY(0deg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   }
 }
 
 .gm-page-turn-active {
-  animation: cvPageTurn 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: cvPageTurn 0.32s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: left center;
   transform-style: preserve-3d;
   backface-visibility: hidden;
@@ -176,7 +162,7 @@
 }
 
 .gm-page-turn-reverse {
-  animation: cvPageTurnReverse 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: cvPageTurnReverse 0.32s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: right center;
   transform-style: preserve-3d;
   backface-visibility: hidden;

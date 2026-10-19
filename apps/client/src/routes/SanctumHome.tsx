@@ -901,17 +901,76 @@ export function SanctumHome({
 
   const handleUniversalArchiveImport = async (file: File) => {
     try {
-      const text = await file.text();
       let rawData: any;
-      try {
-        rawData = JSON.parse(text);
-      } catch {
-        toast({
-          title: "Import Error",
-          description: "File is not a valid JSON or .gca format.",
-          variant: "destructive",
-        });
-        return;
+      if (file.name.toLowerCase().endsWith(".zip")) {
+        try {
+          const buffer = await file.arrayBuffer();
+          const bytes = new Uint8Array(buffer);
+          let foundJson: string | null = null;
+          const view = new DataView(buffer);
+          let offset = 0;
+          while (offset + 30 < bytes.length) {
+            if (view.getUint32(offset, true) === 0x04034b50) {
+              const compMethod = view.getUint16(offset + 8, true);
+              const compSize = view.getUint32(offset + 18, true);
+              const fileNameLen = view.getUint16(offset + 26, true);
+              const extraLen = view.getUint16(offset + 28, true);
+              const nameBytes = bytes.subarray(offset + 30, offset + 30 + fileNameLen);
+              const fileName = new TextDecoder().decode(nameBytes);
+              const dataStart = offset + 30 + fileNameLen + extraLen;
+              const dataEnd = dataStart + compSize;
+
+              if (
+                fileName.endsWith("archive.gca") ||
+                fileName.endsWith("archive.json") ||
+                fileName.endsWith(".gca") ||
+                fileName.endsWith(".json")
+              ) {
+                const fileSlice = bytes.subarray(dataStart, dataEnd);
+                if (compMethod === 0) {
+                  foundJson = new TextDecoder().decode(fileSlice);
+                  break;
+                } else if (compMethod === 8) {
+                  if (typeof DecompressionStream !== "undefined") {
+                    const ds = new DecompressionStream("deflate-raw");
+                    const stream = new Response(fileSlice).body?.pipeThrough(ds);
+                    if (stream) {
+                      foundJson = await new Response(stream).text();
+                      break;
+                    }
+                  }
+                }
+              }
+              offset = dataEnd;
+            } else {
+              offset++;
+            }
+          }
+          if (foundJson) {
+            rawData = JSON.parse(foundJson);
+          } else {
+            throw new Error("Could not find archive.gca or archive.json inside this zip archive.");
+          }
+        } catch (zipErr) {
+          toast({
+            title: "Zip Import Error",
+            description: zipErr instanceof Error ? zipErr.message : "Failed to extract .gca from zip archive.",
+            variant: "destructive",
+          });
+          return;
+        }
+      } else {
+        const text = await file.text();
+        try {
+          rawData = JSON.parse(text);
+        } catch {
+          toast({
+            title: "Import Error",
+            description: "File is not a valid JSON or .gca format.",
+            variant: "destructive",
+          });
+          return;
+        }
       }
 
       const stateMod = await import("@grimoire/state");
@@ -953,31 +1012,61 @@ export function SanctumHome({
         relationsCreated = res.relationsCreated;
       }
 
-      // Restore categories
+      // Restore categories with normalized schema & workIds
       if (Array.isArray(rawData.categories) && rawData.categories.length > 0) {
         try {
-          const rawStored = window.localStorage.getItem("cv:custom_categories:v1");
-          const existingCategories: any[] = rawStored ? JSON.parse(rawStored) : [];
-          const existingIds = new Set(existingCategories.map((c: any) => c.id));
-          const newCats = rawData.categories.filter((c: any) => !existingIds.has(c.id));
-          if (newCats.length > 0) {
-            window.localStorage.setItem("cv:custom_categories:v1", JSON.stringify([...existingCategories, ...newCats]));
-          }
+          const normalizedCats = rawData.categories.map((c: any) => {
+            const validColors = ["indigo", "amber", "rose", "emerald", "sky", "purple", "orange", "cyan"];
+            const assignedColor = validColors.includes(c.color) ? c.color : "indigo";
+            return {
+              id: c.id,
+              name: c.name,
+              description: c.description || "",
+              color: assignedColor,
+              workIds: Array.isArray(c.workIds) ? c.workIds : [],
+              createdAt: c.createdAt || new Date().toISOString(),
+              updatedAt: c.updatedAt || new Date().toISOString(),
+            };
+          });
+          window.localStorage.setItem("cv:custom_categories:v1", JSON.stringify(normalizedCats));
+          stateMod.useCategoriesStore.getState().refresh();
         } catch {}
       }
 
-      // Restore credentials
+      // Restore credentials with normalized schema
       if (Array.isArray(rawData.credentials) && rawData.credentials.length > 0) {
         try {
           const rawCreds = window.localStorage.getItem("grimoire:vault:credentials");
           const existingCreds: any[] = rawCreds ? JSON.parse(rawCreds) : [];
           const existingIds = new Set(existingCreds.map((c: any) => c.id));
-          const newCreds = rawData.credentials.filter((c: any) => !existingIds.has(c.id));
-          if (newCreds.length > 0) {
-            window.localStorage.setItem("grimoire:vault:credentials", JSON.stringify([...existingCreds, ...newCreds]));
+          const normalizedCreds = rawData.credentials.map((c: any) => ({
+            id: c.id || `cred-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            siteName: c.siteName || c.name || "Portal",
+            siteUrl: c.siteUrl || c.url || (c.domain ? `https://${c.domain}` : ""),
+            searchUrl: c.searchUrl || c.searchUrlPattern || "",
+            username: c.username || "",
+            password: c.password || "",
+            notes: c.notes || "",
+            createdAt: c.createdAt || new Date().toISOString(),
+          })).filter((c: any) => !existingIds.has(c.id));
+
+          if (normalizedCreds.length > 0) {
+            window.localStorage.setItem("grimoire:vault:credentials", JSON.stringify([...existingCreds, ...normalizedCreds]));
           }
         } catch {}
       }
+
+      // Restore Archive Records
+      if (Array.isArray(rawData.archiveRecords) && rawData.archiveRecords.length > 0) {
+        try {
+          window.localStorage.setItem("cv:archive_records:v1", JSON.stringify(rawData.archiveRecords));
+        } catch {}
+      }
+
+      // Refresh Trash and Categories
+      try {
+        stateMod.useTrashStore.getState().refreshTrash();
+      } catch {}
 
       // Refresh library store
       stateMod.useLibraryStore.getState().refresh();
@@ -1114,12 +1203,17 @@ export function SanctumHome({
         {/* Main Architectural Header Bar */}
         <div className="px-4 sm:px-8 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] text-[var(--gm-accent-fg)] flex items-center justify-center shadow-[2px_2px_0px_var(--gm-border-strong)]" title="Grimoire Codex Sanctum">
-              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4zm12 16H6v-2h12v2zm0-4H6v-2h12v2zm0-4h-5V4h5v8z" />
-                <circle cx="12" cy="10" r="1.5" fill="#fef08a" />
-              </svg>
-            </div>
+            <img
+              src="/logo.png"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (!target.src.endsWith(".svg")) {
+                  target.src = "/logo.svg";
+                }
+              }}
+              alt="Grimoire"
+              className="h-9 w-9 rounded-full object-cover shadow-[2px_2px_0px_var(--gm-border-strong)] ring-1 ring-[var(--gm-border-strong)] shrink-0"
+            />
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-gm-sm uppercase tracking-wider text-[var(--gm-text)]">
@@ -1447,30 +1541,30 @@ export function SanctumHome({
                 </div>
               </div>
 
-              {/* Profile Details Grid: Rank, Title, Tier & Updates */}
+              {/* Profile Details Grid: Real Reading Metrics (No User Ranks or Grades) */}
               <div className="grid grid-cols-3 gap-2 mb-4 border border-[var(--gm-border)] bg-[var(--gm-surface)] p-3 shadow-[2px_2px_0px_var(--gm-border)]">
                 <div>
                   <div className="text-[9px] font-mono font-bold uppercase text-[var(--gm-text-subtle)]">
-                    Rank &amp; Title
+                    Collection
                   </div>
                   <div className="text-gm-xs font-mono font-bold text-[var(--gm-text)] mt-0.5 truncate">
-                    Grand Archivist
+                    {roomStats.worksCount > 0 ? `${roomStats.worksCount} Works` : "Sanctum Ready"}
                   </div>
                 </div>
                 <div>
                   <div className="text-[9px] font-mono font-bold uppercase text-[var(--gm-text-subtle)]">
-                    Rank Tier
+                    Active Flow
                   </div>
-                  <div className="text-gm-xs font-mono font-bold text-[var(--gm-accent-strong)] mt-0.5">
-                    Tier: S
+                  <div className="text-gm-xs font-mono font-bold text-[var(--gm-accent-strong)] mt-0.5 truncate">
+                    {roomStats.activeCount > 0 ? `${roomStats.activeCount} In Progress` : "All Caught Up"}
                   </div>
                 </div>
                 <div>
                   <div className="text-[9px] font-mono font-bold uppercase text-[var(--gm-text-subtle)]">
-                    Active Works
+                    Memories
                   </div>
-                  <div className="text-gm-xs font-mono font-bold text-amber-500 mt-0.5">
-                    {roomStats.activeCount > 0 ? `${roomStats.activeCount} Active` : "All Caught Up"}
+                  <div className="text-gm-xs font-mono font-bold text-amber-500 mt-0.5 truncate">
+                    {roomStats.memoriesCount > 0 ? `${roomStats.memoriesCount} Saved` : "Memory Vault"}
                   </div>
                 </div>
               </div>
@@ -1814,71 +1908,59 @@ export function SanctumHome({
                 ))}
               </div>
 
-              {/* Redesigned Multiple-Column Dense List Format */}
-              <div className="border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] shadow-[4px_4px_0px_var(--gm-border-strong)] divide-y divide-[var(--gm-border)] overflow-hidden">
-                <div className="hidden md:grid grid-cols-12 gap-3 px-5 py-2.5 bg-[var(--gm-surface)] font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--gm-text-muted)] border-b border-[var(--gm-border)]">
-                  <div className="col-span-3">Reading &amp; Streaming Portal</div>
-                  <div className="col-span-2">Format &amp; Category</div>
-                  <div className="col-span-4">Catalog Focus &amp; Languages</div>
-                  <div className="col-span-3 text-right">Quick Actions</div>
-                </div>
-
-                <div className="divide-y divide-[var(--gm-border)]">
-                  {filteredSites.map((site) => (
-                    <div
-                      key={site.id}
-                      className="p-4 sm:px-5 sm:py-3.5 flex flex-col md:grid md:grid-cols-12 gap-3 md:items-center hover:bg-[var(--gm-surface)]/50 transition-colors"
-                    >
-                      {/* Col 1: Portal Name & Domain */}
-                      <div className="md:col-span-3 min-w-0">
-                        <div className="flex items-center gap-2">
+              {/* Responsive Portal Layout: Two-Columned in Large Windows (lg:grid-cols-2), Single-Columned in Narrow */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+                {filteredSites.map((site) => (
+                  <div
+                    key={site.id}
+                    className="border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-4 sm:p-4.5 flex flex-col justify-between gap-3 shadow-[3px_3px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
                           <h3 className="font-extrabold text-gm-sm text-[var(--gm-text)] truncate">
                             {site.name}
                           </h3>
+                          <a
+                            href={site.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-mono text-[11px] text-[var(--gm-accent-strong)] hover:underline inline-flex items-center gap-1 mt-0.5 truncate"
+                          >
+                            <span>{site.domain}</span>
+                            <ExternalLink className="h-2.5 w-2.5 shrink-0" />
+                          </a>
                         </div>
-                        <a
-                          href={site.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-mono text-[11px] text-[var(--gm-accent-strong)] hover:underline inline-flex items-center gap-1 mt-0.5 truncate"
-                        >
-                          <span>{site.domain}</span>
-                          <ExternalLink className="h-2.5 w-2.5 shrink-0" />
-                        </a>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="border border-[var(--gm-border-strong)] bg-[var(--gm-accent-muted)] px-2 py-0.5 text-[10px] font-mono font-bold uppercase text-[var(--gm-accent-strong)] rounded-cv">
+                            {site.categoryLabel}
+                          </span>
+                          <span className="border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2 py-0.5 text-[10px] font-mono uppercase text-[var(--gm-text-muted)] rounded-cv hidden sm:inline-block">
+                            {site.badge}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Col 2: Category & Badge */}
-                      <div className="md:col-span-2 flex items-center gap-2 flex-wrap">
-                        <span className="border border-[var(--gm-border-strong)] bg-[var(--gm-accent-muted)] px-2 py-0.5 text-[10px] font-mono font-bold uppercase text-[var(--gm-accent-strong)] rounded-cv shrink-0">
-                          {site.categoryLabel}
-                        </span>
-                        <span className="border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2 py-0.5 text-[10px] font-mono uppercase text-[var(--gm-text-muted)] rounded-cv shrink-0">
-                          {site.badge}
-                        </span>
-                      </div>
+                      <p className="text-gm-xs text-[var(--gm-text-muted)] line-clamp-2 leading-relaxed">
+                        {site.description}
+                      </p>
+                      <p className="font-mono text-[10px] text-[var(--gm-text-subtle)]">
+                        {site.languages}
+                      </p>
+                    </div>
 
-                      {/* Col 3: Description & Languages */}
-                      <div className="md:col-span-4 text-gm-xs space-y-0.5">
-                        <p className="text-[var(--gm-text)] line-clamp-1">
-                          {site.description}
-                        </p>
-                        <p className="font-mono text-[10px] text-[var(--gm-text-subtle)]">
-                          {site.languages}
-                        </p>
-                      </div>
+                    <div className="pt-3 border-t border-[var(--gm-border)] flex items-center justify-between gap-2">
+                      <a
+                        href={site.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 bg-[var(--gm-surface)] hover:bg-[var(--gm-surface-hover)] border border-[var(--gm-border-strong)] px-3 py-1 text-gm-xs font-mono font-bold uppercase text-[var(--gm-text)] transition-colors cursor-pointer"
+                      >
+                        <span>LAUNCH</span>
+                        <ExternalLink className="h-3 w-3 text-[var(--gm-accent-strong)]" />
+                      </a>
 
-                      {/* Col 4: Quick Action Controls */}
-                      <div className="md:col-span-3 flex items-center justify-start md:justify-end gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-[var(--gm-border)]">
-                        <a
-                          href={site.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 bg-[var(--gm-surface)] hover:bg-[var(--gm-surface-hover)] border border-[var(--gm-border-strong)] px-2.5 py-1 text-gm-xs font-mono font-bold uppercase text-[var(--gm-text)] transition-colors cursor-pointer"
-                        >
-                          <span>LAUNCH</span>
-                          <ExternalLink className="h-3 w-3 text-[var(--gm-accent-strong)]" />
-                        </a>
-
+                      <div className="flex items-center gap-1.5">
                         <button
                           type="button"
                           onClick={() => {
@@ -1915,8 +1997,8 @@ export function SanctumHome({
                         </button>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
@@ -2087,14 +2169,27 @@ export function SanctumHome({
              ═══════════════════════════════════════════════════════════════════ */}
           <footer className="relative z-10 py-12 px-4 sm:px-8 border-t-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)]">
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-              <div>
-                <div className="font-extrabold text-gm-base font-mono uppercase tracking-wider text-[var(--gm-text)]">
-                  GRIMOIRE
+              <div className="flex items-center gap-3">
+                <img
+                  src="/logo.png"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.endsWith(".svg")) {
+                      target.src = "/logo.svg";
+                    }
+                  }}
+                  alt="Grimoire"
+                  className="h-9 w-9 rounded-full object-cover shadow-[2px_2px_0px_var(--gm-border-strong)] ring-1 ring-[var(--gm-border-strong)] shrink-0"
+                />
+                <div>
+                  <div className="font-extrabold text-gm-base font-mono uppercase tracking-wider text-[var(--gm-text)]">
+                    GRIMOIRE
+                  </div>
+                  <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5">
+                    4 Distinct Themes (Midnight Arcana · Parchment · Blossom Ascendant · Ink) ·
+                    Local-First Privacy · Zero-Knowledge Vault
+                  </p>
                 </div>
-                <p className="text-gm-xs text-[var(--gm-text-muted)] mt-1">
-                  4 Distinct Themes (Midnight Arcana · Parchment · Blossom Ascendant · Ink) ·
-                  Local-First Privacy · Zero-Knowledge Vault
-                </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <button
@@ -2241,12 +2336,12 @@ export function SanctumHome({
         </div>
       )}
 
-      {/* Hidden file input for Landing Page .gca / .json Archive Import */}
+      {/* Hidden file input for Landing Page .gca / .json / .zip Archive Import */}
       <input
         ref={gcaFileInputRef}
         id="landing-gca-import-input"
         type="file"
-        accept=".gca,.cca,.json"
+        accept=".gca,.cca,.json,.zip"
         className="hidden"
         onChange={handleLandingFileImport}
       />

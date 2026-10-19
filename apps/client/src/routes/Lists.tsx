@@ -188,18 +188,18 @@ export function Lists({ onNavigateWork }: ListsProps) {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "my-lists" | "explore")} className="space-y-6">
-        <TabsList className="bg-[var(--gm-surface)] border border-[var(--gm-border)]">
-          <TabsTrigger value="explore" className="gap-2">
-            <Users className="h-4 w-4" />
+        <TabsList className="bg-[var(--gm-surface)] border border-[var(--gm-border)] h-auto min-h-11 px-3 py-1.5 gap-4 flex-wrap">
+          <TabsTrigger value="explore" className="gap-2 px-3 py-1.5">
+            <Users className="h-4 w-4 shrink-0 text-[var(--gm-accent-strong)]" />
             <span>Explore Community Lists</span>
-            <Badge variant="default" className="ml-1.5 text-[10px] bg-[var(--gm-accent)]/20 text-[var(--gm-accent-strong)]">
+            <Badge variant="default" className="ml-1 text-[10px] px-1.5 py-0 bg-[var(--gm-accent)]/20 text-[var(--gm-accent-strong)] shrink-0">
               {communityLists.length}
             </Badge>
           </TabsTrigger>
-          <TabsTrigger value="my-lists" className="gap-2">
-            <BookOpen className="h-4 w-4" />
+          <TabsTrigger value="my-lists" className="gap-2 px-3 py-1.5">
+            <BookOpen className="h-4 w-4 shrink-0 text-[var(--gm-accent-strong)]" />
             <span>My Lists</span>
-            <span className="text-[10px] font-mono text-[var(--gm-text-subtle)]">
+            <span className="text-[10px] font-mono text-[var(--gm-text-subtle)] shrink-0">
               ({myLists.length})
             </span>
           </TabsTrigger>

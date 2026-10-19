@@ -10,6 +10,8 @@ import {
   Search,
   ZoomIn,
   ZoomOut,
+  BookOpen,
+  Columns2,
 } from "lucide-react";
 import {
   getDocument,
@@ -683,8 +685,20 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
                 setSelectedQuotePage(null);
                 window.getSelection()?.removeAllRanges();
               }}
+              className="gap-1.5 text-gm-xs"
+              title={spreadMode ? "Switch to Single Page View" : "Switch to Two-Page Spread View"}
             >
-              Spread
+              {spreadMode ? (
+                <>
+                  <Columns2 className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
+                  <span>2 Pages (Spread)</span>
+                </>
+              ) : (
+                <>
+                  <BookOpen className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
+                  <span>1 Page (Single)</span>
+                </>
+              )}
             </Button>
             <Button
               variant={showSearch ? "default" : "outline"}
