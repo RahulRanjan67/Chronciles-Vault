@@ -6,6 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 [assets]
 directory = "./apps/client/dist"
 binding = "ASSETS"
+not_found_handling = "single-page-application"
 
 # Optional Cloudflare D1 Relational Binding
 # Grimoire operates 100% sovereignly in local-first mode (IndexedDB / OPFS).
