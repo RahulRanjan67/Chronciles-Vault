@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "pnpm --filter @grimoire/shared build && pnpm --filter @grimoire/domain build && pnpm --filter @grimoire/vault build && pnpm --filter @grimoire/state build && pnpm --filter @grimoire/reader build && pnpm --filter @grimoire/ui build",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",

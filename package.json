@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
+    "build:client": "turbo run build --filter=@grimoire/client",
     "test": "turbo run test",
     "test:integration": "turbo run test:integration",
     "test:e2e": "playwright test",
