@@ -23,7 +23,6 @@
   "dependencies": {
     "@grimoire/domain": "workspace:*",
     "@grimoire/shared": "workspace:*",
-    "@grimoire/database": "workspace:*",
     "zustand": "^4.5.2"
   },
   "peerDependencies": {

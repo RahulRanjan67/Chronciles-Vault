@@ -4,7 +4,7 @@
   "private": true,
   "description": "Grimoire — Your personal fiction sanctum",
   "engines": {
-    "node": ">=20.0.0",
+    "node": "20.x",
     "pnpm": ">=9.0.0"
   },
   "packageManager": "pnpm@9.12.0",
