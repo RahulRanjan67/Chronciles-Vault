@@ -71,7 +71,7 @@ describe("local file inspection", () => {
 
   it("rejects unsupported, empty, and over-limit files", async () => {
     await expect(inspectLocalFile(new File(["content"], "archive.cbr"))).rejects.toThrow(
-      "Choose an EPUB, PDF, or CBZ",
+      "Choose an EPUB, PDF, CBZ",
     );
     await expect(inspectLocalFile(new File([], "empty.pdf"))).rejects.toThrow("empty");
     const oversized = {
@@ -82,5 +82,16 @@ describe("local file inspection", () => {
       arrayBuffer: async () => new ArrayBuffer(0),
     } as File;
     await expect(inspectLocalFile(oversized)).rejects.toThrow("128 MB or smaller");
+  });
+
+  it("handles HTTP origins safely when crypto.subtle or crypto.randomUUID is undefined", async () => {
+    const file = new File(["%PDF-1.7 document"], "paper.pdf");
+    // Simulate non-secure context / HTTP origin where cryptoProvider has no subtle or randomUUID
+    const mockProvider = {} as any;
+    const inspected = await inspectLocalFile(file, mockProvider);
+    expect(inspected.mimeType).toBe("application/pdf");
+    expect(typeof inspected.contentHash).toBe("string");
+    expect(inspected.contentHash.length).toBeGreaterThan(0);
+    expect(inspected.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
   });
 });

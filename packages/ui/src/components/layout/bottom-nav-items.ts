@@ -8,10 +8,12 @@ import {
   Compass,
   HardDrive,
   HelpCircle,
+  KeyRound,
   ListFilter,
   type LucideIcon,
   MessageSquare,
   Radar,
+  RefreshCw,
   RotateCcw,
   Settings,
   Sparkles,
@@ -41,6 +43,9 @@ export const BOTTOM_NAV_ITEMS: BottomNavItem[] = [
  * Opens in a "More" bottom sheet instead of crowding the five-tab bar.
  */
 export const MORE_NAV_ITEMS: BottomNavItem[] = [
+  { id: 'discover', label: 'Discover', href: '/discover', icon: Compass },
+  { id: 'sync', label: 'Sync Sanctum', href: '/sync', icon: RefreshCw },
+  { id: 'keyring', label: 'Keyring & Portals', href: '/keyring', icon: KeyRound },
   { id: 'radar', label: 'Radar', href: '/radar', icon: Radar },
   { id: 'categories', label: 'My Categories', href: '/categories', icon: Tag },
   { id: 'lists', label: 'Lists', href: '/lists', icon: ListFilter },

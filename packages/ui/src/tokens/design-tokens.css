@@ -418,7 +418,20 @@
 /* Ensure dark containers, buttons, and badges in Ink theme always render high-contrast white text */
 [data-theme="ink"] .bg-\[var\(--gm-accent\)\],
 [data-theme="ink"] .bg-\[var\(--gm-accent-strong\)\],
-[data-theme="ink"] .bg-\[var\(--gm-text\)\] {
+[data-theme="ink"] .bg-\[var\(--gm-text\)\],
+[data-theme="ink"] button.bg-\[var\(--gm-accent\)\],
+[data-theme="ink"] button.bg-cv-accent,
+[data-theme="ink"] .bg-cv-accent {
+  color: #ffffff !important;
+}
+
+[data-theme="ink"] .bg-\[var\(--gm-accent\)\] :is(span, svg, p, div, label),
+[data-theme="ink"] .bg-\[var\(--gm-accent-strong\)\] :is(span, svg, p, div, label),
+[data-theme="ink"] .bg-\[var\(--gm-text\)\] :is(span, svg, p, div, label),
+[data-theme="ink"] button.bg-\[var\(--gm-accent\)\] :is(span, svg, p, div, label),
+[data-theme="ink"] button.bg-cv-accent :is(span, svg, p, div, label),
+[data-theme="ink"] .bg-cv-accent :is(span, svg, p, div, label) {
+  color: #ffffff !important;
 }
 
 

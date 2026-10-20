@@ -14,6 +14,7 @@ import { useVaultAutoLock, useVaultStore } from "@grimoire/vault";
 import { APP_ROUTES, CommandPalette } from "./routes-config";
 import { syncWithCrossPlatformHub } from "./utils/cross-platform-sync";
 import { CredentialKeyringPanel } from "./components/features/Vault/CredentialKeyringPanel";
+import { autoFetchMissingLibraryCovers } from "./utils/official-cover-service";
 
 export interface WorkspaceShellProps {
   currentPath: string;
@@ -34,6 +35,11 @@ export function WorkspaceShell({
   const [isSyncing, setIsSyncing] = React.useState(false);
   const isVaultUnlocked = useVaultStore((state) => state.status === "unlocked");
   useVaultAutoLock({ timeoutMinutes: 30, lockOnVisibilityChange: false });
+
+  // Automatically fetch missing official covers in the background upon entering the room
+  React.useEffect(() => {
+    void autoFetchMissingLibraryCovers({ silent: true });
+  }, []);
 
   const handleLogOut = React.useCallback(() => {
     try {
@@ -174,7 +180,7 @@ export function WorkspaceShell({
             <button
               type="button"
               onClick={() => onNavigate("/vault")}
-              className="inline-flex h-7 w-7 sm:h-8 sm:w-auto items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-0 sm:px-2.5 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer shrink-0"
+              className="hidden md:inline-flex h-8 sm:w-auto items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer shrink-0"
               title="Open Private Vault to reveal or conceal Hidden Works"
             >
               {isVaultUnlocked ? (
@@ -186,7 +192,7 @@ export function WorkspaceShell({
             <button
               type="button"
               onClick={() => onNavigate("/sync")}
-              className="inline-flex h-7 w-7 sm:h-8 sm:w-auto items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-0 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer shrink-0"
+              className="hidden md:inline-flex h-8 sm:w-auto items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer shrink-0"
               title="Configure & Sync Works, Categories, and Memories across Web, PC & Mobile"
             >
               <RefreshCw
@@ -198,12 +204,12 @@ export function WorkspaceShell({
             </button>
             <button
               type="button"
-              onClick={() => setShowPortalsModal(true)}
+              onClick={() => onNavigate("/keyring")}
               className="inline-flex h-7 w-7 sm:h-8 sm:w-auto items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-0 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer shrink-0"
-              title="Reading Portals & Website Credential Manager"
+              title="Keyring & Portals: Reading Websites & Credential Manager"
             >
               <KeyRound className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[var(--gm-accent-strong)]" />
-              <span className="hidden md:inline">Portals</span>
+              <span className="hidden md:inline">Keyring &amp; Portals</span>
             </button>
             <button
               type="button"

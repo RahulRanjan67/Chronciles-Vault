@@ -147,13 +147,49 @@ export class ClientRepository {
     }
   }
 
-  private loadFromStorage(): void {
+  private syncListeners: Set<() => void> = new Set();
+  private storageListenerAttached = false;
+
+  public subscribeToStorage(listener: () => void): () => void {
+    this.syncListeners.add(listener);
+    this.ensureStorageListener();
+    return () => this.syncListeners.delete(listener);
+  }
+
+  public notifyStorageChangeForTesting(): void {
+    this.loadFromStorage();
+    for (const cb of this.syncListeners) {
+      try { cb(); } catch {}
+    }
+  }
+
+  private ensureStorageListener(): void {
+    if (this.storageListenerAttached) return;
+    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+      this.storageListenerAttached = true;
+      window.addEventListener("storage", (event) => {
+        if (
+          event.key === STORAGE_KEY ||
+          event.key === ARCHIVE_STORAGE_KEY ||
+          event.key === RELATIONS_STORAGE_KEY
+        ) {
+          this.loadFromStorage();
+          for (const cb of this.syncListeners) {
+            try { cb(); } catch {}
+          }
+        }
+      });
+    }
+  }
+
+  public loadFromStorage(): void {
     if (typeof window !== "undefined" && window.localStorage) {
       try {
         const raw = window.localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw) as HydratedWorkItem[];
           if (Array.isArray(parsed)) {
+            this.items.clear();
             for (const item of parsed) {
               this.items.set(item.work.id, item);
             }
@@ -288,6 +324,9 @@ export class ClientRepository {
   }
 
   public updateWork(id: WorkId, patch: Partial<Omit<Work, "id" | "createdAt">>): Work {
+    if (patch.privacyState === PrivacyState.Vault) {
+      throw new Error("Vault works must be encrypted in the private vault repository.");
+    }
     const item = this.items.get(id);
     if (!item) throw new Error(`Work with ID ${id} not found`);
 

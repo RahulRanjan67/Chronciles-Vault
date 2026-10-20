@@ -151,7 +151,8 @@ export function Memory({ onNavigateWork }: MemoryProps) {
       .some((value) => value.toLocaleLowerCase().includes(query));
   });
   const columns = viewport.width >= 1024 ? 3 : viewport.width >= 640 ? 2 : 1;
-  const rowStep = 520;
+  const hasImages = filteredMemories.some((m) => m.memory.assets && m.memory.assets.length > 0);
+  const rowStep = hasImages ? 440 : 190;
   const totalRows = Math.ceil(filteredMemories.length / columns);
   const galleryTop =
     (galleryRef.current?.getBoundingClientRect().top ?? 0) +
@@ -496,7 +497,7 @@ export function Memory({ onNavigateWork }: MemoryProps) {
           {visibleMemories.map(({ memory, workTitle }) => (
             <article
               key={`${revision}-${memory.id}`}
-              className="flex h-[504px] flex-col gap-2 overflow-hidden"
+              className="flex flex-col justify-between gap-2.5 rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-3.5 shadow-2xs hover:border-[var(--gm-border-strong)] transition-all"
               data-memory-id={memory.assets.length > 0 ? memory.id : undefined}
               aria-label={`Memory for ${workTitle ?? "unlinked work"}`}
             >
@@ -507,6 +508,7 @@ export function Memory({ onNavigateWork }: MemoryProps) {
                 workId={memory.workId ?? undefined}
                 anchorLabel={anchorLabel(memory.progressAnchor)}
                 createdAt={memory.createdAt}
+                className="border-0 bg-transparent p-0 shadow-none hover:shadow-none hover:border-0"
                 onNavigateWork={(id) => {
                   if (id) onNavigateWork?.(id);
                 }}

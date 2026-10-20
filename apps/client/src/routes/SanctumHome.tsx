@@ -1,6 +1,8 @@
 import * as React from "react";
 import {
   ArrowDown,
+  ChevronLeft,
+  ChevronRight,
   ArrowRight,
   BookOpen,
   Check,
@@ -37,7 +39,7 @@ import {
   Archive,
   Upload,
 } from "lucide-react";
-import { toast } from "@grimoire/ui";
+import { toast, dismissAllToasts } from "@grimoire/ui";
 
 export interface RoomProfile {
   readonly id: string;
@@ -285,7 +287,7 @@ const POPULAR_READING_SITES: readonly PopularSiteEntry[] = [
   },
   {
     id: "bookwalker",
-    name: "BOOK☆WALKER Global",
+    name: "BookWalker Global",
     url: "https://global.bookwalker.jp",
     domain: "global.bookwalker.jp",
     category: "manga",
@@ -551,7 +553,7 @@ const SPONSORED_PARTNERS: readonly SponsoredPartner[] = [
   {
     id: "graphicaudio",
     name: "GraphicAudio",
-    tagline: "A Movie in Your Mind® — Full Cast Audio",
+    tagline: "A Movie in Your Mind - Full Cast Audio",
     category: "Dramatized Audiobooks",
     badge: "Audio Partner",
     description: "Experience fantasy and progression audiobooks performed by a full cast of actors, immersive sound effects, and cinematic orchestral music.",
@@ -590,7 +592,7 @@ export function SanctumHome({
   platformMode = (import.meta.env?.VITE_PLATFORM_MODE as "web" | "pc" | "mobile" | undefined) ?? "web",
 }: SanctumHomeProps) {
   const isWebFullHome = platformMode === "web";
-  // ─── Sponsored Partner Showcase State ──────────────────────────
+  // --- Sponsored Partner Showcase State --------------------------
   const [activePartnerIndex, setActivePartnerIndex] = React.useState<number>(0);
   React.useEffect(() => {
     const timer = window.setInterval(() => {
@@ -599,7 +601,7 @@ export function SanctumHome({
     return () => window.clearInterval(timer);
   }, []);
 
-  // ─── Loading & Session Hydration State ─────────────────────────
+  // --- Loading & Session Hydration State -------------------------
   const [progress, setProgress] = React.useState<number>(100);
   const [isRoomReady, setIsRoomReady] = React.useState<boolean>(true);
   const [isExitingToRoom, setIsExitingToRoom] = React.useState<boolean>(false);
@@ -626,7 +628,7 @@ export function SanctumHome({
     progressPercent: number;
   } | null>(null);
 
-  // ─── Room (User Profile) State ────────────────────────────────
+  // --- Room (User Profile) State --------------------------------
   const [rooms, setRooms] = React.useState<readonly RoomProfile[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -652,7 +654,7 @@ export function SanctumHome({
   const [newRoomName, setNewRoomName] = React.useState("");
   const [newRoomTitle, setNewRoomTitle] = React.useState("");
 
-  // User Account (Strictly empty string if not signed in — zero demo user fallbacks)
+  // User Account (Strictly empty string if not signed in - zero demo user fallbacks)
   const [currentUser, setCurrentUser] = React.useState<string>(() => {
     if (typeof window === "undefined") return "";
     return window.localStorage.getItem("cv:username") || "";
@@ -682,17 +684,17 @@ export function SanctumHome({
     [rooms, activeRoomId],
   );
 
-  // ─── Interactive 3D Room Mouse Parallax & Lamp State ──────────
+  // --- Interactive 3D Room Mouse Parallax & Lamp State ----------
   const [pointerTilt, setPointerTilt] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [lampIntensity, setLampIntensity] = React.useState<"warm" | "bright" | "moonlight">("warm");
 
-  // ─── Popular Sites Directory Filter State ─────────────────────
+  // --- Popular Sites Directory Filter State ---------------------
   const [siteCategory, setSiteCategory] = React.useState<"all" | "manga" | "manhwa" | "novel" | "anime">("all");
   const [siteSearch, setSiteSearch] = React.useState("");
   const [copiedSiteId, setCopiedSiteId] = React.useState<string | null>(null);
   const [capturedSiteId, setCapturedSiteId] = React.useState<string | null>(null);
 
-  // ─── Background Preloading + Smooth Progress Ticker ───────────
+  // --- Background Preloading + Smooth Progress Ticker -----------
   React.useEffect(() => {
     let cancelled = false;
     let preloadDone = false;
@@ -744,7 +746,7 @@ export function SanctumHome({
               title: activeItem.work.title,
               category: activeItem.work.contentType.toUpperCase(),
               updateInfo: activeItem.relationship?.currentAnchor
-                ? "In Progress · Ready to Read"
+                ? "In Progress / Ready to Read"
                 : "Ready to Read in Room",
             });
           }
@@ -859,6 +861,7 @@ export function SanctumHome({
       });
       return;
     }
+    dismissAllToasts();
     setIsExitingToRoom(true);
     window.setTimeout(() => {
       onEnterRoom(targetRoute);
@@ -919,12 +922,7 @@ export function SanctumHome({
     setSignUpInput("");
     setSignUpRoomName("");
 
-    toast({
-      title: "Profile & Room Created",
-      description: `Welcome, @${uname}! Entering your reading room.`,
-      variant: "success",
-    });
-
+    dismissAllToasts();
     onEnterRoom();
   };
 
@@ -952,11 +950,7 @@ export function SanctumHome({
     } catch {}
 
     setShowSignInModal(false);
-    toast({
-      title: "Signed In",
-      description: `Welcome back, @${uname}!`,
-      variant: "success",
-    });
+    dismissAllToasts();
     onEnterRoom();
   };
 
@@ -974,52 +968,48 @@ export function SanctumHome({
       let rawData: any;
       if (file.name.toLowerCase().endsWith(".zip")) {
         try {
-          const buffer = await file.arrayBuffer();
-          const bytes = new Uint8Array(buffer);
-          let foundJson: string | null = null;
-          const view = new DataView(buffer);
-          let offset = 0;
-          while (offset + 30 < bytes.length) {
-            if (view.getUint32(offset, true) === 0x04034b50) {
-              const compMethod = view.getUint16(offset + 8, true);
-              const compSize = view.getUint32(offset + 18, true);
-              const fileNameLen = view.getUint16(offset + 26, true);
-              const extraLen = view.getUint16(offset + 28, true);
-              const nameBytes = bytes.subarray(offset + 30, offset + 30 + fileNameLen);
-              const fileName = new TextDecoder().decode(nameBytes);
-              const dataStart = offset + 30 + fileNameLen + extraLen;
-              const dataEnd = dataStart + compSize;
+          const { SafeZipArchive, importLocalFile } = await import("@grimoire/reader");
+          const zipArchive = await SafeZipArchive.open(file);
 
-              if (
-                fileName.endsWith("archive.gca") ||
-                fileName.endsWith("archive.json") ||
-                fileName.endsWith(".gca") ||
-                fileName.endsWith(".json")
-              ) {
-                const fileSlice = bytes.subarray(dataStart, dataEnd);
-                if (compMethod === 0) {
-                  foundJson = new TextDecoder().decode(fileSlice);
-                  break;
-                } else if (compMethod === 8) {
-                  if (typeof DecompressionStream !== "undefined") {
-                    const ds = new DecompressionStream("deflate-raw");
-                    const stream = new Response(fileSlice).body?.pipeThrough(ds);
-                    if (stream) {
-                      foundJson = await new Response(stream).text();
-                      break;
-                    }
-                  }
-                }
-              }
-              offset = dataEnd;
-            } else {
-              offset++;
-            }
-          }
-          if (foundJson) {
-            rawData = JSON.parse(foundJson);
-          } else {
+          const mainEntry = zipArchive.entries.find(
+            (e) =>
+              e.name.endsWith("archive.gca") ||
+              e.name.endsWith("archive.json") ||
+              e.name.endsWith(".gca") ||
+              e.name.endsWith(".json"),
+          );
+          if (!mainEntry) {
             throw new Error("Could not find archive.gca or archive.json inside this zip archive.");
+          }
+          const archiveBytes = await zipArchive.read(mainEntry);
+          rawData = JSON.parse(new TextDecoder().decode(archiveBytes));
+
+          // Automatically extract and load media and document files into Local Shelf!
+          for (const entry of zipArchive.entries) {
+            const lower = entry.name.toLowerCase();
+            const ext = lower.split(".").pop();
+            if (["epub", "pdf", "cbz", "txt", "md", "docx", "mp3", "mp4", "wav", "m4a"].includes(ext || "")) {
+              try {
+                const fileBytes = await zipArchive.read(entry);
+                const displayName = entry.name.split("/").pop() || entry.name;
+                const mimeType =
+                  ext === "epub"
+                    ? "application/epub+zip"
+                    : ext === "pdf"
+                      ? "application/pdf"
+                      : ext === "cbz"
+                        ? "application/vnd.comicbook+zip"
+                        : ext === "mp3"
+                          ? "audio/mpeg"
+                          : ext === "mp4"
+                            ? "video/mp4"
+                            : "text/plain";
+                const localFile = new File([fileBytes as unknown as BlobPart], displayName, { type: mimeType });
+                await importLocalFile(localFile);
+              } catch (shelfErr) {
+                console.warn("Failed to extract shelf file:", entry.name, shelfErr);
+              }
+            }
           }
         } catch (zipErr) {
           toast({
@@ -1132,6 +1122,101 @@ export function SanctumHome({
         } catch {}
       }
 
+      // Restore Reading Relationships & Progress Anchors
+      if (Array.isArray(rawData.relationships) && rawData.relationships.length > 0) {
+        for (const rel of rawData.relationships) {
+          try {
+            stateMod.clientRepository.updateRelationship(rel.workId, rel);
+          } catch {}
+        }
+      }
+
+      // Restore Radar Captures
+      if (Array.isArray(rawData.radarCaptures) && rawData.radarCaptures.length > 0) {
+        try {
+          const now = new Date().toISOString();
+          stateMod.useRadarStore.getState().importBatch({
+            format: "grimoire-radar",
+            version: 1,
+            batchId: `batch-import-${Date.now()}`,
+            batchLabel: `${detectedUser} Archive Radar Ingestion`,
+            browserSource: "unknown",
+            capturedAt: now,
+            items: rawData.radarCaptures.map((r: any) => ({
+              id: r.id || `radar-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+              url: r.url,
+              normalizedUrl: r.url.toLowerCase(),
+              title: r.title,
+              browserSource: r.browserSource || "chromium",
+              capturedAt: r.capturedAt || now,
+              batchId: `batch-import-${Date.now()}`,
+              batchLabel: `${detectedUser} Archive Radar Ingestion`,
+              state: r.state || "pending",
+              snippet: r.snippet || "",
+            })),
+          });
+        } catch {}
+      }
+
+      // Restore Notebook Entries & Activate Notebooks
+      const rawNotebook = rawData.notebook_entries || rawData.notebookEntries;
+      if (Array.isArray(rawNotebook) && rawNotebook.length > 0) {
+        try {
+          const notebookStore = stateMod.useNotebookStore.getState();
+          const activatedSet = new Set<string>();
+          for (const nb of rawNotebook) {
+            if (!nb || !nb.workId) continue;
+            if (!activatedSet.has(nb.workId)) {
+              notebookStore.activateNotebook(nb.workId);
+              activatedSet.add(nb.workId);
+            }
+            notebookStore.addEntry({
+              workId: nb.workId,
+              category: nb.category || "scratch",
+              title: nb.title || "Untitled Note",
+              body: nb.body || "",
+              chapterHint: nb.chapterHint || null,
+              pinned: Boolean(nb.pinned),
+            });
+          }
+        } catch (nbErr) {
+          console.warn("Failed to restore notebook entries:", nbErr);
+        }
+      }
+
+      // Restore Fandom Links
+      const rawFandom = rawData.fandom_links || rawData.fandomLinks;
+      if (Array.isArray(rawFandom) && rawFandom.length > 0) {
+        try {
+          const fandomStore = stateMod.useFandomLinksStore.getState();
+          for (const fl of rawFandom) {
+            if (!fl || !fl.workId || !fl.url) continue;
+            try {
+              fandomStore.addFandomLink({
+                workId: fl.workId,
+                communityName: fl.communityName || fl.name || "Community Wiki",
+                provider: fl.provider,
+                canonicalTitle: fl.canonicalTitle || fl.communityName,
+                url: fl.url,
+                language: fl.language || "en",
+                isPreferred: Boolean(fl.isPreferred),
+                provenance: fl.provenance || "import",
+              });
+            } catch (fErr) {
+              console.warn("Failed to add fandom link:", fl.url, fErr);
+            }
+          }
+        } catch (fandomErr) {
+          console.warn("Failed to restore fandom links:", fandomErr);
+        }
+      }
+
+      // Refresh Return Desk and Radar stores
+      try {
+        stateMod.useReturnDeskStore.getState().refresh();
+        stateMod.useRadarStore.getState().refresh();
+      } catch {}
+
       // Refresh Trash and Categories
       try {
         stateMod.useTrashStore.getState().refreshTrash();
@@ -1207,7 +1292,7 @@ export function SanctumHome({
             id: `radar-portal-${site.id}-${Date.now()}`,
             url: site.url,
             normalizedUrl: site.url.toLowerCase(),
-            title: `${site.name} (${site.categoryLabel} — ${site.badge})`,
+            title: `${site.name} (${site.categoryLabel} - ${site.badge})`,
             browserSource: "unknown",
             capturedAt: now,
             batchId,
@@ -1267,9 +1352,9 @@ export function SanctumHome({
         style={{ background: "var(--gm-main-overlay)" }}
       />
 
-      {/* ═══════════════════════════════════════════════════════════════════
+      {/* ===================================================================
           ARCHITECTURAL TOP HEADER BAR (CLEAN & MOBILE-SAFE)
-         ═══════════════════════════════════════════════════════════════════ */}
+         =================================================================== */}
       <header className="fixed top-0 inset-x-0 z-40 border-b-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)]/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
         {/* Main Architectural Header Bar */}
         <div className="px-3 sm:px-8 h-14 flex items-center justify-between gap-2 sm:gap-4 overflow-hidden">
@@ -1411,15 +1496,15 @@ export function SanctumHome({
               }}
               className="inline-flex items-center gap-1 sm:gap-1.5 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] px-2.5 sm:px-4 py-1.5 text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-accent-fg)] shadow-[2px_2px_0px_var(--gm-border-strong)] sm:shadow-[3px_3px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer shrink-0"
             >
-              <span>{currentUser ? "Enter Room →" : "Sign In →"}</span>
+              <span>{currentUser ? "Enter Room" : "Sign In"}</span>
             </button>
           </div>
         </div>
       </header>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          SECTION 1: HERO VIEWPORT — AWWWARDS EDITORIAL ARCHITECTURAL STAGE
-         ═══════════════════════════════════════════════════════════════════ */}
+      {/* ===================================================================
+          SECTION 1: HERO VIEWPORT - AWWWARDS EDITORIAL ARCHITECTURAL STAGE
+         =================================================================== */}
       <section className="relative z-10 min-h-screen pt-28 pb-12 px-4 sm:px-8 flex flex-col justify-between overflow-hidden">
         {/* Ambient Volumetric Lamp & Cursor-Following Spotlight */}
         <div
@@ -1449,14 +1534,14 @@ export function SanctumHome({
                   </span>
                 </div>
                 <span className="text-[10px] font-mono border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-emerald-500 font-bold">
-                  ● ROOM READY
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1.5" /> ROOM READY
                 </span>
               </div>
 
               {/* Title & Greeting */}
               <div className="space-y-2.5">
                 <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--gm-text-muted)]">
-                  SANCTUM RESIDENCE · {(activeRoom?.name ?? "Reading Sanctum").toUpperCase()}
+                  SANCTUM RESIDENCE / {(activeRoom?.name ?? "Reading Sanctum").toUpperCase()}
                 </div>
                 <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[var(--gm-text)] leading-tight">
                   {currentUser ? (
@@ -1493,7 +1578,7 @@ export function SanctumHome({
                   className="flex-1 inline-flex items-center justify-center gap-3 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] px-6 py-4 sm:py-5 text-gm-base sm:text-gm-lg font-mono font-extrabold uppercase tracking-wider text-[var(--gm-accent-fg)] shadow-[6px_6px_0px_var(--gm-border-strong)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
                 >
                   <Sparkles className="h-5 w-5" />
-                  <span>ENTER YOUR ROOM ✦</span>
+                  <span>ENTER YOUR ROOM</span>
                   <ArrowRight className="h-5 w-5" />
                 </button>
                 <button
@@ -1697,7 +1782,7 @@ export function SanctumHome({
                       className="border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2.5 py-1 text-[10px] font-mono font-bold text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:border-[var(--gm-border-strong)] cursor-pointer"
                       aria-label="Previous Partner"
                     >
-                      ← Prev
+                      <ChevronLeft className="h-3 w-3 inline mr-1" /> Prev
                     </button>
                     <button
                       type="button"
@@ -1707,11 +1792,11 @@ export function SanctumHome({
                       className="border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2.5 py-1 text-[10px] font-mono font-bold text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:border-[var(--gm-border-strong)] cursor-pointer"
                       aria-label="Next Partner"
                     >
-                      Next →
+                      Next <ChevronRight className="h-3 w-3 inline ml-1" />
                     </button>
                   </div>
                   <span className="text-[9px] font-mono text-[var(--gm-text-subtle)]">
-                    Non-invasive · Zero popups · Non-tracking
+                    Non-invasive &bull; Zero popups &bull; Non-tracking
                   </span>
                 </div>
               </div>
@@ -1746,9 +1831,9 @@ export function SanctumHome({
 
       {isWebFullHome && (
         <>
-          {/* ═══════════════════════════════════════════════════════════════════
+          {/* ===================================================================
               SECTION 2: WHY GRIMOIRE IS BETTER (ARCHITECTURAL GRID)
-             ═══════════════════════════════════════════════════════════════════ */}
+             =================================================================== */}
           <section
             id="why-better"
             className="relative z-10 py-20 px-4 sm:px-8 border-t-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)]/85"
@@ -1780,7 +1865,7 @@ export function SanctumHome({
                   className="inline-flex items-center gap-2 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] px-5 py-3.5 text-gm-xs font-mono font-bold uppercase tracking-wider text-[var(--gm-accent-fg)] shadow-[4px_4px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all shrink-0 cursor-pointer"
                 >
                   <Layers className="h-4 w-4" />
-                  <span>Inspect All Architectural Guide &amp; FAQ →</span>
+                  <span>Inspect All Architectural Guide &amp; FAQ &rarr;</span>
                 </button>
               </div>
 
@@ -1792,7 +1877,7 @@ export function SanctumHome({
                     badge: "SURVIVES DEAD LINKS",
                     title: "Decoupled Permanent Work Identity",
                     oldWay:
-                      "Browser bookmarks break the day a scanlator or streaming site changes domains—wiping out your title and episode/chapter number.",
+                      "Browser bookmarks break the day a scanlator or streaming site changes domains-wiping out your title and episode/chapter number.",
                     betterWay:
                       "A Work is an immortal entity separated from its Access Paths. Attach web mirrors, RSS feeds, or local PC paths; your progress and notes stay 100% intact.",
                     tryRoute: "/library",
@@ -1802,7 +1887,7 @@ export function SanctumHome({
                     badge: "HIATUS RECOVERY",
                     title: "Up Next & 30-Second Memory Refresher",
                     oldWay:
-                      "After a 4-month break from a 300-chapter novel or series, you forget the cast—and Googling the wiki spoils major plot twists.",
+                      "After a 4-month break from a 300-chapter novel or series, you forget the cast-and Googling the wiki spoils major plot twists.",
                     betterWay:
                       "Up Next surfaces stalled works and opens a spoiler-safe Memory Refresher Drawer showing YOUR own past quotes, theories, and character notes.",
                     tryRoute: "/up-next",
@@ -1824,7 +1909,7 @@ export function SanctumHome({
                     oldWay:
                       "Finishing Anime Season 1 and having no idea which Manhwa chapter or Web Novel volume to continue from.",
                     betterWay:
-                      "Connect Web Novel ↔ Light Novel ↔ Manhwa ↔ Anime into a visual Adaptation Graph with exact chapter/episode handoff notes.",
+                      "Connect Web Novel <-> Light Novel <-> Manhwa <-> Anime into a visual Adaptation Graph with exact chapter/episode handoff notes.",
                     tryRoute: "/library",
                   },
                   {
@@ -1870,7 +1955,7 @@ export function SanctumHome({
 
                         <div className="border-l-2 border-[var(--gm-danger)] bg-[var(--gm-bg)]/70 p-3 space-y-1">
                           <div className="text-[10px] font-mono font-bold uppercase text-[var(--gm-danger)]">
-                            ✕ OLD TRACKERS / BOOKMARKS
+                            X OLD TRACKERS / BOOKMARKS
                           </div>
                           <p className="text-gm-xs text-[var(--gm-text-muted)] leading-relaxed">
                             {card.oldWay}
@@ -1879,7 +1964,7 @@ export function SanctumHome({
 
                         <div className="border-l-2 border-[var(--gm-success)] bg-[var(--gm-surface)]/70 p-3 space-y-1">
                           <div className="text-[10px] font-mono font-bold uppercase text-[var(--gm-success)]">
-                            ✦ GRIMOIRE
+                            GRIMOIRE
                           </div>
                           <p className="text-gm-xs text-[var(--gm-text)] leading-relaxed">
                             {card.betterWay}
@@ -1901,7 +1986,7 @@ export function SanctumHome({
                           onClick={onOpenFeaturesGuide}
                           className="text-[11px] font-mono text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)] cursor-pointer"
                         >
-                          [GUIDE →]
+                          [GUIDE &rarr;]
                         </button>
                       </div>
                     </div>
@@ -1911,9 +1996,9 @@ export function SanctumHome({
             </div>
           </section>
 
-          {/* ═══════════════════════════════════════════════════════════════════
+          {/* ===================================================================
               SECTION 3: MOST POPULAR MANGA / ANIME / MANHWA / NOVEL SITES DIRECTORY
-             ═══════════════════════════════════════════════════════════════════ */}
+             =================================================================== */}
           <section
             id="popular-portals"
             className="relative z-10 py-20 px-4 sm:px-8 border-t-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg)]/90"
@@ -1943,7 +2028,7 @@ export function SanctumHome({
                     type="text"
                     value={siteSearch}
                     onChange={(e) => setSiteSearch(e.target.value)}
-                    placeholder="Search MangaDex, Crunchyroll, Webtoon…"
+                    placeholder="Search MangaDex, Crunchyroll, Webtoon..."
                     className="w-full border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] pl-10 pr-4 py-2 text-gm-sm text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none focus:border-[var(--gm-border-focus)]"
                   />
                 </div>
@@ -2070,9 +2155,9 @@ export function SanctumHome({
             </div>
           </section>
 
-          {/* ═══════════════════════════════════════════════════════════════════
+          {/* ===================================================================
               SECTION 4: DIRECT INSTALLERS & MULTI-DEVICE DOWNLOADS
-             ═══════════════════════════════════════════════════════════════════ */}
+             =================================================================== */}
           <section
             id="installers"
             className="relative z-10 py-20 px-4 sm:px-8 border-t-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg)]"
@@ -2101,10 +2186,10 @@ export function SanctumHome({
                 </div>
                 <div className="space-y-1 flex-1">
                   <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--gm-text)]">
-                    ✦ ARCHITECTURAL NOTICE: WEB VS. NATIVE INSTALLERS ✦
+                    ARCHITECTURAL NOTICE: WEB VS. NATIVE INSTALLERS
                   </div>
                   <p className="text-gm-xs text-[var(--gm-text-muted)] leading-relaxed">
-                    <strong className="text-[var(--gm-text)]">Web Browser Version:</strong> Works best with instant portal linking, real-time multi-device cloud relay, and online metadata fetching — <strong className="text-[var(--gm-accent-strong)]">requires active internet connection</strong>.<br />
+                    <strong className="text-[var(--gm-text)]">Web Browser Version:</strong> Works best with instant portal linking, real-time multi-device cloud relay, and online metadata fetching - <strong className="text-[var(--gm-accent-strong)]">requires active internet connection</strong>.<br />
                     <strong className="text-[var(--gm-text)]">Windows &amp; Android Installers:</strong> Engineered for complete offline freedom. Index your local PC folders, watch downloaded anime ZIPs/MKVs, read offline EPUBs/CBZs, and sync over local Wi-Fi without internet.
                   </p>
                   <p className="text-[11px] font-mono italic text-[var(--gm-accent-strong)] pt-1 border-t border-[var(--gm-border)]">
@@ -2115,7 +2200,7 @@ export function SanctumHome({
 
               {/* Download Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* ── CARD 1: ANDROID MOBILE INSTALLER ── */}
+                {/* -- CARD 1: ANDROID MOBILE INSTALLER -- */}
                 <div className="border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-6 sm:p-8 shadow-[6px_6px_0px_var(--gm-border-strong)] flex flex-col justify-between space-y-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between border-b border-[var(--gm-border)] pb-4">
@@ -2150,8 +2235,8 @@ export function SanctumHome({
                       <ol className="list-decimal list-inside space-y-1 text-[var(--gm-text-muted)] font-mono text-[10px]">
                         <li>Tap <strong className="text-[var(--gm-text)]">Download Android Mobile APK</strong> below directly on your phone.</li>
                         <li>When browser prompts <em className="text-[var(--gm-text)]">&ldquo;File might be harmful&rdquo;</em>, tap <strong className="text-emerald-600">Download anyway</strong>.</li>
-                        <li>Open the file → If prompted, tap <strong className="text-[var(--gm-text)]">Settings</strong> → toggle <strong className="text-emerald-600">Allow from this source</strong> ON → tap <strong className="text-[var(--gm-text)]">Install</strong>.</li>
-                        <li>If Google Play Protect asks, tap <strong className="text-[var(--gm-text)]">More details</strong> → <strong className="text-emerald-600">Install anyway</strong>.</li>
+                        <li>Open the file &rarr; If prompted, tap <strong className="text-[var(--gm-text)]">Settings</strong> &rarr; toggle <strong className="text-emerald-600">Allow from this source</strong> ON &rarr; tap <strong className="text-[var(--gm-text)]">Install</strong>.</li>
+                        <li>If Google Play Protect asks, tap <strong className="text-[var(--gm-text)]">More details</strong> &rarr; <strong className="text-emerald-600">Install anyway</strong>.</li>
                       </ol>
                     </div>
                   </div>
@@ -2168,7 +2253,7 @@ export function SanctumHome({
                   </div>
                 </div>
 
-                {/* ── CARD 2: WINDOWS PC WORKSTATION INSTALLER ── */}
+                {/* -- CARD 2: WINDOWS PC WORKSTATION INSTALLER -- */}
                 <div className="border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-6 sm:p-8 shadow-[6px_6px_0px_var(--gm-border-strong)] flex flex-col justify-between space-y-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between border-b border-[var(--gm-border)] pb-4">
@@ -2231,9 +2316,9 @@ export function SanctumHome({
             </div>
           </section>
 
-          {/* ═══════════════════════════════════════════════════════════════════
+          {/* ===================================================================
               FOOTER CTA BANNER
-             ═══════════════════════════════════════════════════════════════════ */}
+             =================================================================== */}
           <footer className="relative z-10 py-12 px-4 sm:px-8 border-t-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)]">
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-3">
@@ -2253,8 +2338,8 @@ export function SanctumHome({
                     GRIMOIRE
                   </div>
                   <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5">
-                    4 Distinct Themes (Midnight Arcana · Parchment · Blossom Ascendant · Ink) ·
-                    Local-First Privacy · Zero-Knowledge Vault
+                    4 Distinct Themes (Midnight Arcana &bull; Parchment &bull; Blossom Ascendant &bull; Ink) &bull;
+                    Local-First Privacy &bull; Zero-Knowledge Vault
                   </p>
                 </div>
               </div>
@@ -2271,7 +2356,7 @@ export function SanctumHome({
                   onClick={() => handleEnterRoom()}
                   className="border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] px-5 py-2.5 text-gm-xs font-mono font-bold uppercase text-[var(--gm-accent-fg)] shadow-[3px_3px_0px_var(--gm-border-strong)] hover:opacity-95 cursor-pointer"
                 >
-                  Enter My Room ✦
+                  Enter My Room
                 </button>
               </div>
             </div>
@@ -2279,20 +2364,24 @@ export function SanctumHome({
         </>
       )}
       {/* Sign Up / Switch Explorer Modal */}
-      {showSignUpModal && (
+      {(showSignUpModal || showSignInModal) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
           <div className="w-full max-w-lg border-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-6 shadow-[8px_8px_0px_var(--gm-border-strong)] space-y-4">
             <div className="flex items-center justify-between border-b border-[var(--gm-border)] pb-3">
               <div className="font-mono font-bold text-gm-sm uppercase text-[var(--gm-text)] flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-[var(--gm-accent-strong)]" />
-                <span>ARCHIVIST ACCESS — SWITCH OR SIGN UP</span>
+                <span>ARCHIVIST ACCESS - SWITCH OR SIGN UP</span>
               </div>
               <button
                 type="button"
-                onClick={() => setShowSignUpModal(false)}
+                onClick={() => {
+                  setShowSignUpModal(false);
+                  setShowSignInModal(false);
+                  dismissAllToasts();
+                }}
                 className="text-gm-xs font-mono text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] cursor-pointer"
               >
-                [✕ CLOSE]
+                [CLOSE]
               </button>
             </div>
 
@@ -2306,7 +2395,7 @@ export function SanctumHome({
                   {
                     id: "Archivist",
                     title: "Archivist",
-                    role: "Grand Archivist · All Categories",
+                    role: "Grand Archivist - All Categories",
                   },
                 ].map((account) => {
                   const isCurrent = currentUser === account.id;
@@ -2316,8 +2405,12 @@ export function SanctumHome({
                       type="button"
                       onClick={() => {
                         window.localStorage.setItem("cv:username", account.id);
+                        window.localStorage.setItem("cv:auth_token", `token-${Date.now()}`);
                         setCurrentUser(account.id);
                         setShowSignUpModal(false);
+                        setShowSignInModal(false);
+                        dismissAllToasts();
+                        onEnterRoom();
                       }}
                       className={`text-left p-3 border-2 transition-all cursor-pointer ${
                         isCurrent
@@ -2362,9 +2455,13 @@ export function SanctumHome({
                 if (signUpInput.trim()) {
                   const uname = signUpInput.trim();
                   window.localStorage.setItem("cv:username", uname);
+                  window.localStorage.setItem("cv:auth_token", `token-${Date.now()}`);
                   setCurrentUser(uname);
                   setShowSignUpModal(false);
+                  setShowSignInModal(false);
                   setSignUpInput("");
+                  dismissAllToasts();
+                  onEnterRoom();
                 }
               }}
               className="space-y-4"
@@ -2386,7 +2483,11 @@ export function SanctumHome({
               <div className="flex items-center justify-end gap-2.5 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowSignUpModal(false)}
+                  onClick={() => {
+                    setShowSignUpModal(false);
+                    setShowSignInModal(false);
+                    dismissAllToasts();
+                  }}
                   className="border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-4 py-2 text-gm-xs font-mono uppercase text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] cursor-pointer"
                 >
                   Cancel
@@ -2395,7 +2496,7 @@ export function SanctumHome({
                   type="submit"
                   className="border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] px-5 py-2 text-gm-xs font-mono font-bold uppercase text-[var(--gm-accent-fg)] shadow-[3px_3px_0px_var(--gm-border-strong)] hover:opacity-95 cursor-pointer"
                 >
-                  Create Handle &amp; Save ✦
+                  Create Handle &amp; Save
                 </button>
               </div>
             </form>

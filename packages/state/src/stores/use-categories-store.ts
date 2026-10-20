@@ -58,7 +58,7 @@ function getInitialCategories(): CustomCategory[] {
       name: "Must-Read Masterpieces",
       description: "Stories of transcendent narrative ambition, worldbuilding, and emotional weight.",
       color: "indigo",
-      workIds: ["work-orv", "work-vagabond", "work-frieren"],
+      workIds: [],
       createdAt: now,
       updatedAt: now,
     },
@@ -67,7 +67,7 @@ function getInitialCategories(): CustomCategory[] {
       name: "Late Night Comfort",
       description: "Warm, low-stress, relaxing comfort reads to unwind after a long day.",
       color: "amber",
-      workIds: ["work-dungeon-meshi", "work-apothecary-diaries"],
+      workIds: [],
       createdAt: now,
       updatedAt: now,
     },
@@ -76,7 +76,7 @@ function getInitialCategories(): CustomCategory[] {
       name: "High Stakes Survival",
       description: "Brutal death games, unforgiving battlefields, and razor-thin margins of life or death.",
       color: "rose",
-      workIds: ["work-chainsaw-man", "work-solo-leveling"],
+      workIds: [],
       createdAt: now,
       updatedAt: now,
     },
@@ -85,7 +85,7 @@ function getInitialCategories(): CustomCategory[] {
       name: "Progression Fantasy",
       description: "Satisfying power scaling, cultivation systems, tower climbs, and relentless self-improvement.",
       color: "emerald",
-      workIds: ["work-tower-of-god", "work-tbate", "work-solo-leveling"],
+      workIds: [],
       createdAt: now,
       updatedAt: now,
     },
@@ -94,7 +94,7 @@ function getInitialCategories(): CustomCategory[] {
       name: "Peak Fiction",
       description: "Peak execution across character arcs, unforgettable dialogue, and shocking twists.",
       color: "sky",
-      workIds: ["work-lotm", "work-orv", "work-vagabond"],
+      workIds: [],
       createdAt: now,
       updatedAt: now,
     },
@@ -167,7 +167,7 @@ export const useCategoriesStore = create<CategoriesState>((set, get) => {
         if (cat.workIds.includes(workId)) return cat;
         return {
           ...cat,
-          workIds: [...cat.workIds, workId],
+          workIds: [],
           updatedAt: new Date().toISOString(),
         };
       });

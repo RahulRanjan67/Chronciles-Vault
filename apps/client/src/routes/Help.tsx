@@ -19,6 +19,15 @@ import {
   Sparkles,
   Terminal,
   Zap,
+  Clock,
+  Calendar,
+  AlertCircle,
+  ExternalLink,
+  Mail,
+  CheckCircle,
+  Timer,
+  Globe,
+  Flame,
 } from "lucide-react";
 import {
   Badge,
@@ -57,7 +66,7 @@ interface FaqItem {
   id: string;
   question: string;
   answer: string;
-  category: "general" | "radar" | "readers" | "vault" | "troubleshooting";
+  category: "general" | "radar" | "readers" | "vault" | "troubleshooting" | "cadence";
 }
 
 const FAQ_ITEMS: FaqItem[] = [
@@ -69,24 +78,59 @@ const FAQ_ITEMS: FaqItem[] = [
     category: "general",
   },
   {
-    id: "faq-vault-lost-password",
-    question: "What happens if I forget my Private Vault passphrase?",
+    id: "faq-sync-cross-device",
+    question: "How does cross-device synchronization work between Web, PC Studio (.exe), and Mobile?",
     answer:
-      "Because Grimoire uses hardware-accelerated zero-knowledge encryption — your passphrase never leaves your device. The vault data is encrypted locally before being stored. If you lose your passphrase, the encrypted data cannot be recovered by anyone. We strongly recommend recording your passphrase in a secure password manager.",
+      "Grimoire supports local Wi-Fi / LAN synchronization and private Cloudflare D1 cloud sync. Your reading library, custom categories, reading history, and progress anchors synchronize seamlessly using smart conflict-free merging. Website credentials and Private Vault records are strictly excluded from remote sync to maintain zero-knowledge privacy.",
+    category: "general",
+  },
+  {
+    id: "faq-official-covers",
+    question: "How does official cover auto-fetching work?",
+    answer:
+      "When you add a work or enter your room with imported titles, Grimoire automatically queries AniList, Open Library, and MangaUpdates in the background to fetch official high-resolution covers. Background fetches are completely silent—if a cover isn't found, no error alerts appear. You can also manually click 'Fetch Official Cover' on any Work Detail page, which will notify you if a cover is retrieved.",
+    category: "general",
+  },
+  {
+    id: "faq-cadence-manual",
+    question: "How do I configure release update timers per access path when a website can't be scraped automatically?",
+    answer:
+      "When a website uses Cloudflare bot defense or proprietary reader apps, automated scraping fails. In Grimoire, navigate to the work's 'Access Paths' tab and click 'Set Timer' on any web access link. Select your expected chapter interval (e.g., Daily, Every 3 Days, Weekly on release days, or Bi-Weekly). Grimoire calculates the exact target date and displays a timer badge. When the target date arrives, a '⚠️ Chapter Check Due Now!' notification appears with a 1-click button to open the webpage and reset the cadence timer once verified.",
+    category: "cadence",
+  },
+  {
+    id: "faq-hiatus-timers",
+    question: "How do I mark a work for Hiatus or Dropped, and how do Hiatus Awakening Timers work?",
+    answer:
+      "On the Work Detail page, select 'Paused' or 'Dropped' in the Status dropdown. A modal will prompt you for the reason (e.g., 'Author on medical hiatus', 'Season 1 ended') and allow you to set a Hiatus Awakening Timer (14, 30, 60, or 90 days). During this time, the story won't clutter your daily active queue. When the awakening date arrives, a prominent '🔔 HIATUS AWAKENING RECHECK DUE!' alert appears on the work and Return Desk. You can click 'Check Webpage' to see if chapters resumed, and either click 'Mark Off Hiatus (Resumed)' to immediately put it back in your active reading rotation, or extend the timer by another 30 days.",
+    category: "cadence",
+  },
+  {
+    id: "faq-multi-catalogs",
+    question: "Which metadata catalogs can I search in Discover?",
+    answer:
+      "In the Discover tab, you can search across multiple world-class fiction databases: AniList (Anime, Manga, Manhwa, Light Novels), MangaUpdates / Baka-Updates (the premier database for Manga, Manhwa, Manhua, and Web Novels), Goodreads (global book reviews, member ratings, author quotes, and user bookshelves), Google Books (publication editions), MangaDex (scanlation releases), and Open Library (Western novels and literature), plus deep search gateways for NovelUpdates, Webnovel, IMDb, and Rotten Tomatoes.",
+    category: "general",
+  },
+  {
+    id: "faq-vault-single",
+    question: "How many Private Vaults can I create, and what if I lose my master passphrase?",
+    answer:
+      "Each user profile has exactly one hardware-accelerated Private Vault protected by an AES-GCM 256-bit cryptographic key derived via PBKDF2. Because encryption happens on-device with zero-knowledge architecture, your master passphrase never leaves your machine. If you forget your passphrase, encrypted vault items cannot be recovered by anyone, so keep your passphrase in a secure password manager.",
     category: "vault",
   },
   {
-    id: "faq-radar-detect",
-    question: "How does the Radar tab capture work and why might a tab not show up?",
+    id: "faq-auto-lock",
+    question: "How does Private Vault auto-locking and panic lock work?",
     answer:
-      "Radar works by inspecting active reading tabs on supported webtoon, manga, and novel platforms, extracting the series identity and current chapter index. If a tab isn't automatically detected, check whether your site uses custom URL formats or use the 'Triage Capture' input at the top of the Radar page to paste the chapter URL directly.",
-    category: "radar",
+      "Your decrypted master key is held solely in volatile session memory. If you leave your device idle for 30 minutes, the vault locks automatically and purges the key from memory. You can also press Ctrl+Shift+L at any moment to trigger an instantaneous Panic Lock that immediately clears sensitive items from the screen and purges memory keys.",
+    category: "vault",
   },
   {
     id: "faq-reader-formats",
     question: "Which file formats are supported on the Local Shelf?",
     answer:
-      "Local Shelf natively supports EPUB (.epub) with realistic 3D book turning and exact CFI progress, PDF (.pdf) with vector rendering, full-text search, and bookmarking, and Comic Book Zip (.cbz) archives with continuous vertical webtoon scroll or double-page spread manga modes.",
+      "Local Shelf natively supports EPUB (.epub) with realistic 3D book turning and exact CFI progress, PDF (.pdf) with high-fidelity vector rendering and bookmarks, Comic Book Zip (.cbz) archives with continuous vertical webtoon scroll or double-page spread manga modes, Plain Text (.txt) with dark/clean typography and chapter parsing, Audiobooks (.mp3, .m4a, .wav) with variable playback speed and sleep timer, and Video (.mp4, .webm) with subtitle support.",
     category: "readers",
   },
   {
@@ -97,24 +141,45 @@ const FAQ_ITEMS: FaqItem[] = [
     category: "readers",
   },
   {
-    id: "faq-auto-lock",
-    question: "How does Private Vault auto-locking work?",
+    id: "faq-relations-graph",
+    question: "How do I map novel, manhwa, and anime adaptations together?",
     answer:
-      "Your decrypted master key is held solely in volatile session memory. If you leave your device idle for 15 minutes, or if your browser tab is hidden/backgrounded, the vault locks automatically and purges the key from memory. You can also press Ctrl+Shift+L at any moment to lock it instantly.",
-    category: "vault",
+      "Open any Work Detail page and switch to the 'Relations' tab. Click '+ Link Work' to connect another story from your library as an 'Adaptation', 'Source Novel', 'Prequel', or 'Sequel'. You can add chapter transition notes (e.g. 'Manhwa Season 1 ends at Web Novel Chapter 65') to easily navigate across formats as you read.",
+    category: "general",
+  },
+  {
+    id: "faq-keyring-portals",
+    question: "How does the Reading Keyring & Frequent Websites Portal work?",
+    answer:
+      "Under 'Keyring & Portals' (/keyring), you can store encrypted website login credentials, custom search URLs, and quick launch links for your favorite reading portals. Grimoire also automatically detects and pins 'Frequent Websites' whenever 5 or more works in your library originate from that platform.",
+    category: "general",
+  },
+  {
+    id: "faq-radar-detect",
+    question: "How does the Radar tab capture work and why might a tab not show up?",
+    answer:
+      "Radar works by inspecting active reading tabs on supported webtoon, manga, and novel platforms, extracting the series identity and current chapter index. If a tab isn't automatically detected, check whether your site uses custom URL formats or use the 'Triage Capture' input at the top of the Radar page to paste the chapter URL directly.",
+    category: "radar",
   },
   {
     id: "faq-spoilers",
     question: "How does spoiler protection work in Memory?",
     answer:
       "Memories tagged with Minor or Major spoilers are protected with blur filters and hidden from the global gallery by default. You can reveal them individually or toggle 'Show spoiler memories' in the Memory Gallery when you are caught up with the story.",
-    category: "troubleshooting",
+    category: "general",
   },
   {
     id: "faq-backup",
-    question: "Can I export or backup my library data?",
+    question: "Can I export or backup my library data and what is a .gca file?",
     answer:
-      "Yes. In the Settings route, you can generate a complete JSON export of your library, relationships, and reading history. Note that Private Vault items require entering your passphrase to export decrypted records.",
+      "Yes. In Settings, you can create a complete Grimoire Chronicles Archive (.gca) bundle or standard JSON export containing your library items, relationships, memories, and reading history. You can restore this archive on any PC or phone via the 'Import .gca File' option.",
+    category: "general",
+  },
+  {
+    id: "faq-contact-support",
+    question: "What is the official Grimoire project email for support or user inquiries?",
+    answer:
+      "For bug reports, community inquiries, or feedback, you can reach out to the core project team at: 1234567890rahulranjan@gmail.com",
     category: "general",
   },
 ];
@@ -166,7 +231,7 @@ const KEYBOARD_SHORTCUTS = [
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export function Help(_props: HelpProps) {
-  const [activeTab, setActiveTab] = React.useState<"features" | "shortcuts" | "faq">("features");
+  const [activeTab, setActiveTab] = React.useState<"features" | "cadence" | "shortcuts" | "faq">("features");
   const [expandedFaq, setExpandedFaq] = React.useState<string | null>("faq-storage");
   const [completedSteps, setCompletedSteps] = React.useState<Record<string, boolean>>({
     step1: true,
@@ -181,6 +246,7 @@ export function Help(_props: HelpProps) {
 
   const TABS = [
     { id: "features" as const, label: "Features Guide", icon: Layers },
+    { id: "cadence" as const, label: "Update Timers & Hiatus", icon: Clock },
     { id: "shortcuts" as const, label: "Keyboard Shortcuts", icon: Terminal },
     { id: "faq" as const, label: "FAQ", icon: HelpCircle },
   ];
@@ -226,6 +292,17 @@ export function Help(_props: HelpProps) {
           </div>
         </div>
 
+        {/* Persistent Official Contact & Support Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3 mt-4 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] text-gm-xs">
+          <div className="flex items-center gap-2">
+            <Mail className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+            <span className="font-semibold text-[var(--gm-text)]">Official Support &amp; User Feedback:</span>
+          </div>
+          <a href="mailto:1234567890rahulranjan@gmail.com" className="font-mono text-emerald-500 font-bold hover:underline">
+            1234567890rahulranjan@gmail.com
+          </a>
+        </div>
+
         {/* ── Navigation Tabs ── */}
         <div className="flex gap-2 pt-4 mt-4 border-t border-[var(--gm-border)] overflow-x-auto pb-0.5">
           {TABS.map((tab) => {
@@ -263,7 +340,103 @@ export function Help(_props: HelpProps) {
       )}
 
       {/* ══════════════════════════════════════════════════════════
-          TAB 2 — Keyboard Shortcuts
+          TAB 2 — Update Timers & Hiatus Lifecycle Guide
+      ═══════════════════════════════════════════════════════════ */}
+      {activeTab === "cadence" && (
+        <div className="space-y-6 animate-in fade-in-30">
+          {/* Header Card */}
+          <div className="rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-6 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-cv bg-[var(--gm-accent-muted)] text-[var(--gm-accent-strong)]">
+                <Clock className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-gm-base font-bold text-[var(--gm-text)]">
+                  Manual Release Cadence &amp; Hiatus Awakening Timers
+                </h2>
+                <p className="text-gm-xs text-[var(--gm-text-muted)]">
+                  Stay on top of weekly novel and manhwa releases even when websites block automated web scrapers.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 1: Why Manual Cadence Timers */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="p-5 rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] space-y-3">
+              <div className="flex items-center gap-2 font-bold text-gm-sm text-[var(--gm-text)]">
+                <ShieldAlert className="h-4 w-4 text-amber-500" />
+                <span>The Web Scraping Bottleneck</span>
+              </div>
+              <p className="text-gm-xs text-[var(--gm-text-muted)] leading-relaxed">
+                Many modern reader portals employ heavy anti-bot security (Cloudflare Turnstile, CAPTCHAs, or proprietary mobile apps). Automated background crawlers either trigger IP bans or fail completely. Grimoire solves this by giving you full control with <strong>Manual Cadence Timers</strong>.
+              </p>
+              <div className="p-3 rounded-cv bg-[var(--gm-surface)] border border-[var(--gm-border)] text-[11px] font-mono text-[var(--gm-accent-strong)]">
+                ✓ Zero CAPTCHA headaches · Safe from IP bans · 100% reliable
+              </div>
+            </div>
+
+            <div className="p-5 rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] space-y-3">
+              <div className="flex items-center gap-2 font-bold text-gm-sm text-[var(--gm-text)]">
+                <Timer className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+                <span>How Cadence Timers Work</span>
+              </div>
+              <ol className="text-gm-xs text-[var(--gm-text-muted)] space-y-1.5 list-decimal list-inside leading-relaxed">
+                <li>Navigate to any work&apos;s <strong>Access Paths</strong> tab.</li>
+                <li>Click <strong>&quot;Set Timer&quot;</strong> on any web access link.</li>
+                <li>Select your cadence: <strong>Daily (1d)</strong>, <strong>Every 3 Days</strong>, <strong>Weekly (7d)</strong>, or <strong>Bi-Weekly (14d)</strong>.</li>
+                <li>When the scheduled date arrives, Grimoire shows a glowing <strong>&quot;⚠️ Chapter Check Due Now!&quot;</strong> banner with a 1-click link to open the page.</li>
+              </ol>
+            </div>
+          </div>
+
+          {/* Section 2: Hiatus Awakening Timers */}
+          <div className="rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-6 space-y-4">
+            <div className="flex items-center gap-2.5 font-bold text-gm-sm text-[var(--gm-text)]">
+              <AlertCircle className="h-4 w-4 text-amber-500" />
+              <span>Hiatus &amp; Dropped Story Lifecycle</span>
+            </div>
+            <p className="text-gm-xs text-[var(--gm-text-muted)] leading-relaxed">
+              When an author takes a seasonal break, health leave, or a webtoon concludes Season 1, don&apos;t let it linger in your daily reading queue. Grimoire provides an intelligent <strong>Hiatus Awakening</strong> lifecycle:
+            </p>
+
+            <div className="grid gap-3 sm:grid-cols-3 pt-1">
+              <div className="p-4 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] space-y-2">
+                <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-amber-500/15 text-amber-500 border border-amber-500/30">
+                  Step 1: Mark Status
+                </span>
+                <h4 className="font-bold text-gm-xs text-[var(--gm-text)]">Set Paused or Dropped</h4>
+                <p className="text-[11px] text-[var(--gm-text-muted)] leading-snug">
+                  Choose &apos;Paused&apos; or &apos;Dropped&apos; in the Status dropdown. Grimoire will prompt you to enter the reason (e.g. &apos;Season 1 finale break&apos;).
+                </p>
+              </div>
+
+              <div className="p-4 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] space-y-2">
+                <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-purple-500/15 text-purple-500 border border-purple-500/30">
+                  Step 2: Schedule Timer
+                </span>
+                <h4 className="font-bold text-gm-xs text-[var(--gm-text)]">Hiatus Awakening Timer</h4>
+                <p className="text-[11px] text-[var(--gm-text-muted)] leading-snug">
+                  Pick an awakening interval: 14, 30, 60, or 90 days. The work is safely dormant without cluttering your daily &apos;Up Next&apos; queue.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] space-y-2">
+                <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+                  Step 3: Recheck Alert
+                </span>
+                <h4 className="font-bold text-gm-xs text-[var(--gm-text)]">Awaken &amp; Recheck</h4>
+                <p className="text-[11px] text-[var(--gm-text-muted)] leading-snug">
+                  When the date arrives, Grimoire surfaces a &apos;🔔 Hiatus Awakening Recheck Due&apos; banner. Check the source with 1 click and tap &apos;Mark Off Hiatus (Resumed)&apos; to return it to active reading!
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════
+          TAB 3 — Keyboard Shortcuts
       ═══════════════════════════════════════════════════════════ */}
       {activeTab === "shortcuts" && (
         <div className="space-y-6 animate-in fade-in-30">

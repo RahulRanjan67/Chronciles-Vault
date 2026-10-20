@@ -1,5 +1,7 @@
 import * as React from "react";
 import { SanctumHome } from "./routes/SanctumHome";
+import { Toaster, dismissAllToasts } from "@grimoire/ui";
+import { autoFetchMissingLibraryCovers } from "./utils/official-cover-service";
 
 const WorkspaceShell = React.lazy(() =>
   import("./WorkspaceShell").then((m) => ({ default: m.WorkspaceShell })),
@@ -44,6 +46,7 @@ export function App() {
       if (p === "/home") {
         setEnteredRoom(false);
       } else if (p !== "/" && p !== "/features-guide") {
+        dismissAllToasts();
         setEnteredRoom(true);
       }
     };
@@ -59,83 +62,86 @@ export function App() {
     }
   }, []);
 
-  // Standalone Feature Encyclopedia Webpage (/features-guide)
-  if (currentPath === "/features-guide") {
-    return (
-      <React.Suspense
-        fallback={
-          <div className="min-h-screen bg-[var(--gm-bg)] text-[var(--gm-text)] flex items-center justify-center font-mono text-gm-sm">
-            Opening Complete Feature Encyclopedia…
-          </div>
-        }
-      >
-        <FeaturesGuide
-          onNavigate={(href) => {
-            if (href === "/home" || href === "/") {
-              setEnteredRoom(false);
-              navigate("/");
-            } else {
-              setEnteredRoom(true);
-              navigate(href);
-            }
+  return (
+    <>
+      {/* Standalone Feature Encyclopedia Webpage (/features-guide) */}
+      {currentPath === "/features-guide" ? (
+        <React.Suspense
+          fallback={
+            <div className="min-h-screen bg-[var(--gm-bg)] text-[var(--gm-text)] flex items-center justify-center font-mono text-gm-sm">
+              Opening Complete Feature Encyclopedia…
+            </div>
+          }
+        >
+          <FeaturesGuide
+            onNavigate={(href) => {
+              if (href === "/home" || href === "/") {
+                setEnteredRoom(false);
+                navigate("/");
+              } else {
+                dismissAllToasts();
+                setEnteredRoom(true);
+                navigate(href);
+              }
+            }}
+            onEnterRoomAndNavigate={(href) => {
+              if (href === "/home" || href === "/") {
+                setEnteredRoom(false);
+                navigate("/");
+              } else {
+                dismissAllToasts();
+                setEnteredRoom(true);
+                navigate(href);
+              }
+            }}
+          />
+        </React.Suspense>
+      ) : !enteredRoom || currentPath === "/home" ? (
+        /* Instant-Load Sanctum Room Homepage ("Loading Your Room" + Why Better + Popular Sites) */
+        <SanctumHome
+          preloadWorkspace={preloadWorkspaceBundle}
+          onEnterRoom={(targetRoute) => {
+            dismissAllToasts();
+            setEnteredRoom(true);
+            const nextRoute = targetRoute && targetRoute !== "/home" ? targetRoute : "/library";
+            navigate(nextRoute);
+            void autoFetchMissingLibraryCovers({ silent: true });
           }}
-          onEnterRoomAndNavigate={(href) => {
-            if (href === "/home" || href === "/") {
-              setEnteredRoom(false);
-              navigate("/");
-            } else {
-              setEnteredRoom(true);
-              navigate(href);
-            }
+          onOpenFeaturesGuide={() => {
+            navigate("/features-guide");
           }}
         />
-      </React.Suspense>
-    );
-  }
-
-  // Instant-Load Sanctum Room Homepage ("Loading Your Room" + Why Better + Popular Sites)
-  if (!enteredRoom || currentPath === "/home") {
-    return (
-      <SanctumHome
-        preloadWorkspace={preloadWorkspaceBundle}
-        onEnterRoom={(targetRoute) => {
-          setEnteredRoom(true);
-          const nextRoute = targetRoute && targetRoute !== "/home" ? targetRoute : "/library";
-          navigate(nextRoute);
-        }}
-        onOpenFeaturesGuide={() => {
-          navigate("/features-guide");
-        }}
-      />
-    );
-  }
-
-  // Full Grimoire Room Workspace
-  return (
-    <React.Suspense
-      fallback={
-        <div className="min-h-screen bg-[var(--gm-bg)] text-[var(--gm-text)] flex items-center justify-center font-mono text-gm-sm">
-          Entering Your Room…
-        </div>
-      }
-    >
-      <WorkspaceShell
-        currentPath={currentPath}
-        onNavigate={(href) => {
-          if (href === "/home") {
-            setEnteredRoom(false);
+      ) : (
+        /* Full Grimoire Room Workspace */
+        <React.Suspense
+          fallback={
+            <div className="min-h-screen bg-[var(--gm-bg)] text-[var(--gm-text)] flex items-center justify-center font-mono text-gm-sm">
+              Entering Your Room…
+            </div>
           }
-          navigate(href);
-        }}
-        onOpenSanctumHome={() => {
-          setEnteredRoom(false);
-          navigate("/home");
-        }}
-        onOpenFeaturesGuide={() => {
-          navigate("/features-guide");
-        }}
-      />
-    </React.Suspense>
+        >
+          <WorkspaceShell
+            currentPath={currentPath}
+            onNavigate={(href) => {
+              if (href === "/home") {
+                setEnteredRoom(false);
+              }
+              navigate(href);
+            }}
+            onOpenSanctumHome={() => {
+              setEnteredRoom(false);
+              navigate("/home");
+            }}
+            onOpenFeaturesGuide={() => {
+              navigate("/features-guide");
+            }}
+          />
+        </React.Suspense>
+      )}
+
+      {/* Global Application Toast Viewport mounted persistently across both Sanctum Lobby & Library Room */}
+      <Toaster />
+    </>
   );
 }
 

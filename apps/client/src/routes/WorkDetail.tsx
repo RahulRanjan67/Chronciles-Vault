@@ -30,6 +30,11 @@ import {
   SkipForward,
   Tag,
   ListFilter,
+  Clock,
+  Calendar,
+  Bell,
+  AlertCircle,
+  Timer,
 } from "lucide-react";
 import {
   Badge,
@@ -91,6 +96,7 @@ import { WorkFandomLinksPanel } from "../components/features/WorkDetail/WorkFand
 import { WorkFanCreationsPanel } from "../components/features/WorkDetail/WorkFanCreationsPanel";
 import { ResumeReadingModal } from "../components/features/Reader";
 import { openLocalDiskPath } from "../utils/local-media";
+import { autoFetchCoverForWork } from "../utils/official-cover-service";
 
 export interface WorkDetailProps {
   workId?: string;
@@ -121,7 +127,7 @@ const SHELF_TIER_OPTIONS: Array<{ value: ShelfPriorityTier; label: string }> = [
 ];
 
 export function WorkDetail({
-  workId = "work-orv",
+  workId = "",
   onBack,
   onNavigateWork,
   onResumeReader,
@@ -133,6 +139,7 @@ export function WorkDetail({
     activeItem,
     relations,
     updatePersonalState,
+    updateShelfTier,
     advanceChapter,
     addAccessPath,
     deleteAccessPath,
@@ -222,6 +229,80 @@ export function WorkDetail({
       }
     };
   }, [localAudioUrl]);
+
+  // ─── Manual Cadence & Hiatus Awakening Timers ─────────────────────────────
+  const [showCadenceModal, setShowCadenceModal] = React.useState(false);
+  const [selectedPathForCadence, setSelectedPathForCadence] = React.useState<string | null>(null);
+  const [cadenceDays, setCadenceDays] = React.useState<number>(7);
+  const [cadenceScheduleName, setCadenceScheduleName] = React.useState<string>("Weekly (7 Days)");
+  const [showHiatusModal, setShowHiatusModal] = React.useState(false);
+  const [hiatusDays, setHiatusDays] = React.useState<number>(30);
+  const [hiatusReason, setHiatusReason] = React.useState<string>("Author on hiatus / seasonal break");
+  const [hiatusNotes, setHiatusNotes] = React.useState<string>("");
+
+  const [cadenceMap, setCadenceMap] = React.useState<Record<string, { days: number; nextDate: string; label: string }>>(() => {
+    try {
+      const raw = localStorage.getItem("cv:access_path_cadence:v1");
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const [hiatusMap, setHiatusMap] = React.useState<Record<string, { days: number; recheckDate: string; reason: string; notes?: string }>>(() => {
+    try {
+      const raw = localStorage.getItem("cv:hiatus_timers:v1");
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const saveCadence = (pathId: string, days: number, label: string) => {
+    const nextDate = new Date(Date.now() + days * 86400000).toISOString();
+    const updated = { ...cadenceMap, [pathId]: { days, nextDate, label } };
+    setCadenceMap(updated);
+    localStorage.setItem("cv:access_path_cadence:v1", JSON.stringify(updated));
+    setShowCadenceModal(false);
+    toast({ title: "Update cadence saved", description: `Recheck timer scheduled every ${days} days (${label})` });
+  };
+
+  const resetCadenceTimer = (pathId: string) => {
+    const existing = cadenceMap[pathId];
+    const days = existing?.days ?? 7;
+    const label = existing?.label ?? "Weekly (7 Days)";
+    const nextDate = new Date(Date.now() + days * 86400000).toISOString();
+    const updated = { ...cadenceMap, [pathId]: { days, nextDate, label } };
+    setCadenceMap(updated);
+    localStorage.setItem("cv:access_path_cadence:v1", JSON.stringify(updated));
+    toast({ title: "Cadence timer reset", description: `Next manual check due in ${days} days.` });
+  };
+
+  const removeCadence = (pathId: string) => {
+    const updated = { ...cadenceMap };
+    delete updated[pathId];
+    setCadenceMap(updated);
+    localStorage.setItem("cv:access_path_cadence:v1", JSON.stringify(updated));
+    setShowCadenceModal(false);
+    toast({ title: "Cadence timer removed" });
+  };
+
+  const saveHiatusTimer = (workIdToSave: string, days: number, reason: string, notes?: string) => {
+    const recheckDate = new Date(Date.now() + days * 86400000).toISOString();
+    const updated = { ...hiatusMap, [workIdToSave]: { days, recheckDate, reason, notes } };
+    setHiatusMap(updated);
+    localStorage.setItem("cv:hiatus_timers:v1", JSON.stringify(updated));
+    setShowHiatusModal(false);
+    toast({ title: "Hiatus Awakening Timer set", description: `Grimoire will prompt you to recheck in ${days} days.` });
+  };
+
+  const clearHiatusTimer = (workIdToClear: string) => {
+    const updated = { ...hiatusMap };
+    delete updated[workIdToClear];
+    setHiatusMap(updated);
+    localStorage.setItem("cv:hiatus_timers:v1", JSON.stringify(updated));
+    toast({ title: "Hiatus timer cleared" });
+  };
 
   // Audio playback ticker for synthetic / fallback audio
   React.useEffect(() => {
@@ -356,7 +437,12 @@ export function WorkDetail({
   const [metaContentWarnings, setMetaContentWarnings] = React.useState("");
 
   const [archiveModalOpen, setArchiveModalOpen] = React.useState(false);
-  const [mergeModalOpen, setMergeModalOpen] = React.useState(false);
+  const [mergeModalOpen, setMergeModalOpen] = React.useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("merge") === "1";
+    }
+    return false;
+  });
   const [resumeModalOpen, setResumeModalOpen] = React.useState(false);
   const [showAccessLinksModal, setShowAccessLinksModal] = React.useState(false);
   const [fetchingCover, setFetchingCover] = React.useState(false);
@@ -372,36 +458,10 @@ export function WorkDetail({
     if (!work) return;
     setFetchingCover(true);
     try {
-      const query = `query($search: String) { Media(search: $search, type: MANGA) { coverImage { extraLarge large medium } } }`;
-      const res = await fetch("https://graphql.anilist.co", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ query, variables: { search: work.title } }),
-      });
-      const data = await res.json();
-      const media = data.data?.Media;
-      const coverUrl =
-        media?.coverImage?.extraLarge || media?.coverImage?.large || media?.coverImage?.medium;
+      const coverUrl = await autoFetchCoverForWork(work.id, work.title, { silent: false });
       if (coverUrl) {
         updateCover(coverUrl);
-        toast({
-          title: "Cover Updated",
-          description: `Official cover fetched from AniList for ${work.title}`,
-          variant: "success",
-        });
-      } else {
-        toast({
-          title: "Cover Not Found",
-          description: "Could not find a cover on AniList. You can upload an image or enter a URL manually.",
-          variant: "warning",
-        });
       }
-    } catch (err) {
-      toast({
-        title: "Fetch Failed",
-        description: err instanceof Error ? err.message : "Network error fetching cover.",
-        variant: "destructive",
-      });
     } finally {
       setFetchingCover(false);
     }
@@ -422,73 +482,6 @@ export function WorkDetail({
       }
     };
     reader.readAsDataURL(file);
-  };
-
-  const handleResume = async () => {
-    if (work?.contentType === ContentType.Audiobook) {
-      toggleAudioPlay();
-      return;
-    }
-    const { listLocalFiles } = await import("@grimoire/reader");
-    const files = await listLocalFiles().catch(() => []);
-
-    // 1. Direct local file linked via accessPaths
-    const localPath = accessPaths.find((p) => p.kind === "local_file" && p.fileId);
-    if (localPath?.fileId) {
-      const matched = files.find((f) => f.id === localPath.fileId);
-      if (matched) {
-        toast({
-          title: "Resuming reading session",
-          description: `Opening ${matched.displayName}`,
-        });
-        if (onOpenFile) onOpenFile(matched.id);
-        else window.location.href = `/reader/${encodeURIComponent(matched.id)}`;
-        return;
-      }
-    }
-
-    // 2. Shelf file linked to this work
-    const shelfFile = files.find((f) => f.workId === work.id);
-    if (shelfFile) {
-      toast({
-        title: "Resuming reading session",
-        description: `Opening ${shelfFile.displayName}`,
-      });
-      if (onOpenFile) onOpenFile(shelfFile.id);
-      else window.location.href = `/reader/${encodeURIComponent(shelfFile.id)}`;
-      return;
-    }
-
-    // 3. If a linked local video exists and no ebook is linked, jump to Access Paths tab & open video player
-    const linkedVideo = accessPaths.find(
-      (p) =>
-        p.kind === "local_file" &&
-        ((p.mimeType && p.mimeType.startsWith("video/")) ||
-          /\.(mp4|mkv|webm|avi|mov)$/i.test(p.filePath ?? "")),
-    );
-    if (linkedVideo && accessPaths.every((p) => p.kind === "local_file")) {
-      setActiveTab("sources");
-      setActiveVideoPathId(linkedVideo.id);
-      toast({
-        title: "Opening linked local video",
-        description: linkedVideo.label ?? (linkedVideo.kind === 'local_file' ? linkedVideo.filePath : null) ?? undefined,
-      });
-      return;
-    }
-
-    // 4. If web access paths exist, open directly (1 link) or show picker (2+)
-    const webPaths = accessPaths.filter((p): p is typeof p & { url: string } => p.kind === "web" && typeof p.url === "string" && p.url.length > 0);
-    if (webPaths.length === 1 && webPaths[0]) {
-      window.open(webPaths[0].url, "_blank");
-      return;
-    }
-    if (webPaths.length > 1) {
-      setShowAccessLinksModal(true);
-      return;
-    }
-
-    // 5. Otherwise open ResumeReadingModal to choose web source, video, or shelf EPUB
-    setResumeModalOpen(true);
   };
 
   React.useEffect(() => {
@@ -521,15 +514,107 @@ export function WorkDetail({
   const anchorLabel = anchor ? formatProgressAnchor(anchor) : "Not started";
   const preferredPath = accessPaths.find((p) => p.isPreferred) ?? accessPaths[0];
 
+  const handleResume = async () => {
+    if (work?.contentType === ContentType.Audiobook) {
+      toggleAudioPlay();
+      return;
+    }
+
+    // 1. Priority: Check preferredPath FIRST!
+    if (preferredPath) {
+      if (preferredPath.kind === "web" && preferredPath.url) {
+        window.open(preferredPath.url, "_blank");
+        return;
+      }
+      if (preferredPath.kind === "local_file" && preferredPath.fileId) {
+        toast({
+          title: "Resuming reading session",
+          description: `Opening ${preferredPath.label ?? "local file"}`,
+        });
+        if (onOpenFile) onOpenFile(preferredPath.fileId);
+        else window.location.href = `/reader/${encodeURIComponent(preferredPath.fileId)}`;
+        return;
+      }
+    }
+
+    const { listLocalFiles } = await import("@grimoire/reader");
+    const files = await listLocalFiles().catch(() => []);
+
+    // 2. Direct local file linked via accessPaths
+    const localPath = accessPaths.find((p) => p.kind === "local_file" && p.fileId);
+    if (localPath?.fileId) {
+      const matched = files.find((f) => f.id === localPath.fileId);
+      if (matched) {
+        toast({
+          title: "Resuming reading session",
+          description: `Opening ${matched.displayName}`,
+        });
+        if (onOpenFile) onOpenFile(matched.id);
+        else window.location.href = `/reader/${encodeURIComponent(matched.id)}`;
+        return;
+      }
+    }
+
+    // 3. Shelf file linked to this work
+    const shelfFile = files.find((f) => f.workId === work.id);
+    if (shelfFile) {
+      toast({
+        title: "Resuming reading session",
+        description: `Opening ${shelfFile.displayName}`,
+      });
+      if (onOpenFile) onOpenFile(shelfFile.id);
+      else window.location.href = `/reader/${encodeURIComponent(shelfFile.id)}`;
+      return;
+    }
+
+    // 4. If a linked local video exists and no ebook is linked, jump to Access Paths tab & open video player
+    const linkedVideo = accessPaths.find(
+      (p) =>
+        p.kind === "local_file" &&
+        ((p.mimeType && p.mimeType.startsWith("video/")) ||
+          /\.(mp4|mkv|webm|avi|mov)$/i.test(p.filePath ?? "")),
+    );
+    if (linkedVideo && accessPaths.every((p) => p.kind === "local_file")) {
+      setActiveTab("sources");
+      setActiveVideoPathId(linkedVideo.id);
+      toast({
+        title: "Opening linked local video",
+        description: linkedVideo.label ?? (linkedVideo.kind === 'local_file' ? linkedVideo.filePath : null) ?? undefined,
+      });
+      return;
+    }
+
+    // 5. If web access paths exist, open directly (1 link) or show picker (2+)
+    const webPaths = accessPaths.filter((p): p is typeof p & { url: string } => p.kind === "web" && typeof p.url === "string" && p.url.length > 0);
+    if (webPaths.length === 1 && webPaths[0]) {
+      window.open(webPaths[0].url, "_blank");
+      return;
+    }
+    if (webPaths.length > 1) {
+      setShowAccessLinksModal(true);
+      return;
+    }
+
+    // 6. Otherwise open ResumeReadingModal to choose web source, video, or shelf EPUB
+    setResumeModalOpen(true);
+  };
+
   const handleStateChange = (value: string) => {
     updatePersonalState(value as PersonalState);
+    if (value === PersonalState.Paused || value === PersonalState.Dropped) {
+      setHiatusReason(value === PersonalState.Paused ? "Author on hiatus / seasonal break" : "Dropped story / lost interest");
+      setShowHiatusModal(true);
+    } else if (value === PersonalState.Reading && hiatusMap[work.id]) {
+      clearHiatusTimer(work.id);
+      toast({ title: "Story Resumed!", description: "Hiatus timer cleared. Happy reading!" });
+      return;
+    }
     toast({ title: "Status updated", description: `Marked as ${value}` });
   };
 
   const handleShelfTierChange = (value: string) => {
     const tier = value as ShelfPriorityTier;
-    updateRelationshipInLibrary(work.id, { shelfTier: tier });
-    loadWork(work.id);
+    updateShelfTier(tier);
     toast({
       title: "Shelf tier updated",
       description: `Set shelf priority to ${tier.replace("_", " ")}`,
@@ -904,6 +989,115 @@ export function WorkDetail({
 
             {/* Progress & Status Controls */}
             <div className="mt-6 pt-5 border-t border-[var(--gm-border)] flex flex-col gap-4">
+              {/* Hiatus & Awakening Timer Alert Banner */}
+              {(() => {
+                const hiatusData = hiatusMap[work.id];
+                const isPaused = relationship?.personalState === PersonalState.Paused;
+                const isDropped = relationship?.personalState === PersonalState.Dropped;
+                if (!hiatusData && !isPaused && !isDropped) return null;
+
+                const now = Date.now();
+                const recheckTime = hiatusData ? new Date(hiatusData.recheckDate).getTime() : 0;
+                const isDue = hiatusData && now >= recheckTime;
+                const daysLeft = hiatusData ? Math.ceil((recheckTime - now) / 86400000) : 0;
+
+                return (
+                  <div
+                    className={cn(
+                      "rounded-gm-lg border p-3.5 space-y-2.5 transition-all text-gm-xs",
+                      isDue
+                        ? "border-amber-500/80 bg-amber-500/10 shadow-sm animate-pulse"
+                        : isDropped
+                        ? "border-[var(--gm-border)] bg-[var(--gm-surface)]"
+                        : "border-[var(--gm-accent)]/50 bg-[var(--gm-accent-muted)]/20"
+                    )}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        {isDue ? (
+                          <AlertCircle className="h-4 w-4 text-amber-500 shrink-0" />
+                        ) : (
+                          <Clock className="h-4 w-4 text-[var(--gm-accent-strong)] shrink-0" />
+                        )}
+                        <span className="font-bold text-gm-xs text-[var(--gm-text)]">
+                          {isDue
+                            ? "🔔 HIATUS AWAKENING RECHECK DUE!"
+                            : isDropped
+                            ? "Dropped Work Archive"
+                            : "Hiatus Awakening Tracker"}
+                        </span>
+                        {hiatusData && (
+                          <span
+                            className={cn(
+                              "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold",
+                              isDue
+                                ? "bg-amber-500 text-black"
+                                : "bg-[var(--gm-surface)] text-[var(--gm-text-muted)] border border-[var(--gm-border)]"
+                            )}
+                          >
+                            {isDue
+                              ? "Recheck Now"
+                              : daysLeft > 0
+                              ? `${daysLeft} days remaining`
+                              : "Today"}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-6 px-2 text-[10px] gap-1"
+                          onClick={() => {
+                            setHiatusDays(hiatusData?.days ?? 30);
+                            setHiatusReason(hiatusData?.reason ?? (isDropped ? "Dropped story" : "Author hiatus"));
+                            setHiatusNotes(hiatusData?.notes ?? "");
+                            setShowHiatusModal(true);
+                          }}
+                        >
+                          <Timer className="h-3 w-3" />
+                          <span>{hiatusData ? "Edit Timer" : "Set Awakening Timer"}</span>
+                        </Button>
+
+                        {isDue && preferredPath && "url" in preferredPath && preferredPath.url && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="h-6 px-2.5 text-[10px] gap-1 bg-amber-500 text-black hover:bg-amber-600"
+                            onClick={() => {
+                              window.open((preferredPath as any).url, "_blank", "noopener,noreferrer");
+                            }}
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            <span>Check Webpage</span>
+                          </Button>
+                        )}
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-[10px] text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10"
+                          onClick={() => {
+                            handleStateChange(PersonalState.Reading);
+                          }}
+                        >
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          <span>Mark Off Hiatus (Resumed)</span>
+                        </Button>
+                      </div>
+                    </div>
+
+                    <p className="text-[11px] text-[var(--gm-text-muted)] leading-relaxed">
+                      {isDue
+                        ? "The scheduled hiatus period has concluded. Check whether new chapters have been published on your reading source. If the story has resumed, click 'Mark Off Hiatus' to return it to your active reading rotation!"
+                        : hiatusData?.reason
+                        ? `Status note: ${hiatusData.reason}${hiatusData.notes ? ` · Note: ${hiatusData.notes}` : ""}`
+                        : "This work is paused. Set a Hiatus Awakening Timer to schedule an automated prompt to recheck the source later."}
+                    </p>
+                  </div>
+                );
+              })()}
               {/* Personal State & Shelf Tier Selector */}
               <div className="flex flex-wrap items-center gap-3">
                 <span className="text-gm-xs text-[var(--gm-text-muted)]">Status:</span>
@@ -1926,6 +2120,31 @@ export function WorkDetail({
                           </Button>
                         )}
 
+                        {/* Cadence & Update Timer Trigger */}
+                        {path.kind === "web" && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-[11px] text-[var(--gm-text-muted)] hover:text-[var(--gm-accent-strong)] gap-1"
+                            onClick={() => {
+                              setSelectedPathForCadence(path.id);
+                              const existing = cadenceMap[path.id];
+                              if (existing) {
+                                setCadenceDays(existing.days);
+                                setCadenceScheduleName(existing.label);
+                              } else {
+                                setCadenceDays(7);
+                                setCadenceScheduleName("Weekly (7 Days)");
+                              }
+                              setShowCadenceModal(true);
+                            }}
+                            title="Configure manual chapter release cadence & update timer"
+                          >
+                            <Clock className="h-3 w-3" />
+                            <span>{cadenceMap[path.id]?.label ?? "Set Timer"}</span>
+                          </Button>
+                        )}
+
                         <Button
                           variant="ghost"
                           size="icon"
@@ -2008,6 +2227,38 @@ export function WorkDetail({
                         </Button>
                       </div>
                     </div>
+
+                    {/* Access Path Cadence Schedule Row */}
+                    {(() => {
+                      const cadence = cadenceMap[path.id];
+                      if (!cadence) return null;
+                      const now = Date.now();
+                      const nextTime = new Date(cadence.nextDate).getTime();
+                      const isDue = now >= nextTime;
+                      const daysDiff = Math.ceil((nextTime - now) / 86400000);
+
+                      return (
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--gm-border)]/50 text-[11px]">
+                          <div className="flex items-center gap-1.5 font-mono">
+                            <Timer className={cn("h-3.5 w-3.5", isDue ? "text-amber-500 animate-pulse" : "text-[var(--gm-accent-strong)]")} />
+                            <span className={cn(isDue ? "text-amber-500 font-bold" : "text-[var(--gm-text-muted)]")}>
+                              {isDue
+                                ? "⚠️ Manual Check Due Now! Click URL to check chapters."
+                                : `Cadence: ${cadence.label} · Next check in ${daysDiff}d (${new Date(cadence.nextDate).toLocaleDateString()})`}
+                            </span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-[10px] text-[var(--gm-accent-strong)] hover:underline"
+                            onClick={() => resetCadenceTimer(path.id)}
+                            title="Mark checked and restart cadence interval"
+                          >
+                            Mark Checked &amp; Reset (+{cadence.days}d)
+                          </Button>
+                        </div>
+                      );
+                    })()}
 
                     {isVideoPath && isPlayerOpen && (
                       <div className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] p-3 space-y-2">
@@ -2502,6 +2753,212 @@ export function WorkDetail({
 
           <DialogFooter className="pt-2">
             <Button onClick={() => setListsModalOpen(false)}>Done</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── Modal 1: Configure Chapter Release Cadence & Update Timer ────── */}
+      <Dialog open={showCadenceModal} onOpenChange={setShowCadenceModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-[var(--gm-accent-strong)]" />
+              <span>Configure Release Cadence &amp; Check Timer</span>
+            </DialogTitle>
+            <DialogDescription>
+              When websites cannot be scraped automatically (e.g. Cloudflare protection or apps), Grimoire tracks your expected chapter cadence and alerts you when a manual check is due.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="text-gm-xs font-semibold text-[var(--gm-text)] block mb-1.5">
+                Release Check Interval:
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {[
+                  { days: 1, label: "Daily (1 Day)" },
+                  { days: 3, label: "Every 3 Days" },
+                  { days: 7, label: "Weekly (7 Days)" },
+                  { days: 14, label: "Bi-Weekly (14 Days)" },
+                  { days: 30, label: "Monthly (30 Days)" },
+                ].map((preset) => (
+                  <button
+                    key={preset.days}
+                    type="button"
+                    onClick={() => {
+                      setCadenceDays(preset.days);
+                      setCadenceScheduleName(preset.label);
+                    }}
+                    className={cn(
+                      "p-2.5 rounded-cv border text-left text-gm-xs font-mono transition-all cursor-pointer",
+                      cadenceDays === preset.days
+                        ? "border-[var(--gm-accent)] bg-[var(--gm-accent-muted)] text-[var(--gm-text)] font-bold shadow-xs"
+                        : "border-[var(--gm-border)] bg-[var(--gm-surface)] text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
+                    )}
+                  >
+                    <div>{preset.label}</div>
+                    <div className="text-[10px] text-[var(--gm-text-subtle)] mt-0.5">+{preset.days} days</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-3 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] text-gm-xs space-y-1">
+              <div className="font-semibold text-[var(--gm-text)]">Scheduled Check Date:</div>
+              <div className="text-[var(--gm-accent-strong)] font-mono">
+                {new Date(Date.now() + cadenceDays * 86400000).toLocaleDateString(undefined, {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </div>
+              <p className="text-[11px] text-[var(--gm-text-muted)] pt-1">
+                Grimoire will display a notification badge on this work when this date arrives so you can recheck the source.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-row items-center justify-between gap-2 pt-2">
+            {selectedPathForCadence && cadenceMap[selectedPathForCadence] ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-red-500 hover:text-red-600 hover:bg-red-500/10 text-gm-xs"
+                onClick={() => removeCadence(selectedPathForCadence)}
+              >
+                Remove Timer
+              </Button>
+            ) : <div />}
+
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowCadenceModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  if (selectedPathForCadence) {
+                    saveCadence(selectedPathForCadence, cadenceDays, cadenceScheduleName);
+                  }
+                }}
+              >
+                Save Cadence Timer
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── Modal 2: Hiatus Awakening & Dropped Lifecycle ────────────────── */}
+      <Dialog open={showHiatusModal} onOpenChange={setShowHiatusModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Timer className="h-5 w-5 text-amber-500" />
+              <span>Hiatus Awakening &amp; Lifecycle Settings</span>
+            </DialogTitle>
+            <DialogDescription>
+              Record why this work is paused or dropped, and schedule a Hiatus Awakening Timer to recheck whether chapters have resumed.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="text-gm-xs font-semibold text-[var(--gm-text)] block mb-1.5">
+                Hiatus / Dropped Reason:
+              </label>
+              <Input
+                value={hiatusReason}
+                onChange={(e) => setHiatusReason(e.target.value)}
+                placeholder="e.g. Author on medical hiatus, Season 1 ended, etc."
+                className="text-gm-xs"
+              />
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {[
+                  "Author on hiatus / seasonal break",
+                  "Season 1 completed, awaiting Season 2",
+                  "Translation caught up to raw chapters",
+                  "Scanlation group disbanded",
+                  "Dropped after chapter milestone",
+                ].map((reasonPreset) => (
+                  <button
+                    key={reasonPreset}
+                    type="button"
+                    onClick={() => setHiatusReason(reasonPreset)}
+                    className="text-[10px] px-2 py-0.5 rounded-full border border-[var(--gm-border)] bg-[var(--gm-surface)] text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:border-[var(--gm-accent)] transition-colors cursor-pointer"
+                  >
+                    {reasonPreset}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-gm-xs font-semibold text-[var(--gm-text)] block mb-1.5">
+                Hiatus Awakening Recheck Timer:
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { days: 14, label: "14 Days" },
+                  { days: 30, label: "30 Days" },
+                  { days: 60, label: "60 Days" },
+                  { days: 90, label: "90 Days" },
+                ].map((preset) => (
+                  <button
+                    key={preset.days}
+                    type="button"
+                    onClick={() => setHiatusDays(preset.days)}
+                    className={cn(
+                      "p-2 rounded-cv border text-center text-gm-xs font-mono transition-all cursor-pointer",
+                      hiatusDays === preset.days
+                        ? "border-amber-500 bg-amber-500/15 text-[var(--gm-text)] font-bold shadow-xs"
+                        : "border-[var(--gm-border)] bg-[var(--gm-surface)] text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
+                    )}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-gm-xs font-semibold text-[var(--gm-text)] block mb-1.5">
+                Personal Notes (Optional):
+              </label>
+              <Input
+                value={hiatusNotes}
+                onChange={(e) => setHiatusNotes(e.target.value)}
+                placeholder="e.g. Check publisher Twitter @author or discord announcement"
+                className="text-gm-xs"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-row items-center justify-between gap-2 pt-2">
+            {hiatusMap[work.id] ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-red-500 hover:text-red-600 hover:bg-red-500/10 text-gm-xs"
+                onClick={() => clearHiatusTimer(work.id)}
+              >
+                Clear Timer
+              </Button>
+            ) : <div />}
+
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowHiatusModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => saveHiatusTimer(work.id, hiatusDays, hiatusReason, hiatusNotes)}
+              >
+                Set Awakening Timer
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

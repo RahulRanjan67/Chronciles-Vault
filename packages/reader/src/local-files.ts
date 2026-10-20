@@ -1,4 +1,4 @@
-export type LocalFileFormat = "epub" | "pdf" | "cbz" | "txt" | "md" | "docx";
+export type LocalFileFormat = "epub" | "pdf" | "cbz" | "txt" | "md" | "docx" | "audio" | "video";
 
 export interface LocalFileMetadata {
   readonly id: string;
@@ -31,6 +31,8 @@ const FORMAT_MIME: Record<LocalFileFormat, string> = {
   txt: "text/plain",
   md: "text/markdown",
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  audio: "audio/mpeg",
+  video: "video/mp4",
 };
 
 function getFormat(fileName: string): LocalFileFormat {
@@ -38,7 +40,9 @@ function getFormat(fileName: string): LocalFileFormat {
   if (extension === "epub" || extension === "pdf" || extension === "cbz" || extension === "txt") return extension;
   if (extension === "md" || extension === "markdown") return "md";
   if (extension === "docx" || extension === "doc") return "docx";
-  throw new Error("Choose an EPUB, PDF, CBZ, TXT, MD, or Word document (.docx/.doc).");
+  if (["mp3", "m4a", "m4b", "wav", "flac", "ogg", "aac"].includes(extension || "")) return "audio";
+  if (["mp4", "webm", "mkv", "mov"].includes(extension || "")) return "video";
+  throw new Error("Choose an EPUB, PDF, CBZ, TXT, MD, DOCX, Audio, or Video file.");
 }
 
 function hasZipSignature(bytes: Uint8Array): boolean {
@@ -83,6 +87,12 @@ async function inspectFileSignature(file: File, format: LocalFileFormat): Promis
   if (format === "docx") {
     return FORMAT_MIME.docx;
   }
+  if (format === "audio") {
+    return file.type || FORMAT_MIME.audio;
+  }
+  if (format === "video") {
+    return file.type || FORMAT_MIME.video;
+  }
   const bytes = new Uint8Array(await file.slice(0, 1024).arrayBuffer());
   if (format === "pdf") {
     const headerStr = new TextDecoder().decode(bytes);
@@ -103,9 +113,61 @@ async function inspectFileSignature(file: File, format: LocalFileFormat): Promis
   return FORMAT_MIME.cbz;
 }
 
+function fallbackByteHash(bytes: Uint8Array): string {
+  let h1 = 0x811c9dc5;
+  let h2 = 0x811c9dc5 ^ 0x5a5a5a5a;
+  let h3 = 0x811c9dc5 ^ 0x33333333;
+  let h4 = 0x811c9dc5 ^ 0x0f0f0f0f;
+  for (let i = 0; i < bytes.length; i++) {
+    const b = bytes[i];
+    h1 = Math.imul(h1 ^ b, 0x01000193);
+    h2 = Math.imul(h2 ^ (b + (i & 0xff)), 0x5bd1e995);
+    h3 = Math.imul(h3 ^ ((b << 1) & 0xff), 0x27d4eb2f);
+    h4 = Math.imul(h4 ^ (b ^ 0x55), 0x165667b1);
+  }
+  return [
+    (h1 >>> 0).toString(16).padStart(8, "0"),
+    (h2 >>> 0).toString(16).padStart(8, "0"),
+    (h3 >>> 0).toString(16).padStart(8, "0"),
+    (h4 >>> 0).toString(16).padStart(8, "0"),
+  ].join("");
+}
+
+async function safeContentHash(
+  bytes: ArrayBuffer,
+  cryptoProvider?: Partial<Pick<Crypto, "subtle">>
+): Promise<string> {
+  if (cryptoProvider?.subtle && typeof cryptoProvider.subtle.digest === "function") {
+    try {
+      const digest = await cryptoProvider.subtle.digest("SHA-256", bytes);
+      return Array.from(new Uint8Array(digest), (byte) =>
+        byte.toString(16).padStart(2, "0")
+      ).join("");
+    } catch {
+      // Fallback if subtle.digest throws unexpectedly
+    }
+  }
+  return fallbackByteHash(new Uint8Array(bytes));
+}
+
+function safeRandomUUID(cryptoProvider?: Partial<Pick<Crypto, "randomUUID">>): string {
+  if (cryptoProvider && typeof cryptoProvider.randomUUID === "function") {
+    try {
+      return cryptoProvider.randomUUID();
+    } catch {
+      // Fallback
+    }
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 export async function inspectLocalFile(
   file: File,
-  cryptoProvider: Pick<Crypto, "subtle" | "randomUUID"> = globalThis.crypto,
+  cryptoProvider: Partial<Pick<Crypto, "subtle" | "randomUUID">> = globalThis.crypto,
   now = new Date(),
 ): Promise<StoredLocalFile> {
   if (file.size <= 0) throw new Error("The selected file is empty.");
@@ -116,14 +178,11 @@ export async function inspectLocalFile(
   const format = getFormat(file.name);
   const mimeType = await inspectFileSignature(file, format);
   const bytes = await file.arrayBuffer();
-  const digest = await cryptoProvider.subtle.digest("SHA-256", bytes);
-  const contentHash = Array.from(new Uint8Array(digest), (byte) =>
-    byte.toString(16).padStart(2, "0"),
-  ).join("");
+  const contentHash = await safeContentHash(bytes, cryptoProvider);
   const importedAt = now.toISOString();
 
   return {
-    id: cryptoProvider.randomUUID(),
+    id: safeRandomUUID(cryptoProvider),
     displayName: file.name,
     mimeType,
     sizeBytes: file.size,

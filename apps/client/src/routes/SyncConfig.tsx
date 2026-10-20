@@ -657,7 +657,7 @@ export function SyncConfig({ onBack }: { onBack?: () => void }) {
                   </Badge>
                 </div>
                 <p className="text-[11px] text-[var(--gm-text-muted)] leading-relaxed">
-                  Sync schema is 100% compliant with Cloudflare D1 distributed SQLite. 5 million read units/day handle up to 50,000 daily users with zero monthly cloud bills.
+                  Fast, encrypted cloud synchronization. Keep your reading shelves, bookmarks, and progress seamlessly in sync across your personal devices with zero configuration.
                 </p>
               </div>
             </div>
@@ -673,8 +673,8 @@ export function SyncConfig({ onBack }: { onBack?: () => void }) {
                     toast({
                       title: res ? "Hub Online" : "Hub Offline",
                       description: res
-                        ? `Connected. Clock: ${res.hlc}`
-                        : "Cannot connect to local sync hub.",
+                        ? `Connected successfully to your sync hub.`
+                        : "Cannot connect to local sync hub. Check your URL.",
                     });
                   });
                 }}
@@ -696,7 +696,7 @@ export function SyncConfig({ onBack }: { onBack?: () => void }) {
               <li>Passwords and website credentials are NEVER synchronized.</li>
               <li>Vault records stay strictly unreadable without your local passphrase.</li>
               <li>Local media files (EPUB/PDF/Audio/Video) stay on your device disk.</li>
-              <li>CRDT Hybrid Logical Clock prevents sync conflicts across devices.</li>
+              <li>Smart conflict-free merging prevents accidental overwrites when switching devices.</li>
             </ul>
           </div>
         </div>

@@ -19,6 +19,7 @@ export const cvTokens = {
       'text-subtle': 'var(--gm-text-subtle)',
       'text-inverse': 'var(--gm-text-inverse)',
       accent: 'var(--gm-accent)',
+      'accent-fg': 'var(--gm-accent-fg)',
       'accent-muted': 'var(--gm-accent-muted)',
       'accent-strong': 'var(--gm-accent-strong)',
       'accent-subtle': 'var(--gm-accent-subtle)',

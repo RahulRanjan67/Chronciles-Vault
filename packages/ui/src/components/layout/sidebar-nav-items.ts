@@ -32,6 +32,7 @@ export interface NavItem {
 
 export const PRIMARY_NAV_ITEMS: NavItem[] = [
   { id: 'library', label: 'Library', href: '/', icon: BookOpen },
+  { id: 'discover', label: 'Discover', href: '/discover', icon: Compass },
   { id: 'return', label: 'Up Next', href: '/up-next', icon: Clock },
   { id: 'radar', label: 'Radar', href: '/radar', icon: Radar },
   { id: 'shelf', label: 'Local Shelf', href: '/shelf', icon: HardDrive },

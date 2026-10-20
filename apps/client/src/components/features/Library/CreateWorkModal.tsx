@@ -25,6 +25,7 @@ import {
   normalizeUrl,
 } from "@grimoire/domain";
 import { useLibraryStore } from "@grimoire/state";
+import { autoFetchCoverForWork } from "../../../utils/official-cover-service";
 import { WorkItemData } from "./VirtualWorkGrid";
 
 export interface CreateWorkModalProps {
@@ -150,6 +151,11 @@ export function CreateWorkModal({
     };
 
     onWorkCreated?.(newWork);
+
+    // Auto-fetch official cover in background if not already provided
+    if (!created.work.coverRef) {
+      void autoFetchCoverForWork(created.work.id, created.work.title, { silent: true });
+    }
 
     toast({
       title: "Work Added to Library",

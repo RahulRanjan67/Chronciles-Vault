@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, beforeEach } from "vitest";
 import {
   contentTypeLabel,
   evaluatePublication,
@@ -237,6 +237,37 @@ describe("publication renderers escape everything", () => {
 });
 
 describe("lists store: reorder, notes and publication history", () => {
+  beforeEach(() => {
+    const store = useListsStore.getState();
+    const listId = "list-all-time-favorites";
+    const existing = store.myLists.find((l) => l.id === listId);
+    if (!existing) {
+      useListsStore.setState({
+        myLists: [
+          ...store.myLists,
+          {
+            id: listId,
+            title: "All-Time Favorites",
+            description: "Pillars",
+            privacyState: "public" as any,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            items: [
+              { id: "item-1", workId: "w-1", position: 0, personalNote: null, createdAt: new Date().toISOString() },
+              { id: "item-2", workId: "w-2", position: 1, personalNote: null, createdAt: new Date().toISOString() },
+            ],
+          },
+        ],
+      });
+    } else if (existing.items.length < 2) {
+      existing.items = [
+        { id: "item-1", workId: "w-1", position: 0, personalNote: null, createdAt: new Date().toISOString() },
+        { id: "item-2", workId: "w-2", position: 1, personalNote: null, createdAt: new Date().toISOString() },
+      ];
+      useListsStore.setState({ myLists: [...store.myLists] });
+    }
+  });
+
   it("moves an item down and back up, renumbering positions", () => {
     const store = useListsStore.getState();
     const listId = "list-all-time-favorites";

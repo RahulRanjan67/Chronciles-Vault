@@ -39,6 +39,11 @@ from media_generator import (
     generate_audio_file,
     generate_video_file
 )
+from sample_pack_enrichments import (
+    get_pack_1_enrichments,
+    get_pack_2_enrichments,
+    get_pack_3_enrichments
+)
 
 ROOT_DIR = r"c:\Users\67rah\Desktop\Chronciles Vault"
 os.makedirs(ROOT_DIR, exist_ok=True)
@@ -268,16 +273,16 @@ def build_pack_1():
 
     # Screenshot memory definitions & insertion
     screenshot_memory_defs = [
-        ("Lord of the Mysteries", "Divination in the Gray Fog", "Lord of the Mysteries", "The fool that doesn't belong to this era; The mysterious ruler above the gray fog.", "Ch. 1 · Gray Fog Divination", (129, 140, 248)),
-        ("Reverend Insanity", "Spring Autumn Cicada Awakening", "Reverend Insanity", "The river of time rushed past. Fang Yuan smiled calmly: 'I have no regrets.'", "Ch. 1 · Qing Mao Mountain", (239, 68, 68)),
-        ("Cradle", "Blackflame Dragon Path", "Cradle: Unsouled", "Wei Shi Lindon ignited his Blackflame core, incinerating the iron-ranked dreadbeast.", "Ch. 11 · Blackflame Trials", (245, 158, 11)),
-        ("A Will Eternal", "Turtle-Wok Medicine Refining", "A Will Eternal", "Bai Xiaochun stared wide-eyed as the turtle-wok sparked with immortal multi-colored flames.", "Ch. 18 · Nine Invocations", (16, 185, 129)),
-        ("Renegade Immortal", "Ancient God Stars Crystallize", "Renegade Immortal", "Wang Lin carved the third ancient god star directly between his brows.", "Ch. 340 · Ancient God Sea", (168, 85, 247)),
-        ("ISSTH", "Copper Mirror Feather Replication", "I Shall Seal the Heavens", "Meng Hao adjusted his scholar's robes and rubbed the warm, mysterious copper mirror.", "Ch. 50 · Reliance Sect", (236, 72, 153)),
-        ("Coiling Dragon", "Sovereign Bloodline Awakening", "Coiling Dragon", "Linley Baruch manifested dragon scales across his forearms, feeling the primordial dragon roar.", "Ch. 75 · Ernst Institute", (59, 130, 246)),
-        ("Desolate Era", "Heartforce and Sword Dao Convergence", "Desolate Era", "Ji Ning stepped into the void, his sword light carving through nine layers of astral thunder.", "Ch. 120 · Swallow Mountain", (20, 184, 166)),
-        ("Martial World", "Magic Cube Dream Reincarnation", "Martial World", "Lin Ming absorbed the memories of supreme elders scattered across the dark starry cosmos.", "Ch. 42 · Seven Profound Martial House", (249, 115, 22)),
-        ("Battle Through the Heavens", "Heavenly Flame Lotus Fusion", "Battle Through the Heavens", "Xiao Yan converged the green lotus flame with the bone chilling flame into a lotus.", "Ch. 210 · Desert of Tagore", (234, 179, 8))
+        ("Lord of the Mysteries", "Divination in the Gray Fog", "Lord of the Mysteries", "The fool that doesn't belong to this era; The mysterious ruler above the gray fog.", "Ch. 1 Â· Gray Fog Divination", (129, 140, 248)),
+        ("Reverend Insanity", "Spring Autumn Cicada Awakening", "Reverend Insanity", "The river of time rushed past. Fang Yuan smiled calmly: 'I have no regrets.'", "Ch. 1 Â· Qing Mao Mountain", (239, 68, 68)),
+        ("Cradle", "Blackflame Dragon Path", "Cradle: Unsouled", "Wei Shi Lindon ignited his Blackflame core, incinerating the iron-ranked dreadbeast.", "Ch. 11 Â· Blackflame Trials", (245, 158, 11)),
+        ("A Will Eternal", "Turtle-Wok Medicine Refining", "A Will Eternal", "Bai Xiaochun stared wide-eyed as the turtle-wok sparked with immortal multi-colored flames.", "Ch. 18 Â· Nine Invocations", (16, 185, 129)),
+        ("Renegade Immortal", "Ancient God Stars Crystallize", "Renegade Immortal", "Wang Lin carved the third ancient god star directly between his brows.", "Ch. 340 Â· Ancient God Sea", (168, 85, 247)),
+        ("ISSTH", "Copper Mirror Feather Replication", "I Shall Seal the Heavens", "Meng Hao adjusted his scholar's robes and rubbed the warm, mysterious copper mirror.", "Ch. 50 Â· Reliance Sect", (236, 72, 153)),
+        ("Coiling Dragon", "Sovereign Bloodline Awakening", "Coiling Dragon", "Linley Baruch manifested dragon scales across his forearms, feeling the primordial dragon roar.", "Ch. 75 Â· Ernst Institute", (59, 130, 246)),
+        ("Desolate Era", "Heartforce and Sword Dao Convergence", "Desolate Era", "Ji Ning stepped into the void, his sword light carving through nine layers of astral thunder.", "Ch. 120 Â· Swallow Mountain", (20, 184, 166)),
+        ("Martial World", "Magic Cube Dream Reincarnation", "Martial World", "Lin Ming absorbed the memories of supreme elders scattered across the dark starry cosmos.", "Ch. 42 Â· Seven Profound Martial House", (249, 115, 22)),
+        ("Battle Through the Heavens", "Heavenly Flame Lotus Fusion", "Battle Through the Heavens", "Xiao Yan converged the green lotus flame with the bone chilling flame into a lotus.", "Ch. 210 Â· Desert of Tagore", (234, 179, 8))
     ]
 
     screenshot_bytes_map = {}
@@ -375,6 +380,79 @@ def build_pack_1():
         }
     ]
 
+    relationships = [
+        {
+            "id": "rel-xianxia-01",
+            "workId": "work-xianxia-01",
+            "personalState": "reading",
+            "currentAnchor": {"type": "chapter", "chapter": 420},
+            "lastActiveAt": "2026-10-20T12:00:00Z",
+            "priority": "urgent",
+            "shelfTier": "favorite"
+        },
+        {
+            "id": "rel-xianxia-02",
+            "workId": "work-xianxia-02",
+            "personalState": "reading",
+            "currentAnchor": {"type": "chapter", "chapter": 340},
+            "lastActiveAt": "2026-10-20T11:00:00Z",
+            "priority": "high",
+            "shelfTier": "standard"
+        },
+        {
+            "id": "rel-xianxia-04",
+            "workId": "work-xianxia-04",
+            "personalState": "reading",
+            "currentAnchor": {"type": "chapter", "chapter": 80},
+            "lastActiveAt": "2026-10-20T09:30:00Z",
+            "priority": "normal",
+            "shelfTier": "standard"
+        },
+        {
+            "id": "rel-xianxia-07",
+            "workId": "work-xianxia-07",
+            "personalState": "paused",
+            "currentAnchor": {"type": "chapter", "chapter": 11},
+            "lastActiveAt": "2026-09-25T10:00:00Z",
+            "stoppedAt": "2026-09-25T10:00:00Z",
+            "stoppedReason": "waiting_chapters",
+            "priority": "normal",
+            "shelfTier": "standard"
+        }
+    ]
+
+    radar_captures = [
+        {
+            "id": "radar-xianxia-01",
+            "url": "https://www.royalroad.com/fiction/11204/reverend-insanity-discussion",
+            "title": "Royal Road: Gu Daoist Discussions & Rank 9 Venerables",
+            "state": "pending",
+            "capturedAt": "2026-10-20T10:15:00Z",
+            "browserSource": "chromium",
+            "snippet": "Analysis of the Spring Autumn Cicada, Heaven's Will, and Fate Gu refined by Star Constellation."
+        },
+        {
+            "id": "radar-xianxia-02",
+            "url": "https://www.wuxiaworld.com/novel/martial-world/mw-chapter-2200",
+            "title": "Martial World Finale Arc: The Asura Road & Magic Cube Rebirth",
+            "state": "pending",
+            "capturedAt": "2026-10-20T11:45:00Z",
+            "browserSource": "firefox",
+            "snippet": "Lin Ming ascends beyond the true divinity realm into the dark starry cosmos."
+        },
+        {
+            "id": "radar-xianxia-03",
+            "url": "https://novelupdates.com/series/a-will-eternal-donghua-season-3",
+            "title": "NovelUpdates: A Will Eternal Season 3 Anime Announcement",
+            "state": "pending",
+            "capturedAt": "2026-10-20T12:00:00Z",
+            "browserSource": "chromium",
+            "snippet": "Tencent Video unveils 52 new episodes of Bai Xiaochun's Blood Stream Sect arc."
+        }
+    ]
+
+    nb_entries, fl_links = get_pack_1_enrichments()
+
     archive_payload = {
         "format": "grimoire-backup",
         "version": 2,
@@ -382,10 +460,14 @@ def build_pack_1():
         "user": {"username": "XianxiaArchivist"},
         "works": works,
         "relations": relations,
+        "relationships": relationships,
+        "radarCaptures": radar_captures,
         "memories": memories,
         "categories": categories,
         "credentials": credentials,
         "archiveRecords": archive_records,
+        "notebook_entries": nb_entries,
+        "fandom_links": fl_links,
         "customTags": ["dao-heart-ascension", "pill-refining-art", "heavenly-tribulation"]
     }
 
@@ -416,8 +498,8 @@ def build_pack_1():
 
         # 3 Readable 10-15 Page Books (PDF & EPUB)
         sample_chs = create_sample_chapters("Cradle: Unsouled", 11)
-        z.writestr("books/cradle_unsouled_ch1_12.pdf", generate_pdf_book("Cradle: Unsouled — Chronicles Edition", "Will Wight", "Wei Shi Lindon embarks on an impossible journey beyond Sacred Valley.", sample_chs))
-        z.writestr("books/lord_of_mysteries_vol1_sampler.pdf", generate_pdf_book("Lord of the Mysteries — Clown & Seer", "Cuttlefish That Loves Diving", "Klein Moretti explores the mysteries of Victorian Backlund.", sample_chs))
+        z.writestr("books/cradle_unsouled_ch1_12.pdf", generate_pdf_book("Cradle: Unsouled â€” Chronicles Edition", "Will Wight", "Wei Shi Lindon embarks on an impossible journey beyond Sacred Valley.", sample_chs))
+        z.writestr("books/lord_of_mysteries_vol1_sampler.pdf", generate_pdf_book("Lord of the Mysteries â€” Clown & Seer", "Cuttlefish That Loves Diving", "Klein Moretti explores the mysteries of Victorian Backlund.", sample_chs))
         z.writestr("books/a_will_eternal_preview.epub", generate_epub_book("A Will Eternal: The River of Heavens", "Er Gen", "Bai Xiaochun seeks eternal life through hilarious misadventures.", sample_chs))
 
         # 1 Playable local audio file
@@ -433,7 +515,7 @@ Welcome to the **Xianxia & Progression Fantasy Sample Pack** for **Grimoire**!
 
 ---
 
-## 🗝️ Private Vault Master Passphrase
+## ðŸ—ï¸ Private Vault Master Passphrase
 
 > **Master Passphrase:** `{MASTER_PASSPHRASE}`
 >
@@ -441,7 +523,7 @@ Welcome to the **Xianxia & Progression Fantasy Sample Pack** for **Grimoire**!
 
 ---
 
-## 📦 What is inside this Sample Pack?
+## ðŸ“¦ What is inside this Sample Pack?
 
 - **26 Active Works + 2 Trash Bin Works**:
   - **9 Works secured in Private Vault** (`privacyState: "vault"`).
@@ -454,7 +536,7 @@ Welcome to the **Xianxia & Progression Fantasy Sample Pack** for **Grimoire**!
 - **Live Chapter Updates Feed**: Every work has unread chapter alerts populating `/inbox`.
 - **Cold Storage Archive Records**: 2 volume records documenting completed runs.
 - **Trash Bin Pre-Populated**: 2 soft-deleted draft entries ready to test restoration or permanent purge.
-- **3 Actual 10–15 Page Readable Offline Books**:
+- **3 Actual 10â€“15 Page Readable Offline Books**:
   - `books/cradle_unsouled_ch1_12.pdf`: 12-page PDF with chapter TOC, headers, and running page numbers readable in Grimoire's built-in PDF viewer with 1-page/2-page spread toggle.
   - `books/lord_of_mysteries_vol1_sampler.pdf`: 12-page PDF sampler.
   - `books/a_will_eternal_preview.epub`: 12-chapter valid EPUB book readable in Grimoire's built-in EPUB reader with physical right-to-left page sweep.
@@ -470,7 +552,7 @@ Welcome to the **Xianxia & Progression Fantasy Sample Pack** for **Grimoire**!
 
 ---
 
-## 🚀 How to Import into Grimoire
+## ðŸš€ How to Import into Grimoire
 
 1. **Option A (From Title Screen)**:
    - On the Sanctum Title Screen, click the **Import .gca File** card.
@@ -478,12 +560,12 @@ Welcome to the **Xianxia & Progression Fantasy Sample Pack** for **Grimoire**!
    - Your library immediately hydrates and transitions directly into your reading room!
 
 2. **Option B (From Inside the App)**:
-   - Navigate to **Settings → Data Transfer & Portability**.
+   - Navigate to **Settings â†’ Data Transfer & Portability**.
    - Under *Restore & Import*, upload `archive.gca` (or `archive.json`).
 
 ---
 
-## 🗺️ Step-by-Step Feature Exploration Guide
+## ðŸ—ºï¸ Step-by-Step Feature Exploration Guide
 
 1. **Library Perspectives (`/library`)**:
    - Press `Ctrl+1` for **Grid View**, `Ctrl+2` for **Bookshelf View**, and `Ctrl+3` for the **Dense Metadata Table**.
@@ -613,6 +695,10 @@ def build_pack_2():
         ]),
         ("Gantz", "manga", "japanese", False, [
             ("Black Sphere Mission", "https://youngjump.jp/manga/gantz/")
+        ]),
+        ("Attack on Titan", "manga", "japanese", False, [
+            ("Bessatsu Shonen Magazine", "https://shonenmagazine.com/special/shingeki"),
+            ("Paradis Island Wiki", "https://attackontitan.fandom.com/wiki/Attack_on_Titan_Wiki")
         ])
     ]
 
@@ -717,16 +803,16 @@ def build_pack_2():
         })
 
     screenshot_defs = [
-        ("Solo Leveling", "The Double Dungeon Commandments", "Solo Leveling", "First: Worship the Lord. Second: Praise the Lord. Third: Prove your faith.", "Ch. 2 · Cartenon Temple", (59, 130, 246)),
-        ("Berserk", "The Eclipse & Brand of Sacrifice", "Berserk", "The black sun hung suspended in the abyss. Guts roared against the God Hand.", "Vol. 12 · The Eclipse", (220, 38, 38)),
-        ("Frieren", "Aura the Guillotine Balance", "Frieren", "Frieren placed 1,000 years of concealed mana on the scales: 'Aura, kill yourself.'", "Ch. 28 · Scales of Obedience", (20, 184, 166)),
-        ("Chainsaw Man", "Gun Devil 12-Second Incursion", "Chainsaw Man", "The Gun Devil appeared for twelve seconds across seven countries.", "Ch. 75 · Gun Devil Arrival", (249, 115, 22)),
-        ("Vinland Saga", "I Have No Enemies", "Vinland Saga", "Thorfinn dropped his daggers into the snow: 'I have no enemies. No one has any enemies.'", "Ch. 96 · Ketil's Farm", (234, 179, 8)),
-        ("Vagabond", "Preoccupied with a Single Leaf", "Vagabond", "If you are preoccupied with a single leaf, you will not see the tree.", "Vol. 28 · Kyoto Duels", (107, 114, 128)),
-        ("Monster", "The Name on the Hospital Bed", "Monster", "Tenma realized with horror that the young boy he saved was Johan Liebert.", "Vol. 1 · Düsseldorf Hospital", (156, 163, 175)),
-        ("Jujutsu Kaisen", "Hollow Purple: Unlimited Void", "Jujutsu Kaisen", "Phase, twilight, eyes of wisdom. Nine ropes, polarized light, crow and declaration.", "Ch. 223 · Shinjuku Showdown", (147, 51, 234)),
-        ("Tower of God", "The Push at the Submerged Fish Tank", "Tower of God", "Rachel looked down at Bam with cold eyes: 'I'm sorry, Bam. I must climb.'", "Season 1 Finale · Floor of Tests", (236, 72, 153)),
-        ("The Boxer", "The Light in the Darkness", "The Boxer", "Yu stood motionless in the center of the ring, waiting for a single ray of sunlight.", "Ch. 104 · Championship Bout", (16, 185, 129))
+        ("Solo Leveling", "The Double Dungeon Commandments", "Solo Leveling", "First: Worship the Lord. Second: Praise the Lord. Third: Prove your faith.", "Ch. 2 Â· Cartenon Temple", (59, 130, 246)),
+        ("Berserk", "The Eclipse & Brand of Sacrifice", "Berserk", "The black sun hung suspended in the abyss. Guts roared against the God Hand.", "Vol. 12 Â· The Eclipse", (220, 38, 38)),
+        ("Frieren", "Aura the Guillotine Balance", "Frieren", "Frieren placed 1,000 years of concealed mana on the scales: 'Aura, kill yourself.'", "Ch. 28 Â· Scales of Obedience", (20, 184, 166)),
+        ("Chainsaw Man", "Gun Devil 12-Second Incursion", "Chainsaw Man", "The Gun Devil appeared for twelve seconds across seven countries.", "Ch. 75 Â· Gun Devil Arrival", (249, 115, 22)),
+        ("Vinland Saga", "I Have No Enemies", "Vinland Saga", "Thorfinn dropped his daggers into the snow: 'I have no enemies. No one has any enemies.'", "Ch. 96 Â· Ketil's Farm", (234, 179, 8)),
+        ("Vagabond", "Preoccupied with a Single Leaf", "Vagabond", "If you are preoccupied with a single leaf, you will not see the tree.", "Vol. 28 Â· Kyoto Duels", (107, 114, 128)),
+        ("Monster", "The Name on the Hospital Bed", "Monster", "Tenma realized with horror that the young boy he saved was Johan Liebert.", "Vol. 1 Â· DÃ¼sseldorf Hospital", (156, 163, 175)),
+        ("Jujutsu Kaisen", "Hollow Purple: Unlimited Void", "Jujutsu Kaisen", "Phase, twilight, eyes of wisdom. Nine ropes, polarized light, crow and declaration.", "Ch. 223 Â· Shinjuku Showdown", (147, 51, 234)),
+        ("Tower of God", "The Push at the Submerged Fish Tank", "Tower of God", "Rachel looked down at Bam with cold eyes: 'I'm sorry, Bam. I must climb.'", "Season 1 Finale Â· Floor of Tests", (236, 72, 153)),
+        ("The Boxer", "The Light in the Darkness", "The Boxer", "Yu stood motionless in the center of the ring, waiting for a single ray of sunlight.", "Ch. 104 Â· Championship Bout", (16, 185, 129))
     ]
 
     screenshot_bytes_map = {}
@@ -769,7 +855,7 @@ def build_pack_2():
             "id": "cat-dark-seinen",
             "name": "Dark Fantasy Seinen",
             "color": "rose",
-            "workIds": ["work-manga-03", "work-manga-06", "work-manga-07", "work-manga-08", "work-manga-13", "work-manga-14", "work-manga-21", "work-manga-22"],
+            "workIds": ["work-manga-03", "work-manga-06", "work-manga-07", "work-manga-08", "work-manga-13", "work-manga-14", "work-manga-21", "work-manga-22", "work-manga-27"],
             "description": "Gritty, philosophical masterpieces with mature themes."
         },
         {
@@ -813,6 +899,8 @@ def build_pack_2():
         }
     ]
 
+    nb_entries, fl_links = get_pack_2_enrichments()
+
     archive_payload = {
         "format": "grimoire-backup",
         "version": 2,
@@ -824,6 +912,8 @@ def build_pack_2():
         "categories": categories,
         "credentials": credentials,
         "archiveRecords": archive_records,
+        "notebook_entries": nb_entries,
+        "fandom_links": fl_links,
         "customTags": ["shadow-monarch-awakening", "dungeon-break-rank-s", "hunter-association"]
     }
 
@@ -860,7 +950,7 @@ Welcome to the **Manga & Anime Chronicles Sample Pack** for **Grimoire**!
 
 ---
 
-## 🗝️ Private Vault Master Passphrase
+## ðŸ—ï¸ Private Vault Master Passphrase
 
 > **Master Passphrase:** `{MASTER_PASSPHRASE}`
 >
@@ -868,7 +958,7 @@ Welcome to the **Manga & Anime Chronicles Sample Pack** for **Grimoire**!
 
 ---
 
-## 📦 What is inside this Sample Pack?
+## ðŸ“¦ What is inside this Sample Pack?
 
 - **26 Curated Manga & Graphic Fiction Works + 2 Trash Bin Drafts**:
   - **8 Works in Private Vault** (`privacyState: "vault"`).
@@ -880,7 +970,7 @@ Welcome to the **Manga & Anime Chronicles Sample Pack** for **Grimoire**!
   - **10 Screenshot Memories** capturing pivotal double-page spreads.
 - **Live Chapter Updates**: Real-time chapter alerts ready in `/inbox`.
 - **Trash Bin**: 2 soft-deleted draft scans in `/trash`.
-- **3 Actual 10–15 Page Readable Offline Books** (`solo_leveling_novel_ch1_12.epub`, `berserk_chronicles_tome1.pdf`, `frieren_journey_ch1_12.pdf`).
+- **3 Actual 10â€“15 Page Readable Offline Books** (`solo_leveling_novel_ch1_12.epub`, `berserk_chronicles_tome1.pdf`, `frieren_journey_ch1_12.pdf`).
 - **1 Playable Local Audiobook File** (`audio/solo_leveling_audio_prologue.wav`).
 - **1 Playable Local Video File** (`video/solo_leveling_anime_trailer.mp4`).
 - **2 Encrypted Portal Logins** for MangaDex and Webtoons.
@@ -891,7 +981,7 @@ Welcome to the **Manga & Anime Chronicles Sample Pack** for **Grimoire**!
 
 ---
 
-## 🚀 How to Import into Grimoire
+## ðŸš€ How to Import into Grimoire
 
 1. On the Sanctum Title Screen, click **Import .gca File**.
 2. Select either `archive.gca`, `manga.gca`, or this `.zip` file directly.
@@ -1110,16 +1200,16 @@ def build_pack_3():
         })
 
     screenshot_defs = [
-        ("Omniscient Reader", "Scenario 1: Proof of Value", "Omniscient Reader", "Kill one or more living things within 30 minutes. Failure: Death.", "Subway Car 3434 · Carriage 3807", (14, 165, 233)),
-        ("Neuromancer", "The Dead Channel Sky", "Neuromancer", "The sky above the port was the color of television, tuned to a dead channel.", "Ch. 1 · Chiba City Sprawl", (16, 185, 129)),
-        ("TBATE", "Arthur Leywin Aether Core Burst", "The Beginning After The End", "Aether gathered into a crystalline singularity at Arthur's core.", "Ch. 250 · Relictombs Ascent", (129, 140, 248)),
-        ("Steins;Gate", "D-Mail Across World Lines", "Steins;Gate", "1.048596% — The Divergence Meter confirmed arrival at the Steins Gate world line.", "Akihabara Future Gadget Lab", (245, 158, 11)),
-        ("Ghost in the Shell", "Diving into the Net", "Ghost in the Shell", "The Net is vast and infinite. Major Kusanagi merged with the Puppet Master.", "New Port City · Cyberbrain Net", (168, 85, 247)),
+        ("Omniscient Reader", "Scenario 1: Proof of Value", "Omniscient Reader", "Kill one or more living things within 30 minutes. Failure: Death.", "Subway Car 3434 Â· Carriage 3807", (14, 165, 233)),
+        ("Neuromancer", "The Dead Channel Sky", "Neuromancer", "The sky above the port was the color of television, tuned to a dead channel.", "Ch. 1 Â· Chiba City Sprawl", (16, 185, 129)),
+        ("TBATE", "Arthur Leywin Aether Core Burst", "The Beginning After The End", "Aether gathered into a crystalline singularity at Arthur's core.", "Ch. 250 Â· Relictombs Ascent", (129, 140, 248)),
+        ("Steins;Gate", "D-Mail Across World Lines", "Steins;Gate", "1.048596% â€” The Divergence Meter confirmed arrival at the Steins Gate world line.", "Akihabara Future Gadget Lab", (245, 158, 11)),
+        ("Ghost in the Shell", "Diving into the Net", "Ghost in the Shell", "The Net is vast and infinite. Major Kusanagi merged with the Puppet Master.", "New Port City Â· Cyberbrain Net", (168, 85, 247)),
         ("BLAME!", "Gravitational Beam Emitter Discharge", "BLAME!", "Killy fired the GBE, burning a straight tunnel through 70 kilometers of megastructure.", "Netsphere Level 4096", (239, 68, 68)),
         ("Akira", "Neo-Tokyo Olympic Crater Explosion", "Akira", "Tetsuo screamed as the kinetic singularity consumed the stadium.", "Neo-Tokyo Ground Zero", (236, 72, 153)),
         ("Dune", "Fear is the Mind Killer Litany", "Dune", "I must not fear. Fear is the mind-killer. Fear is the little-death that brings obliteration.", "Arrakis Sietch Tabr", (234, 179, 8)),
-        ("Three-Body Problem", "The Sophon Unfolding in 11 Dimensions", "The Three-Body Problem", "Trisolaran particle physicists unfolded a single proton into a two-dimensional mirror.", "Red Coast Base · Year 1971", (59, 130, 246)),
-        ("Cyberpunk Edgerunners", "I Really Want to Stay at Your House", "Cyberpunk: Edgerunners", "David Martinez activated the Sandevistan to propel Lucy toward the Moon.", "Arasaka Tower Apex · Night City", (249, 115, 22))
+        ("Three-Body Problem", "The Sophon Unfolding in 11 Dimensions", "The Three-Body Problem", "Trisolaran particle physicists unfolded a single proton into a two-dimensional mirror.", "Red Coast Base Â· Year 1971", (59, 130, 246)),
+        ("Cyberpunk Edgerunners", "I Really Want to Stay at Your House", "Cyberpunk: Edgerunners", "David Martinez activated the Sandevistan to propel Lucy toward the Moon.", "Arasaka Tower Apex Â· Night City", (249, 115, 22))
     ]
 
     screenshot_bytes_map = {}
@@ -1206,6 +1296,8 @@ def build_pack_3():
         }
     ]
 
+    nb_entries, fl_links = get_pack_3_enrichments()
+
     archive_payload = {
         "format": "grimoire-backup",
         "version": 2,
@@ -1217,6 +1309,8 @@ def build_pack_3():
         "categories": categories,
         "credentials": credentials,
         "archiveRecords": archive_records,
+        "notebook_entries": nb_entries,
+        "fandom_links": fl_links,
         "customTags": ["constellation-star-stream", "fable-weaving-meta", "fourth-wall-shattered"]
     }
 
@@ -1242,7 +1336,7 @@ def build_pack_3():
         sample_chs = create_sample_chapters("Omniscient Reader Chronicles", 11)
         z.writestr("books/omniscient_reader_vol1.epub", generate_epub_book("Omniscient Reader: The Epilogue", "Sing Shong", "Kim Dokja begins reading the story that saved his life.", sample_chs))
         z.writestr("books/neuromancer_sprawl_sampler.pdf", generate_pdf_book("Neuromancer: The Sprawl Trilogy Sampler", "William Gibson", "Case jacks into cyberspace from the Chiba City bar.", sample_chs))
-        z.writestr("books/the_beginning_after_the_end_ch1_12.pdf", generate_pdf_book("The Beginning After The End — Relictombs", "TurtleMe", "Arthur Leywin awakens in the Relictombs.", sample_chs))
+        z.writestr("books/the_beginning_after_the_end_ch1_12.pdf", generate_pdf_book("The Beginning After The End â€” Relictombs", "TurtleMe", "Arthur Leywin awakens in the Relictombs.", sample_chs))
 
         z.writestr("audio/star_stream_transmission.wav", generate_audio_file(duration_sec=3.5, base_freq=520.0))
         z.writestr("video/orv_scenario_teaser.mp4", generate_video_file(duration_ms=2500))
@@ -1253,7 +1347,7 @@ Welcome to the **Cyberpunk, Sci-Fi & Meta-Fiction Sample Pack** for **Grimoire**
 
 ---
 
-## 🗝️ Private Vault Master Passphrase
+## ðŸ—ï¸ Private Vault Master Passphrase
 
 > **Master Passphrase:** `{MASTER_PASSPHRASE}`
 >
@@ -1261,7 +1355,7 @@ Welcome to the **Cyberpunk, Sci-Fi & Meta-Fiction Sample Pack** for **Grimoire**
 
 ---
 
-## 📦 What is inside this Sample Pack?
+## ðŸ“¦ What is inside this Sample Pack?
 
 - **26 Speculative & Cyberpunk Works + 2 Trash Bin Drafts**:
   - **9 Works in Private Vault** (`privacyState: "vault"`).
@@ -1273,7 +1367,7 @@ Welcome to the **Cyberpunk, Sci-Fi & Meta-Fiction Sample Pack** for **Grimoire**
   - **10 Screenshot Memories** capturing mind-bending cyberpunk moments.
 - **Live Chapter Updates**: Real-time chapter alerts ready in `/inbox`.
 - **Trash Bin**: 2 soft-deleted draft records in `/trash`.
-- **3 Actual 10–15 Page Readable Offline Books** (`omniscient_reader_vol1.epub`, `neuromancer_sprawl_sampler.pdf`, `the_beginning_after_the_end_ch1_12.pdf`).
+- **3 Actual 10â€“15 Page Readable Offline Books** (`omniscient_reader_vol1.epub`, `neuromancer_sprawl_sampler.pdf`, `the_beginning_after_the_end_ch1_12.pdf`).
 - **1 Playable Local Audio Broadcast** (`audio/star_stream_transmission.wav`).
 - **1 Playable Local Video Teaser** (`video/orv_scenario_teaser.mp4`).
 - **2 Encrypted Portal Logins** for Munpia and NovelUpdates.
@@ -1284,7 +1378,7 @@ Welcome to the **Cyberpunk, Sci-Fi & Meta-Fiction Sample Pack** for **Grimoire**
 
 ---
 
-## 🚀 How to Import into Grimoire
+## ðŸš€ How to Import into Grimoire
 
 1. On the Sanctum Title Screen, click **Import .gca File**.
 2. Select either `archive.gca`, `scifi.gca`, or this `.zip` file directly.

@@ -46,6 +46,7 @@ interface NotebookState {
     title: string;
     body: string;
     chapterHint?: string | null;
+    pinned?: boolean;
   }) => NotebookEntry;
   updateEntry: (
     entryId: string,
@@ -130,14 +131,33 @@ export const useNotebookStore = create<NotebookState>((set, get) => {
 
     addEntry: (input) => {
       const now = new Date().toISOString();
+      const trimmedTitle = input.title.trim() || "Untitled scratch note";
+      const trimmedBody = input.body.trim();
+      const isPinned = Boolean(input.pinned);
+
+      // Idempotency: if an entry with same workId and title already exists, update and return
+      const existing = get().entries.find(
+        (e) => e.workId === input.workId && e.title.toLowerCase() === trimmedTitle.toLowerCase(),
+      );
+      if (existing) {
+        if (input.pinned !== undefined && existing.pinned !== isPinned) {
+          get().updateEntry(existing.id, {
+            pinned: isPinned,
+            body: trimmedBody,
+            chapterHint: input.chapterHint?.trim() || null,
+          });
+        }
+        return existing;
+      }
+
       const entry: NotebookEntry = {
         id: `nb-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         workId: input.workId,
         category: input.category,
-        title: input.title.trim() || "Untitled scratch note",
-        body: input.body.trim(),
+        title: trimmedTitle,
+        body: trimmedBody,
         chapterHint: input.chapterHint?.trim() || null,
-        pinned: false,
+        pinned: isPinned,
         promotedMemoryId: null,
         createdAt: now,
         updatedAt: now,
@@ -298,6 +318,16 @@ export const useFandomLinksStore = create<FandomLinksState>((set, get) => ({
       throw new Error("Fandom link URL must use HTTP or HTTPS.");
     }
     const existingForWork = get().links.filter((l) => l.workId === input.workId);
+    const normalizedUrl = parsedUrl.toString().toLowerCase().replace(/\/+$/, "");
+    const existingSameUrl = existingForWork.find(
+      (l) => l.url.toLowerCase().replace(/\/+$/, "") === normalizedUrl,
+    );
+    if (existingSameUrl) {
+      if (input.isPreferred) {
+        get().setPreferredFandomLink(input.workId, existingSameUrl.id);
+      }
+      return existingSameUrl;
+    }
     const shouldBePreferred = input.isPreferred ?? existingForWork.length === 0;
     const now = new Date().toISOString();
 

@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Command, Search } from 'lucide-react';
 import { usePerformanceProfile } from '../../hooks/usePerformanceProfile';
 import { cn } from '../../utils/cn';
-import { Toaster } from '../primitives/Toast';
 import { BottomNav } from './BottomNav';
 import { Sidebar } from './Sidebar';
 
@@ -182,9 +181,6 @@ export function AppShell({
         badgeCounts={badgeCounts}
         isVaultUnlocked={isVaultUnlocked}
       />
-
-      {/* Global Toast System */}
-      <Toaster />
     </div>
   );
 }

@@ -135,6 +135,11 @@ function notify() {
   listeners.forEach((l) => l([...memoryToasts]));
 }
 
+export function dismissAllToasts() {
+  memoryToasts = [];
+  notify();
+}
+
 export function toast(props: Omit<ToastItem, 'id'>) {
   const id = Math.random().toString(36).slice(2, 9);
   const newToast: ToastItem = { ...props, id };
@@ -165,10 +170,15 @@ export function useToast() {
     notify();
   }, []);
 
+  const dismissAll = React.useCallback(() => {
+    dismissAllToasts();
+  }, []);
+
   return {
     toasts,
     toast,
     dismiss,
+    dismissAll,
   };
 }
 

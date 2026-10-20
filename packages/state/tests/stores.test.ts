@@ -17,6 +17,44 @@ import { clientRepository } from "../src/client-repository";
 describe("State Package Stores", () => {
   beforeEach(() => {
     useLibraryStore.getState().resetFilters();
+    if (clientRepository.getItems().length < 2) {
+      const w1 = clientRepository.createWork(
+        {
+          title: "Frieren: Beyond Journey's End",
+          contentType: ContentType.Manga,
+          originCountry: "JP",
+          isFavorite: false,
+          isArchived: false,
+          tags: ["fantasy"],
+          genres: ["Adventure"],
+        },
+        PersonalState.Reading,
+      );
+      clientRepository.addAccessPath(w1.work.id, {
+        provider: "MangaDex",
+        url: "https://mangadex.org/title/frieren",
+        label: "Primary Scan",
+      } as any);
+
+      const w2 = clientRepository.createWork(
+        {
+          title: "Omniscient Reader's Viewpoint",
+          contentType: ContentType.Novel,
+          originCountry: "KR",
+          isFavorite: true,
+          isArchived: false,
+          tags: ["progression"],
+          genres: ["Action"],
+        },
+        PersonalState.Reading,
+      );
+      clientRepository.addAccessPath(w2.work.id, {
+        provider: "Webnovel",
+        url: "https://webnovel.com/book/orv",
+        label: "Official English",
+      } as any);
+      useLibraryStore.getState().refresh();
+    }
   });
 
   describe("useLibraryStore", () => {

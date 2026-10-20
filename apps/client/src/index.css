@@ -35,6 +35,24 @@
 }
 
 /* ============================================================
+   Universal High-Contrast Button & Accent Text Rendering Guarantee
+   ============================================================ */
+button.bg-\[var\(--gm-accent\)\],
+.bg-\[var\(--gm-accent\)\],
+.bg-\[var\(--gm-accent-strong\)\],
+.bg-cv-accent,
+[data-variant="default"] {
+  color: var(--gm-accent-fg) !important;
+}
+button.bg-\[var\(--gm-accent\)\] :is(span, svg, p, div),
+.bg-\[var\(--gm-accent\)\] :is(span, svg, p, div),
+.bg-\[var\(--gm-accent-strong\)\] :is(span, svg, p, div),
+.bg-cv-accent :is(span, svg, p, div),
+[data-variant="default"] :is(span, svg, p, div) {
+  color: var(--gm-accent-fg) !important;
+}
+
+/* ============================================================
    Awwwards-Inspired Sanctum Room & Preloader Motion System
    Compositor-only (transform, opacity, clip-path)
    ============================================================ */
@@ -199,42 +217,42 @@
 /* 2. Two-Page Layout: Flipping to backside of page motion across book spine */
 @keyframes gmPageFlipSpineForward {
   0% {
-    transform: perspective(2000px) rotateY(0deg);
+    transform: perspective(2000px) rotateY(35deg);
     transform-origin: left center;
-    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-    opacity: 1;
+    box-shadow: -20px 0 35px rgba(0, 0, 0, 0.35);
+    opacity: 0.7;
   }
-  45% {
-    transform: perspective(2000px) rotateY(-90deg);
+  50% {
+    transform: perspective(2000px) rotateY(15deg);
     transform-origin: left center;
-    box-shadow: -20px 0 35px rgba(0, 0, 0, 0.5);
+    box-shadow: -10px 0 20px rgba(0, 0, 0, 0.2);
     opacity: 0.9;
   }
   100% {
-    transform: perspective(2000px) rotateY(-180deg);
+    transform: perspective(2000px) rotateY(0deg);
     transform-origin: left center;
-    box-shadow: -40px 0 50px rgba(0, 0, 0, 0.3);
-    opacity: 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    opacity: 1;
   }
 }
 
 @keyframes gmPageFlipSpineReverse {
   0% {
-    transform: perspective(2000px) rotateY(-180deg);
+    transform: perspective(2000px) rotateY(-35deg);
     transform-origin: right center;
-    box-shadow: -40px 0 50px rgba(0, 0, 0, 0.3);
-    opacity: 0;
+    box-shadow: 20px 0 35px rgba(0, 0, 0, 0.35);
+    opacity: 0.7;
   }
-  55% {
-    transform: perspective(2000px) rotateY(-90deg);
+  50% {
+    transform: perspective(2000px) rotateY(-15deg);
     transform-origin: right center;
-    box-shadow: 20px 0 35px rgba(0, 0, 0, 0.5);
+    box-shadow: 10px 0 20px rgba(0, 0, 0, 0.2);
     opacity: 0.9;
   }
   100% {
     transform: perspective(2000px) rotateY(0deg);
     transform-origin: right center;
-    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     opacity: 1;
   }
 }
@@ -252,33 +270,29 @@
 }
 
 .gm-spine-turn-forward {
-  animation: gmPageFlipSpineForward 0.48s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: gmPageFlipSpineForward 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   transform-style: preserve-3d;
-  backface-visibility: hidden;
-  will-change: transform, box-shadow;
+  will-change: transform, opacity;
 }
 
 .gm-spine-turn-reverse {
-  animation: gmPageFlipSpineReverse 0.48s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: gmPageFlipSpineReverse 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   transform-style: preserve-3d;
-  backface-visibility: hidden;
-  will-change: transform, box-shadow;
+  will-change: transform, opacity;
 }
 
 .gm-page-turn-active {
-  animation: gmPageFlipSpineForward 0.44s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: gmPageFlipSpineForward 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   transform-origin: left center;
   transform-style: preserve-3d;
-  backface-visibility: hidden;
-  will-change: transform;
+  will-change: transform, opacity;
 }
 
 .gm-page-turn-reverse {
-  animation: gmPageFlipSpineReverse 0.44s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: gmPageFlipSpineReverse 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   transform-origin: right center;
   transform-style: preserve-3d;
-  backface-visibility: hidden;
-  will-change: transform;
+  will-change: transform, opacity;
 }
 
 .gm-spine-active {
@@ -361,6 +375,15 @@
 
   ::-webkit-scrollbar-thumb:hover {
     background: var(--gm-surface-hover);
+  }
+
+  /* Utility to hide scrollbar while preserving scroll behavior */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   ::selection {

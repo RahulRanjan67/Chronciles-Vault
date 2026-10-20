@@ -89,3 +89,7 @@ lerna-debug.log*
 *.tgz
 *.zip
 *.7z
+
+# Native binaries
+*.apk
+apps/client/public/installers/*.apk

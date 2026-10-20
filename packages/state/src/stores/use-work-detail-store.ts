@@ -14,6 +14,7 @@ import {
   ArchiveRecord,
   DuplicateCandidate,
   Work,
+  ShelfPriorityTier,
 } from '@grimoire/domain';
 import {
   clientRepository,
@@ -32,6 +33,7 @@ export interface WorkDetailState {
   // Actions
   loadWork: (workId: WorkId) => void;
   clearWork: () => void;
+  updateShelfTier: (tier: ShelfPriorityTier) => void;
   updatePersonalState: (
     state: PersonalState,
     stoppedReason?: string,
@@ -83,6 +85,18 @@ export const useWorkDetailStore = create<WorkDetailState>((set, get) => ({
 
   clearWork: () => {
     set({ activeWorkId: null, activeItem: null, relations: [], isLoading: false });
+  },
+
+  updateShelfTier: (tier: ShelfPriorityTier) => {
+    const { activeWorkId } = get();
+    if (!activeWorkId) return;
+
+    clientRepository.updateRelationship(activeWorkId, { shelfTier: tier });
+    const updated = clientRepository.getItem(activeWorkId) ?? null;
+    set({ activeItem: updated });
+
+    useLibraryStore.getState().refresh();
+    useReturnDeskStore.getState().refresh();
   },
 
   updatePersonalState: (state, stoppedReason, stoppedNote) => {

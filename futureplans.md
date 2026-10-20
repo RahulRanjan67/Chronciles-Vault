@@ -45,6 +45,15 @@ In **Version 3.0**, Grimoire will introduce the **Sanctum Bot AI Assistant**, an
    - User-selectable typeface pairings (Classic Book Serifs, High-Density System Sans, Japanese/CJK-optimized Mincho fonts).
 4. **Adaptive Contextual Headers:**
    - Auto-collapsing slim navigation bars that preserve vertical reading canvas and transition smoothly on scroll.
+5. **Grimoire Companion Browser Extension (Google Chrome & Brave — Manifest V3):**
+   - **Target Browsers:** Chromium-based ecosystems (Google Chrome, Brave, Edge, Opera, Vivaldi).
+   - **Zero-Friction Ingestion Pipeline:**
+     - Contextual Omni-Button & Right-Click Actions (`"Add to Grimoire Sanctum"` or `"Capture Chapter Anchor"`).
+     - **Automatic URL & Medium Detection:** Deep scrapers for popular web reading platforms (Royal Road, Syosetu, KakaoPage, Naver Series, MangaDex, MangaUpdates, NovelUpdates, Webtoons, Bilibili Comics, ScribbleHub, AO3).
+     - **Intelligent Chapter & Progress Sniffing:** DOM mutation observers and URL pattern heuristics detect currently viewed chapter number, volume, scroll percentage, and latest available releases without manual user entry.
+     - **One-Click Local Deep Progress Sync:** Automatically advances your Grimoire reading relationship anchor via local HTTP bridge (`http://localhost:3000` / `http://localhost:5173` or WebSocket bridge to PC Studio) with zero copy-pasting.
+     - **Ambient Memory & Quote Clipper:** Highlight text on any web page -> right click -> `"Save Quote as Sanctum Memory"`, with automatic source attribution, chapter stamp, and emotional tagging.
+     - **Offline & Air-Gapped Privacy Architecture:** Built strictly on Manifest V3 declarative APIs; zero external tracking, zero third-party telemetry, and zero unencrypted cloud transmission.
 
 ---
 
@@ -83,6 +92,36 @@ flowchart TD
 
 ---
 
+## Phase 3: Mobile Native App Rebuild From Scratch (< 100 MB, Zero Security Concerns)
+
+### 1. The Mobile Incompatibility Problem
+- **Why Desktop Web UX Fails on Handheld Phones:**
+  - Standard web responsive scaling results in awkward micro-buttons, multi-column headers that squeeze onto 360–390px screens, and lack of true native gestures (edge swipes, pull-to-refresh, pinch zoom).
+  - Web views on Android often carry browser chrome overhead and sluggish touch-event dispatching compared to hardware-accelerated native surfaces.
+
+### 2. Standalone Mobile Native Architecture
+Grimoire Mobile is scheduled to be rebuilt from the ground up as a dedicated touch-native application:
+- **Lightweight Native Core (Strictly < 100 MB Installed Footprint):**
+  - **APK Package Size:** Target package under **15 MB** (current build is **~3.8 MB**).
+  - **Device Storage Footprint:** Strictly capped under **50–80 MB** on disk including core offline readers (EPUB, PDF, CBZ, TXT).
+  - **Zero Security & Privacy Risks:**
+    - Zero third-party telemetry, tracking SDKs, or ad trackers.
+    - Minimal Android manifest permissions: only scoped media reading for local book files (`READ_MEDIA_IMAGES`, `READ_MEDIA_AUDIO`) and optional `INTERNET` solely for user-initiated Cloudflare D1 sync.
+    - Local AES-GCM-256 encrypted SQLite storage on device via SQLCipher or Capacitor Secure Storage.
+    - Native Android `BiometricPrompt` (Fingerprint / Face Unlock) to unlock the Private Vault with a single tap.
+
+### 3. Thumb-First Mobile UX Ergonomics
+- **40% Bottom Reachability Rule:**
+  - All critical action controls (Chapter advance, Bookmark, Play/Pause, Vault unlock, Filter chips) are anchored strictly in the bottom 40% of the screen within comfortable one-handed thumb reach.
+- **Top Bar De-cluttering:**
+  - On mobile, the top bar is stripped to a pure minimal reading status pill; Private Vault and Sync are relocated into the bottom sheet to eliminate icon overlapping.
+- **Gesture-Driven Reading Engine:**
+  - Edge-swipe page flipping with hardware-accelerated 60fps curl physics.
+  - Double-tap margin to advance chapters.
+  - Pull-down gesture to dismiss work detail sheets and memory modals.
+
+---
+
 ## Architectural File & Codebase Layout
 
 ```
@@ -106,6 +145,14 @@ Chronicles Vault/
 │   ├── sync_hub_server.py         # Embedded CRDT Hybrid Logical Clock server
 │   ├── client_dist/               # Built static client assets bundled in executable
 │   └── Grimoire-Studio.exe        # Standalone Windows executable
+│
+├── grimoire-extension/            # [Chrome & Brave Browser Extension — Manifest V3]
+│   ├── manifest.json              # Chrome Web Store & Brave compatible MV3 manifest
+│   ├── src/
+│   │   ├── background/            # Service worker for local bridge communication & alarms
+│   │   ├── content/               # High-accuracy chapter sniffer & quote clipper
+│   │   └── popup/                 # Quick shelf switcher, status updater & instant capture
+│   └── icons/                     # Extension branding icons
 │
 └── grimoire Mobile/               # [Mobile App Codebase & Android Native Package]
     ├── android/                   # Capacitor / Gradle Android Studio project

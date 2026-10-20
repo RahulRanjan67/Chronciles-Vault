@@ -64,11 +64,15 @@ export function Vault({ onNavigateWork }: VaultProps) {
     [libraryStore.items],
   );
 
+  const hasExistingVault = Boolean(keyRecord || hiddenWorks.length > 0 || (summaryCount !== null && summaryCount > 0));
+
   React.useEffect(() => {
-    if (keyRecord || hiddenWorks.length > 0) {
+    if (hasExistingVault) {
       setVaultAccessMode("unlock");
+    } else {
+      setVaultAccessMode("setup");
     }
-  }, [keyRecord, hiddenWorks.length]);
+  }, [hasExistingVault]);
 
   const publicWorks = React.useMemo(
     () =>
@@ -309,65 +313,32 @@ export function Vault({ onNavigateWork }: VaultProps) {
             </div>
             <div className="text-left">
               <h1 className="text-gm-xl font-extrabold text-[var(--gm-text)]">
-                {keyRecord || hiddenWorks.length > 0
-                  ? "Vault Is Locked"
-                  : "Setup Private Vault"}
+                {hasExistingVault ? "Vault Is Locked" : "Setup Private Vault"}
               </h1>
               <p className="mt-1 text-gm-xs leading-relaxed text-[var(--gm-text-muted)]">
-                {keyRecord || hiddenWorks.length > 0
+                {hasExistingVault
                   ? 'Enter your master passphrase to unlock sealed works, private notes, and protected credentials for this session (sample packs use "GrimoireVault#2026").'
                   : "Create a master passphrase to isolate sensitive fiction titles, private notes, and credentials behind hardware-accelerated zero-knowledge encryption."}
               </p>
             </div>
           </div>
 
-          <div className="flex border-b border-[var(--gm-border-strong)] mb-6">
-            <button
-              type="button"
-              onClick={() => {
-                setVaultAccessMode("unlock");
-                setError("");
-              }}
-              className={`flex-1 py-2 text-gm-xs font-bold border-b-2 transition-all cursor-pointer ${
-                vaultAccessMode === "unlock"
-                  ? "border-[var(--gm-accent-strong)] text-[var(--gm-accent-strong)]"
-                  : "border-transparent text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
-              }`}
-            >
-              Unlock Vault
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setVaultAccessMode("setup");
-                setError("");
-              }}
-              className={`flex-1 py-2 text-gm-xs font-bold border-b-2 transition-all cursor-pointer ${
-                vaultAccessMode === "setup"
-                  ? "border-[var(--gm-accent-strong)] text-[var(--gm-accent-strong)]"
-                  : "border-transparent text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
-              }`}
-            >
-              {keyRecord ? "Reset Master Passphrase" : "Create New Vault"}
-            </button>
-          </div>
-
           <form onSubmit={handleAccess} className="space-y-3">
             <label className="block text-left font-mono text-[11px] font-bold uppercase text-[var(--gm-text-subtle)]">
-              {vaultAccessMode === "unlock" ? "Master Passphrase" : "New Master Passphrase"}
+              {hasExistingVault ? "Master Passphrase" : "New Master Passphrase"}
             </label>
             <Input
               type="password"
               placeholder={
-                vaultAccessMode === "unlock"
+                hasExistingVault
                   ? "Enter vault master passphrase (e.g. GrimoireVault#2026)"
                   : "Enter a secure master passphrase (min 8 chars)"
               }
               value={passphrase}
               onChange={(event) => setPassphrase(event.target.value)}
-              autoComplete={vaultAccessMode === "unlock" ? "current-password" : "new-password"}
+              autoComplete={hasExistingVault ? "current-password" : "new-password"}
             />
-            {vaultAccessMode === "setup" && (
+            {!hasExistingVault && (
               <Input
                 type="password"
                 placeholder="Confirm new master passphrase"
@@ -391,10 +362,8 @@ export function Vault({ onNavigateWork }: VaultProps) {
               <span>
                 {busy
                   ? "Unlocking…"
-                  : vaultAccessMode === "unlock"
+                  : hasExistingVault
                     ? "Unlock Private Vault"
-                    : keyRecord
-                    ? "Reset & Update Passphrase"
                     : "Create & Unlock Vault"}
               </span>
             </Button>

@@ -22,6 +22,9 @@ import {
 import { ClientRepository, clientRepository } from "../client-repository";
 import { useLibraryStore } from "../stores/use-library-store";
 import { useListsStore } from "../stores/use-lists-store";
+import { useRadarStore } from "../stores/use-radar-store";
+import { useNotebookStore } from "../stores/use-notebook-store";
+import { useFandomLinksStore } from "../stores/use-fandom-links-store";
 import type { BackupSnapshot, BackupWork, CandidateWork } from "./transfer";
 import { normalizeTitle, safeHttpUrl } from "./transfer";
 
@@ -307,6 +310,123 @@ export function applyBackupImport(
         }));
       if (newCats.length > 0) {
         window.localStorage.setItem("cv:custom_categories:v1", JSON.stringify([...existingCategories, ...newCats]));
+      }
+    } catch {}
+  }
+
+  // Restore Reading Relationships & Progress Anchors
+  const rawRelationships = (snapshot as any).relationships;
+  if (Array.isArray(rawRelationships) && rawRelationships.length > 0) {
+    for (const rel of rawRelationships) {
+      const mappedWorkId = idMap.get(rel.workId) ?? rel.workId;
+      if (!mappedWorkId) continue;
+      try {
+        repo.updateRelationship(mappedWorkId as WorkId, rel);
+      } catch {}
+    }
+  }
+
+  // Restore Radar Captures
+  const rawRadar = (snapshot as any).radarCaptures;
+  if (Array.isArray(rawRadar) && rawRadar.length > 0 && typeof window !== "undefined") {
+    try {
+      const now = new Date().toISOString();
+      useRadarStore.getState().importBatch({
+        format: "grimoire-radar",
+        version: 1,
+        batchId: `import-${Date.now()}`,
+        batchLabel: "Archive Import",
+        browserSource: "unknown",
+        capturedAt: now,
+        items: rawRadar.map((r: any) => ({
+          id: r.id || `radar-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          url: r.url,
+          normalizedUrl: r.url.toLowerCase(),
+          title: r.title,
+          browserSource: r.browserSource || "chromium",
+          capturedAt: r.capturedAt || now,
+          batchId: `import-${Date.now()}`,
+          batchLabel: "Archive Import",
+          state: r.state || "pending",
+          snippet: r.snippet || "",
+        })),
+      });
+    } catch {}
+  }
+
+  // Restore and activate Notebook Entries
+  const rawNotebook =
+    (snapshot as any).notebook_entries ?? (snapshot as any).notebookEntries;
+  if (Array.isArray(rawNotebook) && rawNotebook.length > 0) {
+    try {
+      const notebookStore = useNotebookStore.getState();
+      const activatedSet = new Set<string>();
+
+      for (const entry of rawNotebook) {
+        if (!entry || !entry.workId) continue;
+        const mappedWorkId = (
+          allWorkMap.get(entry.workId) ??
+          existingById.get(entry.workId) ??
+          entry.workId
+        ) as WorkId;
+        if (!mappedWorkId) continue;
+
+        if (!activatedSet.has(mappedWorkId)) {
+          notebookStore.activateNotebook(mappedWorkId);
+          activatedSet.add(mappedWorkId);
+        }
+
+        const validCategories = [
+          "theory",
+          "clue",
+          "character",
+          "question",
+          "scratch",
+        ] as const;
+        const category = validCategories.includes(entry.category)
+          ? entry.category
+          : "scratch";
+
+        notebookStore.addEntry({
+          workId: mappedWorkId,
+          category,
+          title: entry.title || "Untitled Note",
+          body: entry.body || "",
+          chapterHint: entry.chapterHint ?? null,
+          pinned: Boolean(entry.pinned),
+        });
+      }
+    } catch {}
+  }
+
+  // Restore Fandom Links
+  const rawFandom =
+    (snapshot as any).fandom_links ?? (snapshot as any).fandomLinks;
+  if (Array.isArray(rawFandom) && rawFandom.length > 0) {
+    try {
+      const fandomStore = useFandomLinksStore.getState();
+      for (const link of rawFandom) {
+        if (!link || !link.workId || !link.url) continue;
+        const mappedWorkId = (
+          allWorkMap.get(link.workId) ??
+          existingById.get(link.workId) ??
+          link.workId
+        ) as WorkId;
+        if (!mappedWorkId) continue;
+
+        try {
+          fandomStore.addFandomLink({
+            workId: mappedWorkId,
+            communityName:
+              link.communityName || link.name || "Community Wiki",
+            provider: link.provider,
+            canonicalTitle: link.canonicalTitle || link.communityName,
+            url: link.url,
+            language: link.language || "en",
+            isPreferred: Boolean(link.isPreferred),
+            provenance: link.provenance || "import",
+          });
+        } catch {}
       }
     } catch {}
   }

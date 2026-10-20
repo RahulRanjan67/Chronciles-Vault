@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { MemoryType, PrivacyState, SpoilerLevel } from "@grimoire/domain";
+import { describe, expect, it, beforeEach } from "vitest";
+import { MemoryType, PrivacyState, SpoilerLevel, ContentType, PersonalState } from "@grimoire/domain";
 import type { WorkId } from "@grimoire/shared";
 import {
   clientRepository,
@@ -10,6 +10,59 @@ import {
 } from "../src";
 
 describe("Notebook, Fandom Links & Local Explainable Recommendations", () => {
+  beforeEach(() => {
+    if (!clientRepository.getItem("work-orv" as WorkId)) {
+      const item = clientRepository.createWork(
+        {
+          title: "Omniscient Reader's Viewpoint",
+          contentType: ContentType.Novel,
+          originCountry: "KR",
+          isFavorite: true,
+          isArchived: false,
+          tags: ["apocalypse", "progression"],
+          genres: ["Action", "Fantasy"],
+        },
+        PersonalState.Reading,
+      );
+      (item.work as any).id = "work-orv";
+      (clientRepository as any).items.delete(item.work.id);
+      (clientRepository as any).items.set("work-orv", item);
+    }
+    if (!clientRepository.getItem("work-frieren" as WorkId)) {
+      const item = clientRepository.createWork(
+        {
+          title: "Frieren: Beyond Journey's End",
+          contentType: ContentType.Manga,
+          originCountry: "JP",
+          isFavorite: false,
+          isArchived: false,
+          tags: ["fantasy", "magic"],
+          genres: ["Adventure", "Drama"],
+        },
+        PersonalState.Reading,
+      );
+      (item.work as any).id = "work-frieren";
+      (clientRepository as any).items.delete(item.work.id);
+      (clientRepository as any).items.set("work-frieren", item);
+    }
+    if (!clientRepository.getItem("work-planned-fantasy" as WorkId)) {
+      const item3 = clientRepository.createWork(
+        {
+          title: "The Great Mage Returns After 4000 Years",
+          contentType: ContentType.Manhwa,
+          originCountry: "KR",
+          isFavorite: false,
+          isArchived: false,
+          tags: ["fantasy", "magic"],
+          genres: ["Fantasy", "Action"],
+        },
+        PersonalState.Planned,
+      );
+      (item3.work as any).id = "work-planned-fantasy";
+      (clientRepository as any).items.delete(item3.work.id);
+      (clientRepository as any).items.set("work-planned-fantasy", item3);
+    }
+  });
   describe("Activatable Per-Work Notebook (BACKLOG.md §4.3)", () => {
     it("activates and deactivates per work while preserving working entries", () => {
       const workId = "work-frieren" as WorkId;
@@ -172,7 +225,7 @@ describe("Notebook, Fandom Links & Local Explainable Recommendations", () => {
       expect(
         clientRepository
           .getItem(workId)
-          ?.memories.some((m) => m.id === created.id),
+          ?.memories.some((m) => m.id === created.id && !m.deletedAt),
       ).toBe(false);
     });
   });

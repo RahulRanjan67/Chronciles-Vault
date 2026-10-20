@@ -63,11 +63,18 @@ export async function probeSyncHubStatus(): Promise<SyncStatusResponse | null> {
   }
 }
 
+let isSyncInProgress = false;
+
 export async function syncWithCrossPlatformHub(
   platform: "web" | "pc-app" | "mobile-app" = "web",
   deviceName = "Browser Web Sanctum",
   options?: SyncFilterOptions,
 ): Promise<SyncMergeResult | null> {
+  if (isSyncInProgress) {
+    console.warn("A synchronization operation is already in progress. Skipping concurrent invocation.");
+    return null;
+  }
+  isSyncInProgress = true;
   try {
     let currentItems = clientRepository.getItems();
 
@@ -123,11 +130,12 @@ export async function syncWithCrossPlatformHub(
     };
 
     if (data.ok && Array.isArray(data.state?.items) && typeof window !== "undefined") {
-      // Merge converged items into local vault storage and refresh Zustand store
-      const raw = window.localStorage.getItem(VAULT_STORAGE_KEY);
-      const parsed = raw ? (JSON.parse(raw) as Record<string, unknown>) : { version: 1 };
-      parsed.items = data.state.items;
-      window.localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(parsed));
+      // Import converged items into client repository and refresh Zustand store
+      clientRepository.importData({
+        version: "1.0.0",
+        exportedAt: new Date().toISOString(),
+        works: data.state.items,
+      });
       useLibraryStore.getState().refresh();
     }
 
@@ -138,5 +146,7 @@ export async function syncWithCrossPlatformHub(
     };
   } catch {
     return null;
+  } finally {
+    isSyncInProgress = false;
   }
 }

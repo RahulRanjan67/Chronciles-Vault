@@ -242,63 +242,6 @@ export function Lists({ onNavigateWork }: ListsProps) {
 
           {/* Community Lists Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Sponsored Partner Reading Card (Privacy-Respecting Ad Space) */}
-            <div className="flex flex-col justify-between overflow-hidden rounded-gm-xl border-2 border-dashed border-[var(--gm-accent-muted)]/70 bg-[var(--gm-bg-elevated)] hover:border-[var(--gm-accent-strong)] transition-all shadow-sm">
-              <div className="p-5">
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-6 w-6 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-[10px] font-bold text-amber-500">
-                      ★
-                    </div>
-                    <span className="text-gm-xs font-semibold text-[var(--gm-text)]">
-                      J-Novel Club Official
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--gm-accent-strong)] bg-[var(--gm-surface)] px-1.5 py-0.5 rounded border border-[var(--gm-border)]">
-                    Sponsored • Zero Tracking
-                  </span>
-                </div>
-
-                <h3 className="text-gm-base font-bold text-[var(--gm-text)]">
-                  Isekai &amp; Progression Light Novel Simulpubs
-                </h3>
-                <p className="mt-1 text-gm-xs text-[var(--gm-text-muted)] line-clamp-2 leading-relaxed">
-                  Read weekly digital pre-pub chapters of Ascendance of a Bookworm, Tearmoon Empire, and Hell Mode before physical print release.
-                </p>
-
-                <div className="mt-3 flex flex-wrap gap-1">
-                  {["Simulpub", "Light Novel", "Pre-pub", "Official Releases"].map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-gm-full bg-[var(--gm-surface)] px-2 py-0.5 text-[10px] text-[var(--gm-text-muted)] border border-[var(--gm-border)]"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="mt-4 p-2.5 rounded-gm-md bg-[var(--gm-surface)]/80 border border-[var(--gm-border)] flex items-center justify-between text-gm-xs">
-                  <span className="text-[var(--gm-text-muted)]">Exclusive Club Member Pass:</span>
-                  <strong className="font-mono text-[var(--gm-accent-strong)]">GRIMOIRE-CLUB</strong>
-                </div>
-              </div>
-
-              <div className="p-3 bg-[var(--gm-surface)]/60 border-t border-[var(--gm-border)] flex items-center justify-between">
-                <span className="text-[11px] font-mono text-[var(--gm-text-subtle)]">
-                  Zero Analytics • Ad Partner
-                </span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => window.open("https://j-novel.club", "_blank", "noopener,noreferrer")}
-                  className="gap-1.5 text-gm-xs"
-                >
-                  <span>Explore Releases</span>
-                  <ExternalLink className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-
             {filteredCommunityLists.map((list) => (
               <div
                 key={list.id}

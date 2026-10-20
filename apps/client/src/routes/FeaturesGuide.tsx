@@ -62,6 +62,7 @@ export interface FeatureStepItem {
   readonly steps: readonly string[];
   readonly screenshotCaption: string;
   readonly wireframeHighlights: readonly string[];
+  readonly defaultScreenshot?: string;
 }
 
 export interface FaqItem {
@@ -100,6 +101,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Click 'Enter My Room' (or press Enter) once hydration completes to trigger the iris reveal into your workspace.",
     ],
     screenshotCaption: "Sanctum Room Homepage with 3D Bookshelf Stage, Room Profile Switcher and Enter My Room CTA.",
+    defaultScreenshot: "/screenshots/feature_01_sanctum_home.png",
     wireframeHighlights: ["3D Parallax Bookshelves", "00% to 100% Kinetic Telemetry", "Room Profile Selector", "Enter My Room CTA"],
   },
   {
@@ -119,6 +121,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Enter the room—all workspace filters and layout preferences isolate to this room profile.",
     ],
     screenshotCaption: "Room Profile Selector modal with custom title, aesthetic motto, and theme assignment.",
+    defaultScreenshot: "/screenshots/feature_02_profile_switcher.png",
     wireframeHighlights: ["Independent Room Profiles", "Custom Motto & Title", "Per-Profile Layout Cache"],
   },
   {
@@ -138,6 +141,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Select 'Blossom Ascendant' for velvet wine-rose nights, sakura coral-pink highlights, and imperial gold accents (strictly warm, zero cold blue).",
     ],
     screenshotCaption: "Theme Switcher dropdown and side-by-side comparison of Midnight Arcana, Parchment & Ink, and Blossom Ascendant.",
+    defaultScreenshot: "/screenshots/feature_03_settings_appearance_profiles.png",
     wireframeHighlights: ["Midnight Arcana (#060913)", "Parchment & Ink (#f7f1e3)", "Blossom Ascendant (#1c070e)", "Per-Theme Cover Palettes"],
   },
   {
@@ -156,6 +160,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Header and navigation bars smoothly slide away, maximizing content visibility and typographic elegance.",
     ],
     screenshotCaption: "Iris clip-path circular reveal expanding outward from the desk lamp focal center.",
+    defaultScreenshot: "/screenshots/feature_03_themes_and_library.png",
     wireframeHighlights: ["GPU Radial Mask", "Zero Screen Jitter", "Borderless F11 Zen Mode"],
   },
   {
@@ -176,6 +181,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Card 3 (Import .gca): Drop your backup archive to restore your complete library and jump straight into your room.",
     ],
     screenshotCaption: "Three-Way Landing Screen with Sign Up, Sign In, and Import .gca File cards.",
+    defaultScreenshot: "/screenshots/feature_01_sanctum_home.png",
     wireframeHighlights: ["3 Distinct Styled Cards", "Zero Demo User Fallbacks", "1-Click .gca Drag & Drop"],
   },
   {
@@ -195,6 +201,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Or simply pick a local nickname for a purely offline, zero-network sovereign vault identity.",
     ],
     screenshotCaption: "Authentication modal displaying Google Sign-In button, Email ID fields, and Local Offline Mode toggle.",
+    defaultScreenshot: "/screenshots/feature_02_profile_switcher.png",
     wireframeHighlights: ["Continue with Google Button", "Email ID Validation", "Local Offline Identity"],
   },
 
@@ -216,6 +223,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Hover over any cover or spine to reveal the floating Quick-Action HUD.",
     ],
     screenshotCaption: "Library Shelf View showing oak wood grain shelves, varied book spine heights, and status badges.",
+    defaultScreenshot: "/screenshots/feature_07_library_grid_shelf.png",
     wireframeHighlights: ["Adaptive Cover Grid", "Oak Bookshelf Spines", "Dynamic Height Ratios", "Keyboard View Toggles"],
   },
   {
@@ -235,6 +243,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Click any tag pill in the table to filter your library by that tag immediately.",
     ],
     screenshotCaption: "Dense Table View showing tabular work rows, inline progress editor, and compact status pills.",
+    defaultScreenshot: "/screenshots/feature_07_library_grid_shelf.png",
     wireframeHighlights: ["Compact Row Density", "Inline Chapter Edits", "Multi-Column Sorting", "1-Click Tag Filters"],
   },
   {
@@ -254,6 +263,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Works marked 'On Hold' automatically record hiatus duration to prompt you when you return.",
     ],
     screenshotCaption: "Library status tab bar with item counts per status and active Reading tab highlighted.",
+    defaultScreenshot: "/screenshots/feature_07_library_grid_shelf.png",
     wireframeHighlights: ["5 Discrete States", "Unread Count Badges", "Hiatus Time Calculation", "Completion Milestones"],
   },
   {
@@ -273,6 +283,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Press Enter to open the top matched work or Esc to clear.",
     ],
     screenshotCaption: "Omni-search bar with real-time fuzzy match dropdown and highlighted title fragments.",
+    defaultScreenshot: "/screenshots/feature_10_command_palette.png",
     wireframeHighlights: ["Sub-millisecond Scoring", "Romanized Alias Matching", "Instant Keyword Clearing"],
   },
   {
@@ -292,6 +303,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Combine with rating sliders or category pills to pinpoint specific subsections of your collection.",
     ],
     screenshotCaption: "Library Filter Drawer showing Medium chips, Tag cloud, and Category selection pills.",
+    defaultScreenshot: "/screenshots/feature_07_library_grid_shelf.png",
     wireframeHighlights: ["Multi-Tag Intersection", "Medium Toggle Chips", "Rating Slider Filter", "1-Click Reset"],
   },
   {
@@ -311,6 +323,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Choose 'Rating' to showcase your personal hall-of-fame favorites.",
     ],
     screenshotCaption: "Sort dropdown menu open with options for Recently Read, Progress %, Rating, and Title A-Z.",
+    defaultScreenshot: "/screenshots/feature_07_library_grid_shelf.png",
     wireframeHighlights: ["5 Dynamic Sort Criteria", "Ascending / Descending Toggle", "Persistent Sort Preference"],
   },
   {
@@ -330,6 +343,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Confirm the operation—all selected works update in a single atomic storage transaction.",
     ],
     screenshotCaption: "Floating bottom Bulk Action bar with count badge and buttons for Tag, Status, Vault, and Export.",
+    defaultScreenshot: "/screenshots/feature_07_library_grid_shelf.png",
     wireframeHighlights: ["Floating Atomic HUD", "Multi-Select Checkboxes", "Atomic Batch Commit", "Select All Toggle"],
   },
   {
@@ -349,6 +363,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Click '+ Add to Library' or '+ Send to Radar' on any recommendation card to capture it immediately.",
     ],
     screenshotCaption: "Discover route showing taste-matched fiction recommendations and trope clusters.",
+    defaultScreenshot: "/screenshots/feature_24_search_portals_launcher.png",
     wireframeHighlights: ["Affinity Scoring", "Trope Spotlights", "1-Click Add to Library / Radar"],
   },
 
@@ -370,6 +385,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Toggle reading status directly from the header status dropdown.",
     ],
     screenshotCaption: "Work Dossier header with blurred cover ambient glow, chapter stepper, and rating stars.",
+    defaultScreenshot: "/screenshots/feature_15_work_dossier_hud.png",
     wireframeHighlights: ["Ambient Cover Glow", "Quick Chapter Stepper", "1-10 Star Rating", "Status Quick-Select"],
   },
   {
@@ -389,6 +405,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "All aliases become immediately searchable in the global omni-search.",
     ],
     screenshotCaption: "Aliases panel on Work Detail displaying Korean Hangul, romanized title, and acronym tags.",
+    defaultScreenshot: "/screenshots/feature_16_add_work_aliases_modal.png",
     wireframeHighlights: ["Multi-Language Script Support", "Community Acronym Storage", "Omni-Search Indexing"],
   },
   {
@@ -408,6 +425,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "The card will display a discreet warning badge requiring a click to reveal.",
     ],
     screenshotCaption: "Content Warnings editor with warning chips, blur toggle, and age rating badge.",
+    defaultScreenshot: "/screenshots/feature_15_work_dossier_hud.png",
     wireframeHighlights: ["Discreet Content Warnings", "Public Cover Blur Toggle", "Age Rating Selector"],
   },
   {
@@ -427,6 +445,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Browse all works inside any category with a single click.",
     ],
     screenshotCaption: "Category assignment panel showing custom category pills with color-coded dot badges.",
+    defaultScreenshot: "/screenshots/feature_45_my_categories_view.png",
     wireframeHighlights: ["Custom Shelf Taxonomy", "Color-Coded Badges", "Multi-Category Assignment"],
   },
   {
@@ -445,6 +464,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Click any tag chip anywhere in the app to immediately filter your entire library by that trope.",
     ],
     screenshotCaption: "Tag editor with color-picker dropdown and live tag preview chips.",
+    defaultScreenshot: "/screenshots/feature_16_add_work_aliases_modal.png",
     wireframeHighlights: ["Arbitrary Trope Creation", "Custom Color Assignments", "Instant Library Cross-Filtering"],
   },
   {
@@ -464,6 +484,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Click any link to launch external resources in a secure sandboxed tab.",
     ],
     screenshotCaption: "Work Detail Fandom & Links tab with categorized community resources and spoiler tags.",
+    defaultScreenshot: "/screenshots/feature_15_work_dossier_hud.png",
     wireframeHighlights: ["Categorized External Links", "Spoiler Warning Annotations", "Quick External Launch"],
   },
 
@@ -485,6 +506,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "The primary source launches with 1-click from the library card or 'Read Now' button.",
     ],
     screenshotCaption: "Access Paths panel showing multiple mirrors, status indicators, and primary source star.",
+    defaultScreenshot: "/screenshots/feature_21_access_paths_hiatus.png",
     wireframeHighlights: ["Unlimited Fallback Mirrors", "Local File & Web URL Support", "Primary Source Star Toggle"],
   },
   {
@@ -503,6 +525,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Whenever you click 'Continue Reading', Grimoire automatically opens the highest-priority functional source.",
     ],
     screenshotCaption: "Access Paths reordering controls with visual primary highlight badge.",
+    defaultScreenshot: "/screenshots/feature_21_access_paths_hiatus.png",
     wireframeHighlights: ["1-Click Primary Star", "Ordered Fallback Chain", "Automatic Target Resolution"],
   },
   {
@@ -521,6 +544,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Grimoire will automatically promote your next backup mirror to active duty.",
     ],
     screenshotCaption: "Source Health indicators with status badges and fallback transition warnings.",
+    defaultScreenshot: "/screenshots/feature_21_access_paths_hiatus.png",
     wireframeHighlights: ["Visual Health Indicators", "Dead Link Flagging", "Automated Fallback Promotion"],
   },
   {
@@ -539,6 +563,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Or choose 'Open in Browser' to launch the URL externally while Grimoire stays running in the background.",
     ],
     screenshotCaption: "Embedded reader modal showing web chapter view with floating Grimoire progress bar.",
+    defaultScreenshot: "/screenshots/feature_24_search_portals_launcher.png",
     wireframeHighlights: ["Embedded Webview Frame", "Floating Progress Tracker", "External Browser Pop-Out"],
   },
   {
@@ -558,6 +583,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "All credentials are encrypted with AES-256-GCM using your Vault Passphrase and never leave your machine.",
     ],
     screenshotCaption: "Reading Portals & Credentials Keyring showing stored website logins and quick-copy buttons.",
+    defaultScreenshot: "/screenshots/feature_25_credentials_keyring.png",
     wireframeHighlights: ["Zero-Knowledge AES-256 Storage", "1-Click Copy Username / Password", "Search URL Integration"],
   },
   {
@@ -577,6 +603,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Click 'Visit Homepage' or 'Search Catalog' to launch directly to your favorite portals.",
     ],
     screenshotCaption: "Frequent Reading Websites section displaying website badges with work count indicators.",
+    defaultScreenshot: "/screenshots/feature_26_frequent_websites_keyring.png",
     wireframeHighlights: ["Automated 5+ Work Threshold", "Domain Aggregator", "1-Click Catalog Search"],
   },
 
@@ -599,6 +626,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Your exact CFI reading position is automatically saved to your work's progress.",
     ],
     screenshotCaption: "Native EPUB Reader showing two-column typography, chapter TOC sidebar, and theme controls.",
+    defaultScreenshot: "/screenshots/feature_28_local_shelf_parchment.png",
     wireframeHighlights: ["Offline EPUB Rendering", "TOC Chapter Navigation", "Typography Controls", "Auto CFI Progress Save"],
   },
   {
@@ -619,6 +647,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Your last-viewed page is saved automatically to your work progress.",
     ],
     screenshotCaption: "PDF Viewer showing continuous scroll mode, zoom controls, and thumbnail sidebar.",
+    defaultScreenshot: "/screenshots/feature_28_pdf_reader_canvas.png",
     wireframeHighlights: ["Canvas Vector Rendering", "Dual-Page & Continuous Modes", "Fit Width / Fit Page Zoom", "Page Memory"],
   },
   {
@@ -638,6 +667,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "The reader automatically triggers progress saves as you cross chapter boundary markers.",
     ],
     screenshotCaption: "Webtoon reader interface displaying seamless vertical manhwa strip scrolling and bottom HUD.",
+    defaultScreenshot: "/screenshots/feature_28_local_shelf_parchment.png",
     wireframeHighlights: ["Zero-Seam Image Stitching", "Smooth Kinetic Scroll", "Chapter Boundary Detection"],
   },
   {
@@ -658,6 +688,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Playback position is saved to the second so you can resume anytime.",
     ],
     screenshotCaption: "Audiobook mini-player bar showing audio waveform, playback speed selector, and sleep timer.",
+    defaultScreenshot: "/screenshots/feature_28_local_shelf_parchment.png",
     wireframeHighlights: ["0.5x to 2.5x Variable Speed", "Configurable Sleep Timer", "Timestamp Precision Resume"],
   },
   {
@@ -677,6 +708,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Grimoire saves your playback timestamp and increments your episode counter upon completion.",
     ],
     screenshotCaption: "Video player in theater mode with scrub bar, subtitle toggle, and episode progress pill.",
+    defaultScreenshot: "/screenshots/feature_28_local_shelf_parchment.png",
     wireframeHighlights: ["Theater Mode & Fullscreen", "Subtitle Track Support", "Episode Auto-Increment"],
   },
 
@@ -698,6 +730,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Review your daily reading streak and weekly chapter completion counts.",
     ],
     screenshotCaption: "Up Next dashboard showing active reading queue cards, pace metrics, and quick-resume buttons.",
+    defaultScreenshot: "/screenshots/feature_32_up_next_queue.png",
     wireframeHighlights: ["1-Click Quick Resume", "Reading Velocity Metrics", "Streak Counter HUD"],
   },
   {
@@ -717,6 +750,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Adjust your daily reading goal to see the horizon recalculate in real-time.",
     ],
     screenshotCaption: "Velocity Calculator displaying chapters/day velocity curve and estimated completion horizon.",
+    defaultScreenshot: "/screenshots/feature_32_up_next_queue.png",
     wireframeHighlights: ["Rolling Chapter Velocity", "Estimated Finish Date", "Daily Target Adjuster"],
   },
   {
@@ -736,6 +770,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Once reoriented, click 'Resume Catch-Up' to transition the work back to active reading status.",
     ],
     screenshotCaption: "Hiatus Recovery card displaying days elapsed, last scene reflection, and memory refresher list.",
+    defaultScreenshot: "/screenshots/feature_21_access_paths_hiatus.png",
     wireframeHighlights: ["Inactivity Detection Badge", "Last Scene Memory Refresher", "Smooth Catch-Up Transition"],
   },
   {
@@ -754,6 +789,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Earn golden volume ribbons when completing full published arcs or light novel volumes.",
     ],
     screenshotCaption: "Reading Streaks panel with active flame counter, monthly consistency calendar, and badges.",
+    defaultScreenshot: "/screenshots/feature_32_up_next_queue.png",
     wireframeHighlights: ["Daily Flame Counter", "Monthly Activity Heatmap", "Milestone Trophy Badges"],
   },
 
@@ -775,6 +811,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Keep scratch notes nearby while reading without cluttering your permanent Memory Hall.",
     ],
     screenshotCaption: "Notes scratchpad editor with auto-save indicator, markdown formatting bar, and quick list tools.",
+    defaultScreenshot: "/screenshots/feature_36_quote_memories_scratchpad.png",
     wireframeHighlights: ["Auto-Save Scratchpad", "Separated from Memories", "Markdown Formatting", "Instant Revisions"],
   },
   {
@@ -794,6 +831,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Mark pivotal moments with the Vault Shield icon to keep them locked inside your Private Vault.",
     ],
     screenshotCaption: "Memory Vault cards displaying elegant quotation styling, chapter tags, and emotional reflection text.",
+    defaultScreenshot: "/screenshots/feature_37_memories_gallery_all.png",
     wireframeHighlights: ["Quotation Card Typography", "Chapter Milestone Tagging", "Private Vault Encryption Option"],
   },
   {
@@ -813,6 +851,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Click any screenshot thumbnail to open the full-screen pan-and-zoom lightbox.",
     ],
     screenshotCaption: "Screenshot Memory card with high-resolution image preview and expand lightbox button.",
+    defaultScreenshot: "/screenshots/feature_37_memories_gallery_all.png",
     wireframeHighlights: ["High-Res Image Attachments", "Clipboard Paste Support", "Full-Screen Zoom Lightbox"],
   },
   {
@@ -833,6 +872,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Click any linked work node to navigate across mediums instantaneously.",
     ],
     screenshotCaption: "Relations tab displaying cross-medium Novel ↔ Manhwa ↔ Anime visual relationship tree.",
+    defaultScreenshot: "/screenshots/feature_39_cross_medium_adaptation_graph.png",
     wireframeHighlights: ["Novel ↔ Manhwa ↔ Anime Links", "Transition Chapter Notes", "1-Click Cross-Navigation"],
   },
   {
@@ -872,6 +912,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "When ready to start reading, click 'Promote to Library' on any Radar card to convert it into a full Library Work.",
     ],
     screenshotCaption: "Radar Capture Queue with priority badges, medium filters, and Promote to Library action.",
+    defaultScreenshot: "/screenshots/feature_41_radar_capture_triage.png",
     wireframeHighlights: ["Zero-Friction Capture", "Priority & Medium Filters", "1-Click Promote to Library"],
   },
   {
@@ -890,6 +931,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Click 'Mark Seen', 'Snooze', or 'Read Now' to open your preferred source and clear the notification.",
     ],
     screenshotCaption: "Updates Inbox showing unread chapter releases, certainty badges, and batch mark-seen controls.",
+    defaultScreenshot: "/screenshots/feature_42_updates_certainty_feed.png",
     wireframeHighlights: ["Confirmed / Inferred Badges", "Unread Chapter Delta", "Snooze & Dismiss Controls"],
   },
   {
@@ -930,6 +972,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Open the Publication Panel to generate a shareable read-only card or JSON export of your curated list.",
     ],
     screenshotCaption: "Curated Lists view with custom work ordering and Publication Share card generator.",
+    defaultScreenshot: "/screenshots/feature_44_curated_lists_publication.png",
     wireframeHighlights: ["Themed Collections", "Curator Annotations", "Shareable Publication Cards"],
   },
   {
@@ -948,6 +991,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Click any category card to filter and inspect all works inside that shelf.",
     ],
     screenshotCaption: "My Categories dashboard with custom shelf cards and work count indicators.",
+    defaultScreenshot: "/screenshots/feature_45_my_categories_view.png",
     wireframeHighlights: ["Custom Shelf Taxonomy", "Color & Icon Badges", "Instant Category Filtering"],
   },
   {
@@ -967,6 +1011,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Lock the Vault manually or press Ctrl+Shift+L (also auto-locks after 15 minutes of inactivity or window blur).",
     ],
     screenshotCaption: "Private Vault unlock screen and encrypted sanctum view with panic lock trigger.",
+    defaultScreenshot: "/screenshots/feature_46_private_vault_unlocked.png",
     wireframeHighlights: ["Zero-Knowledge AES-256", "PBKDF2 Key Derivation", "Ctrl+Shift+L Panic Lock"],
   },
   {
@@ -986,6 +1031,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "To re-enter, you must re-enter your master passphrase.",
     ],
     screenshotCaption: "Stealth Panic Lock confirmation toast and instant memory scrubbing notification.",
+    defaultScreenshot: "/screenshots/feature_46_private_vault_locked.png",
     wireframeHighlights: ["Sub-Millisecond Key Purge", "Zero DOM Remnants", "Automatic Window Blur Trigger"],
   },
   {
@@ -1004,6 +1050,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Visit '/archive' anytime to search archived works or click 'Unarchive' to restore them to active duty.",
     ],
     screenshotCaption: "Cold Storage Archive modal and Archive catalog with reflection notes and Unarchive button.",
+    defaultScreenshot: "/screenshots/feature_48_trash_bin_recovery.png",
     wireframeHighlights: ["Structured Archive Reasons", "Reflection Notes", "1-Click Unarchive Restore"],
   },
   {
@@ -1023,6 +1070,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "On your other device, simply select 'Import .gca File' from the landing screen to restore everything in seconds.",
     ],
     screenshotCaption: "Export Grimoire Archive dialog showing payload breakdown and instant download button.",
+    defaultScreenshot: "/screenshots/feature_49_data_backup_export_import.png",
     wireframeHighlights: ["Self-Contained Bundle", "Cross-Platform Compatible", "Complete Relational Fidelity"],
   },
   {
@@ -1041,6 +1089,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Click 'Import Browser Bookmarks (.html)' or 'Import CSV' to parse bookmark folders into candidate works, review deduplication matches, and commit them to your Library.",
     ],
     screenshotCaption: "Settings Data Transfer panel showing JSON Backup Export, CSV Importer, and Browser Bookmarks HTML parser.",
+    defaultScreenshot: "/screenshots/feature_49_data_backup_export_import.png",
     wireframeHighlights: ["1-Click JSON Vault Export", "Chrome/Firefox HTML Importer", "Smart Deduplication Preview"],
   },
   {
@@ -1060,6 +1109,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "When online, encrypted CRDT deltas synchronize with your relay or peer devices.",
     ],
     screenshotCaption: "Sync Hub status panel showing HLC clock drift, last sync timestamp, and encrypted relay status.",
+    defaultScreenshot: "/screenshots/feature_51_sources_sync_sanctum.png",
     wireframeHighlights: ["Local-First Architecture", "HLC CRDT Convergence", "End-to-End Encrypted Relay"],
   },
   {
@@ -1079,6 +1129,7 @@ const ALL_TINY_FEATURES: readonly FeatureStepItem[] = [
       "Enjoy full hardware acceleration, native window controls, and offline OPFS/SQLite performance.",
     ],
     screenshotCaption: "Grimoire Windows Desktop app running in dedicated frameless window with native OS integration.",
+    defaultScreenshot: "/screenshots/feature_51_sync_sanctum_scope.png",
     wireframeHighlights: ["56 KB Win32 Launcher", "35 MB PyInstaller Studio", "Zero Console Windows", "Hardware Accelerated"],
   },
 ];
@@ -1223,6 +1274,9 @@ export function FeaturesGuide({ onNavigate, onEnterRoomAndNavigate }: FeaturesGu
   const [expandedCards, setExpandedCards] = React.useState<Record<string, boolean>>(() => {
     return {
       "room-preloader-profiles": true,
+      "multi-profile-reading-rooms": true,
+      "three-way-first-time-landing": true,
+      "multi-provider-authentication": true,
       "three-distinct-themes": true,
       "library-grid-shelf": true,
     };
@@ -1494,7 +1548,7 @@ export function FeaturesGuide({ onNavigate, onEnterRoomAndNavigate }: FeaturesGu
         {activeTab === "features" && (
           <div className="space-y-4">
             {filteredFeatures.map((feature) => {
-              const attachedScreenshot = customScreenshots[feature.id];
+              const attachedScreenshot = customScreenshots[feature.id] || feature.defaultScreenshot;
               const isExpanded = expandedCards[feature.id] ?? false;
 
               return (

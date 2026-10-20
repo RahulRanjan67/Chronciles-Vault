@@ -168,6 +168,11 @@ export const useLibraryStore = create<LibraryState>((set, get) => {
   };
 });
 
+// Wire cross-tab storage sync
+clientRepository.subscribeToStorage(() => {
+  useLibraryStore.getState().refresh();
+});
+
 /**
  * Selector for filtered and sorted works based on active library state.
  * When `options.includeVaultWorks` is false (default when Vault is locked),
