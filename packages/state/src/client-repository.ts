@@ -424,7 +424,7 @@ export class ClientRepository {
             externalIds: Array.isArray(w.externalIds) ? w.externalIds : [],
             createdAt: w.createdAt ?? new Date().toISOString(),
             updatedAt: w.updatedAt ?? new Date().toISOString(),
-            deletedAt: null,
+            deletedAt: w.deletedAt ? String(w.deletedAt) : null,
           };
 
           const paths: AccessPath[] = Array.isArray(w.accessPaths)
@@ -448,8 +448,8 @@ export class ClientRepository {
             relationship: w.relationship,
             accessPaths: paths,
             latestProgress: w.latestProgress,
-            memories: [],
-            updates: [],
+            memories: Array.isArray(w.memories) ? w.memories : [],
+            updates: Array.isArray(w.updates) ? w.updates : [],
           });
           worksCount++;
         }
@@ -461,7 +461,28 @@ export class ClientRepository {
           if (m && m.workId && this.items.has(m.workId)) {
             const target = this.items.get(m.workId)!;
             if (!target.memories.some((existing) => existing.id === m.id)) {
-              target.memories.push(m);
+              const memoryRecord: any = {
+                id: m.id || newId(),
+                workId: m.workId,
+                type: m.type || "note",
+                title: m.title || "",
+                body: m.body || "",
+                privacyState: m.privacyState === "vault" ? "vault" : m.privacyState === "private" ? "private" : "public",
+                spoilerLevel: m.spoilerLevel || "spoiler_free",
+                showInGlobalGallery: m.showInGlobalGallery ?? true,
+                tags: Array.isArray(m.tags) ? m.tags : [],
+                assets: Array.isArray(m.assets)
+                  ? m.assets
+                  : m.mediaUrl
+                  ? [{ id: `asset-${m.id}`, fileId: m.mediaUrl, mimeType: m.mediaMimeType || "image/png" }]
+                  : [],
+                accessPathId: m.accessPathId ?? null,
+                progressAnchor: m.progressAnchor ?? (m.chapterContext ? { type: "chapter", chapter: 1, title: m.chapterContext } : null),
+                createdAt: m.createdAt ?? new Date().toISOString(),
+                updatedAt: m.updatedAt ?? new Date().toISOString(),
+                deletedAt: null,
+              };
+              target.memories.push(memoryRecord);
               memoriesCount++;
             }
           }
@@ -484,6 +505,44 @@ export class ClientRepository {
             this.archiveRecords.set(ar.id, ar);
           }
         }
+      }
+
+      // Root Updates array distribution to tracked works
+      if (Array.isArray(payload.updates)) {
+        for (const upd of payload.updates) {
+          if (upd && upd.workId && this.items.has(upd.workId)) {
+            const target = this.items.get(upd.workId)!;
+            if (!target.updates.some((existing: any) => existing.id === upd.id)) {
+              target.updates.push(upd);
+            }
+          }
+        }
+      }
+
+      // Categories persistence with exact workIds
+      if (Array.isArray(payload.categories) && payload.categories.length > 0 && typeof window !== 'undefined') {
+        try {
+          const rawStored = window.localStorage.getItem('cv:custom_categories:v1');
+          const existing: any[] = rawStored ? JSON.parse(rawStored) : [];
+          const existingIds = new Set(existing.map((c) => c.id));
+          const toAdd = payload.categories.filter((c: any) => c && c.id && !existingIds.has(c.id));
+          if (toAdd.length > 0) {
+            window.localStorage.setItem('cv:custom_categories:v1', JSON.stringify([...existing, ...toAdd]));
+          }
+        } catch {}
+      }
+
+      // Credentials persistence
+      if (Array.isArray(payload.credentials) && payload.credentials.length > 0 && typeof window !== 'undefined') {
+        try {
+          const rawCreds = window.localStorage.getItem('grimoire:vault:credentials');
+          const existing: any[] = rawCreds ? JSON.parse(rawCreds) : [];
+          const existingIds = new Set(existing.map((c) => c.id));
+          const toAdd = payload.credentials.filter((c: any) => c && c.id && !existingIds.has(c.id));
+          if (toAdd.length > 0) {
+            window.localStorage.setItem('grimoire:vault:credentials', JSON.stringify([...existing, ...toAdd]));
+          }
+        } catch {}
       }
     }
 

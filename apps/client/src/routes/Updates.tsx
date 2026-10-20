@@ -63,14 +63,37 @@ function updatesFromLibrary(items: HydratedWorkItem[], now: string): FeedUpdate[
       const currentProgress = item.relationship?.currentAnchor
         ? extractNumericProgress(item.relationship.currentAnchor)
         : null;
-      return item.updates.map((update) => {
-        const evaluated = applyUpdateCertaintyValidity(update, now, STALE_AFTER_MS);
+      return item.updates.map((rawUpdate: any) => {
+        const detectedAt =
+          rawUpdate.detectedAt ||
+          rawUpdate.releasedAt ||
+          rawUpdate.createdAt ||
+          now;
+        const label =
+          rawUpdate.label ||
+          rawUpdate.title ||
+          (rawUpdate.chapterNumber ? `Chapter ${rawUpdate.chapterNumber}` : "New Release");
+        const numericIndex =
+          rawUpdate.numericIndex !== undefined
+            ? rawUpdate.numericIndex
+            : rawUpdate.chapterNumber !== undefined
+            ? rawUpdate.chapterNumber
+            : undefined;
+        const normalizedUpdate = {
+          ...rawUpdate,
+          detectedAt,
+          label,
+          numericIndex,
+          certainty: rawUpdate.certainty || "confirmed",
+        };
+        const evaluated = applyUpdateCertaintyValidity(normalizedUpdate, now, STALE_AFTER_MS);
         const backlog =
           evaluated.numericIndex !== undefined && currentProgress !== null
             ? Math.max(0, Math.floor(evaluated.numericIndex - currentProgress))
             : null;
         const sourceUrl =
-          update.sourceUrl ??
+          rawUpdate.sourceUrl ??
+          rawUpdate.url ??
           (source?.kind === "web" ? source.url : source?.kind === "feed" ? source.feedUrl : null);
         const safeUrl = (() => {
           if (!sourceUrl) return null;
@@ -82,12 +105,12 @@ function updatesFromLibrary(items: HydratedWorkItem[], now: string): FeedUpdate[
           }
         })();
         return {
-          id: buildUpdateFeedId(item.work.id, update.detectedAt, update.label),
+          id: buildUpdateFeedId(item.work.id, detectedAt, label),
           workId: item.work.id,
           workTitle: item.work.title,
           coverSrc: item.work.coverRef,
-          label: update.label,
-          date: update.detectedAt,
+          label,
+          date: detectedAt,
           source: source?.label ?? source?.provider ?? "Choose source",
           sourceHealth: displaySourceHealth(source?.health),
           certainty: evaluated.certainty,

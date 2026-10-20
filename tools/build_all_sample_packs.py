@@ -26,6 +26,7 @@ import os
 import sys
 import json
 import zipfile
+import base64
 import io
 
 # Import media generation utilities
@@ -183,8 +184,13 @@ def build_pack_1():
             {
                 "id": f"upd-{work_id}-1",
                 "chapterNumber": chapter_num,
+                "label": f"Chapter {chapter_num}: Breaking of the Ninefold Meridian",
                 "title": f"Chapter {chapter_num}: Breaking of the Ninefold Meridian",
+                "detectedAt": "2026-10-18T18:30:00Z",
                 "releasedAt": "2026-10-18T18:30:00Z",
+                "numericIndex": chapter_num,
+                "certainty": "confirmed",
+                "sourceUrl": paths[0][1] if paths else "https://wuxiaworld.com",
                 "url": paths[0][1] if paths else "https://wuxiaworld.com",
                 "read": False
             }
@@ -253,7 +259,7 @@ def build_pack_1():
             "type": "quote" if i % 2 == 1 else "reflection",
             "title": f"Epiphany of the Nine Heavens #{i}",
             "body": f"\"The Dao that can be trodden is not the enduring and unchanging Dao.\" Milestone reflection #{i}: The cultivator pierced the celestial barrier, shattering mortal shackles.",
-            "spoilerLevel": "minor" if i % 3 == 0 else "none",
+            "spoilerLevel": "minor" if i % 3 == 0 else "spoiler_free",
             "privacyState": "vault" if is_vault_mem else "public",
             "showInGlobalGallery": True,
             "tags": ["dao-heart-ascension", "cultivation-epiphany", "milestone"],
@@ -274,19 +280,31 @@ def build_pack_1():
         ("Battle Through the Heavens", "Heavenly Flame Lotus Fusion", "Battle Through the Heavens", "Xiao Yan converged the green lotus flame with the bone chilling flame into a lotus.", "Ch. 210 · Desert of Tagore", (234, 179, 8))
     ]
 
+    screenshot_bytes_map = {}
     for idx, (win_t, sec_t, hl, q, prog, acc) in enumerate(screenshot_memory_defs, 1):
+        ss_bytes = generate_screenshot_image(win_t, sec_t, hl, q, prog, acc)
+        screenshot_bytes_map[idx] = ss_bytes
+        b64_uri = f"data:image/png;base64,{base64.b64encode(ss_bytes).decode('ascii')}"
         memories.append({
             "id": f"mem-xianxia-ss-{idx:02d}",
             "workId": f"work-xianxia-{(idx % 10) + 1:02d}",
             "type": "screenshot",
             "title": sec_t,
             "body": q,
-            "mediaUrl": f"screenshots/ss_{idx:02d}.png",
+            "mediaUrl": b64_uri,
             "mediaMimeType": "image/png",
             "chapterContext": prog,
             "privacyState": "public",
             "showInGlobalGallery": True,
             "tags": ["screenshot", "pivotal-scene"],
+            "assets": [
+                {
+                    "id": f"asset-mem-xianxia-ss-{idx:02d}",
+                    "fileId": b64_uri,
+                    "thumbnailRef": b64_uri,
+                    "assetType": "image"
+                }
+            ],
             "createdAt": "2026-10-18T12:00:00Z"
         })
 
@@ -388,7 +406,7 @@ def build_pack_1():
         
         # 10 Screenshots
         for idx, (win_t, sec_t, hl, q, prog, acc) in enumerate(screenshot_memory_defs, 1):
-            ss_bytes = generate_screenshot_image(win_t, sec_t, hl, q, prog, acc)
+            ss_bytes = screenshot_bytes_map.get(idx) or generate_screenshot_image(win_t, sec_t, hl, q, prog, acc)
             z.writestr(f"screenshots/ss_{idx:02d}.png", ss_bytes)
             
         # 3 Cover Images
@@ -616,8 +634,13 @@ def build_pack_2():
             {
                 "id": f"upd-{work_id}-1",
                 "chapterNumber": chapter_num,
+                "label": f"Chapter {chapter_num}: Climax of the Double Dungeon Arc",
                 "title": f"Chapter {chapter_num}: Climax of the Double Dungeon Arc",
+                "detectedAt": "2026-10-18T19:00:00Z",
                 "releasedAt": "2026-10-18T19:00:00Z",
+                "numericIndex": chapter_num,
+                "certainty": "confirmed",
+                "sourceUrl": paths[0][1] if paths else "https://mangadex.org",
                 "url": paths[0][1] if paths else "https://mangadex.org",
                 "read": False
             }
@@ -706,19 +729,31 @@ def build_pack_2():
         ("The Boxer", "The Light in the Darkness", "The Boxer", "Yu stood motionless in the center of the ring, waiting for a single ray of sunlight.", "Ch. 104 · Championship Bout", (16, 185, 129))
     ]
 
+    screenshot_bytes_map = {}
     for idx, (win_t, sec_t, hl, q, prog, acc) in enumerate(screenshot_defs, 1):
+        ss_bytes = generate_screenshot_image(win_t, sec_t, hl, q, prog, acc)
+        screenshot_bytes_map[idx] = ss_bytes
+        b64_uri = f"data:image/png;base64,{base64.b64encode(ss_bytes).decode('ascii')}"
         memories.append({
             "id": f"mem-manga-ss-{idx:02d}",
             "workId": f"work-manga-{(idx % 10) + 1:02d}",
             "type": "screenshot",
             "title": sec_t,
             "body": q,
-            "mediaUrl": f"screenshots/ss_{idx:02d}.png",
+            "mediaUrl": b64_uri,
             "mediaMimeType": "image/png",
             "chapterContext": prog,
             "privacyState": "public",
             "showInGlobalGallery": True,
             "tags": ["screenshot", "pivotal-scene"],
+            "assets": [
+                {
+                    "id": f"asset-mem-manga-ss-{idx:02d}",
+                    "fileId": b64_uri,
+                    "thumbnailRef": b64_uri,
+                    "assetType": "image"
+                }
+            ],
             "createdAt": "2026-10-18T12:00:00Z"
         })
 
@@ -804,7 +839,7 @@ def build_pack_2():
         z.writestr("archive.json", json.dumps(archive_payload, indent=2))
 
         for idx, (win_t, sec_t, hl, q, prog, acc) in enumerate(screenshot_defs, 1):
-            ss_bytes = generate_screenshot_image(win_t, sec_t, hl, q, prog, acc)
+            ss_bytes = screenshot_bytes_map.get(idx) or generate_screenshot_image(win_t, sec_t, hl, q, prog, acc)
             z.writestr(f"screenshots/ss_{idx:02d}.png", ss_bytes)
 
         z.writestr("covers/solo_leveling_cover.png", generate_cover_image("Solo Leveling", "The Shadow Monarch Awakens", "Hunter Fantasy", (59, 130, 246), (15, 23, 42)))
@@ -1067,7 +1102,7 @@ def build_pack_3():
             "type": "quote" if i % 2 == 1 else "reflection",
             "title": f"Star Stream Constellation Transmission #{i}",
             "body": f"\"[The constellation 'Demon King of Salvation' is looking at you.]\" Revelation #{i}: When the fourth wall cracked, the universe revealed its true author.",
-            "spoilerLevel": "major" if i % 3 == 0 else "none",
+            "spoilerLevel": "major" if i % 3 == 0 else "spoiler_free",
             "privacyState": "vault" if is_vault_mem else "public",
             "showInGlobalGallery": True,
             "tags": ["constellation-star-stream", "fourth-wall-shattered", "meta-revelation"],
@@ -1087,19 +1122,31 @@ def build_pack_3():
         ("Cyberpunk Edgerunners", "I Really Want to Stay at Your House", "Cyberpunk: Edgerunners", "David Martinez activated the Sandevistan to propel Lucy toward the Moon.", "Arasaka Tower Apex · Night City", (249, 115, 22))
     ]
 
+    screenshot_bytes_map = {}
     for idx, (win_t, sec_t, hl, q, prog, acc) in enumerate(screenshot_defs, 1):
+        ss_bytes = generate_screenshot_image(win_t, sec_t, hl, q, prog, acc)
+        screenshot_bytes_map[idx] = ss_bytes
+        b64_uri = f"data:image/png;base64,{base64.b64encode(ss_bytes).decode('ascii')}"
         memories.append({
             "id": f"mem-scifi-ss-{idx:02d}",
             "workId": f"work-scifi-{(idx % 10) + 1:02d}",
             "type": "screenshot",
             "title": sec_t,
             "body": q,
-            "mediaUrl": f"screenshots/ss_{idx:02d}.png",
+            "mediaUrl": b64_uri,
             "mediaMimeType": "image/png",
             "chapterContext": prog,
             "privacyState": "public",
             "showInGlobalGallery": True,
             "tags": ["screenshot", "pivotal-scene"],
+            "assets": [
+                {
+                    "id": f"asset-mem-scifi-ss-{idx:02d}",
+                    "fileId": b64_uri,
+                    "thumbnailRef": b64_uri,
+                    "assetType": "image"
+                }
+            ],
             "createdAt": "2026-10-18T12:00:00Z"
         })
 

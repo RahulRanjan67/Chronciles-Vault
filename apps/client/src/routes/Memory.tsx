@@ -129,7 +129,14 @@ export function Memory({ onNavigateWork }: MemoryProps) {
   const filteredMemories = memories.filter(({ memory, workTitle }) => {
     if (memory.privacyState === PrivacyState.Vault && !isVaultUnlocked) return false;
     if (!showHidden && !memory.showInGlobalGallery) return false;
-    if (!showSpoilers && memory.spoilerLevel !== SpoilerLevel.SpoilerFree) return false;
+    const isSpoiler =
+      (memory.spoilerLevel as string) === SpoilerLevel.Minor ||
+      (memory.spoilerLevel as string) === SpoilerLevel.Major ||
+      (memory.spoilerLevel as string) === SpoilerLevel.Mild ||
+      (memory.spoilerLevel as string) === "minor" ||
+      (memory.spoilerLevel as string) === "major" ||
+      (memory.spoilerLevel as string) === "mild";
+    if (!showSpoilers && isSpoiler) return false;
     if (filterType !== "all" && memory.type !== filterType) return false;
     const query = search.trim().toLocaleLowerCase();
     if (!query) return true;
@@ -159,6 +166,21 @@ export function Memory({ onNavigateWork }: MemoryProps) {
       try {
         const asset = memory.assets[0];
         if (!asset) return;
+        const ref = asset.thumbnailRef || asset.fileId;
+        if (
+          ref &&
+          (ref.startsWith("data:") ||
+            ref.startsWith("http://") ||
+            ref.startsWith("https://") ||
+            ref.startsWith("blob:"))
+        ) {
+          setImagePreviews((current) => ({
+            ...current,
+            [memoryId]: { thumbnail: ref },
+          }));
+          return;
+        }
+
         const thumbnailBlob = asset.thumbnailRef
           ? await getMemoryAssetBlob(asset.thumbnailRef)
           : await getMemoryAssetBlob(asset.fileId);
@@ -169,11 +191,8 @@ export function Memory({ onNavigateWork }: MemoryProps) {
           [memoryId]: { thumbnail: thumbnailUrl },
         }));
       } catch (loadError) {
-        loadedImagesRef.current.delete(memoryId);
-        toast({
-          title: "Memory image is unavailable",
-          description: loadError instanceof Error ? loadError.message : "Unable to load image.",
-        });
+        // Fallback: If local IndexedDB asset isn't found, do not crash or spam toasts
+        console.warn(`Memory asset not found in local IndexedDB for ${memoryId}`);
       }
     };
     const cards = Array.from(gallery.querySelectorAll<HTMLElement>("[data-memory-id]"));

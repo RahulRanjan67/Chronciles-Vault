@@ -81,7 +81,7 @@ export function FileReader({ fileId, onBack }: FileReaderProps) {
         <EpubReader fileId={file.id} onBack={onBack} />
       ) : file.format === "cbz" ? (
         <CbzReader fileId={file.id} onBack={onBack} />
-      ) : file.format === "txt" ? (
+      ) : file.format === "txt" || file.format === "md" || file.format === "docx" ? (
         <TxtReader fileId={file.id} onBack={onBack} />
       ) : (
         <PdfReader fileId={file.id} onBack={onBack} />

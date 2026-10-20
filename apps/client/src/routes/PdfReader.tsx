@@ -149,8 +149,11 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
       const data = new Uint8Array(await blob.arrayBuffer());
       loadingTask = getDocument({
         data,
+        cMapUrl: "https://unpkg.com/pdfjs-dist@4.10.38/cmaps/",
+        cMapPacked: true,
+        standardFontDataUrl: "https://unpkg.com/pdfjs-dist@4.10.38/standard_fonts/",
         isEvalSupported: false,
-        enableXfa: false,
+        enableXfa: true,
         disableAutoFetch: true,
         disableStream: true,
       });
@@ -371,9 +374,13 @@ export function PdfReader({ fileId, onBack }: PdfReaderProps) {
           container: textContainer,
           viewport: displayViewport,
         });
-        textLayers.push(textLayer);
         const renderPromise = renderTask.promise;
-        await Promise.all([textLayer.render(), renderPromise]);
+        try {
+          await textLayer.render();
+        } catch (textLayerErr) {
+          console.warn("Non-fatal text layer notice (scanned PDF):", textLayerErr);
+        }
+        await renderPromise;
         if (cancelled) return;
       }
     };

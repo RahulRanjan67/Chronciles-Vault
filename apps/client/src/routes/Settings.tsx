@@ -10,6 +10,7 @@ import {
   Moon,
   Paintbrush,
   Palette,
+  RefreshCw,
   Shield,
   Sliders,
   Trash2,
@@ -265,12 +266,32 @@ export function Settings() {
           {activeSection === 'sources' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-gm-lg font-bold text-[var(--gm-text)]">Sources & Tracking</h3>
+                <h3 className="text-gm-lg font-bold text-[var(--gm-text)]">Sources &amp; Synchronization</h3>
                 <p className="text-gm-xs text-[var(--gm-text-muted)] mt-1">
-                  Manage sync intervals and connected scrapers/extensions.
+                  Manage sync scope, granular memory opt-outs, and background polling intervals.
                 </p>
               </div>
               <Separator />
+              <div className="p-4 rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div>
+                  <h4 className="font-bold text-gm-sm text-[var(--gm-text)]">
+                    Cross-Platform Synchronization Sanctum
+                  </h4>
+                  <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5 max-w-xl">
+                    Configure granular sync options: select all works, select few works, exclude few works, filter by custom categories, opt out individual memories, and enforce zero-knowledge vault boundaries (vault is synced only when open).
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    window.location.hash = "#/sync";
+                  }}
+                  className="gap-2 shrink-0 self-end sm:self-center"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  <span>Configure Sync Scope</span>
+                </Button>
+              </div>
               <p className="text-gm-sm text-[var(--gm-text-muted)]">
                 12 sources currently active.{' '}
                 {perfProfile.pollingIntervalMinutes === null

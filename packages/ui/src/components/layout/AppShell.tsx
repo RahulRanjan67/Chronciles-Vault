@@ -103,16 +103,17 @@ export function AppShell({
             </div>
 
             {/* Center / Search bar trigger */}
-            <div className="flex-1 min-w-0 max-w-3xl mx-2 sm:mx-4">
+            <div className="flex-1 min-w-0 max-w-3xl mx-1.5 sm:mx-4">
               {onOpenCommandPalette && (
                 <button
                   type="button"
                   onClick={onOpenCommandPalette}
-                  className="flex w-full h-9 items-center justify-between rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)]/70 px-3 sm:px-4 text-gm-sm text-[var(--gm-text-muted)] hover:border-[var(--gm-border-strong)] hover:text-[var(--gm-text)] transition-colors cursor-pointer min-w-0"
+                  className="flex w-full h-7 sm:h-9 items-center justify-between rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)]/70 px-2 sm:px-4 text-xs sm:text-gm-sm text-[var(--gm-text-muted)] hover:border-[var(--gm-border-strong)] hover:text-[var(--gm-text)] transition-colors cursor-pointer min-w-0"
                 >
-                  <div className="flex items-center gap-2 min-w-0 truncate">
-                    <Search className="h-4 w-4 shrink-0 text-[var(--gm-text-subtle)]" />
-                    <span className="truncate">Search library, up next, actions…</span>
+                  <div className="flex items-center gap-1.5 min-w-0 truncate">
+                    <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-[var(--gm-text-subtle)]" />
+                    <span className="truncate hidden sm:inline">Search library, up next, actions…</span>
+                    <span className="truncate sm:hidden">Search…</span>
                   </div>
                   <kbd className="hidden sm:inline-flex shrink-0 h-4 items-center gap-0.5 rounded-gm-sm border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] px-1.5 font-mono text-[10px] text-[var(--gm-text-subtle)]">
                     <Command className="h-2.5 w-2.5" /> K

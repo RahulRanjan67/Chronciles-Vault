@@ -290,6 +290,27 @@ export function applyBackupImport(
     }
   }
 
+  // Restore and map Custom Categories
+  const rawCategories = (snapshot as any).categories;
+  if (Array.isArray(rawCategories) && rawCategories.length > 0 && typeof window !== "undefined") {
+    try {
+      const rawStored = window.localStorage.getItem("cv:custom_categories:v1");
+      const existingCategories: any[] = rawStored ? JSON.parse(rawStored) : [];
+      const existingIds = new Set(existingCategories.map((c) => c.id));
+      const newCats = rawCategories
+        .filter((c: any) => c && c.id && !existingIds.has(c.id))
+        .map((c: any) => ({
+          ...c,
+          workIds: Array.isArray(c.workIds)
+            ? c.workIds.map((oldId: string) => allWorkMap.get(oldId) ?? oldId)
+            : [],
+        }));
+      if (newCats.length > 0) {
+        window.localStorage.setItem("cv:custom_categories:v1", JSON.stringify([...existingCategories, ...newCats]));
+      }
+    } catch {}
+  }
+
   if (repo === clientRepository && worksCreated > 0) {
     useLibraryStore.getState().refresh();
   }

@@ -30,6 +30,15 @@ export interface SyncMergeResult {
   hlc?: string;
 }
 
+export interface SyncFilterOptions {
+  workScope?: "all" | "whitelist" | "blacklist";
+  selectedWorkIds?: string[];
+  excludedWorkIds?: string[];
+  categoryIds?: string[];
+  optedOutMemoryIds?: string[];
+  includeVault?: boolean; // Strictly false if vault is locked!
+}
+
 const DEFAULT_SYNC_HUB_URL = "http://127.0.0.1:47920";
 const VAULT_STORAGE_KEY = "cv:local_vault:v1";
 
@@ -57,9 +66,45 @@ export async function probeSyncHubStatus(): Promise<SyncStatusResponse | null> {
 export async function syncWithCrossPlatformHub(
   platform: "web" | "pc-app" | "mobile-app" = "web",
   deviceName = "Browser Web Sanctum",
+  options?: SyncFilterOptions,
 ): Promise<SyncMergeResult | null> {
   try {
-    const currentItems = clientRepository.getItems();
+    let currentItems = clientRepository.getItems();
+
+    // ─── FILTER WORKS & MEMORIES ACCORDING TO USER SYNC PREFERENCES ───
+    if (options) {
+      // 1. Vault gating: if vault is not open/unlocked, strictly omit vault items
+      if (!options.includeVault) {
+        currentItems = currentItems.filter((i) => i.work.privacyState !== "vault");
+      }
+
+      // 2. Work scope: All vs Whitelist vs Blacklist
+      if (options.workScope === "whitelist" && Array.isArray(options.selectedWorkIds)) {
+        const set = new Set(options.selectedWorkIds);
+        currentItems = currentItems.filter((i) => set.has(i.work.id));
+      } else if (options.workScope === "blacklist" && Array.isArray(options.excludedWorkIds)) {
+        const set = new Set(options.excludedWorkIds);
+        currentItems = currentItems.filter((i) => !set.has(i.work.id));
+      }
+
+      // 3. Memory opt-outs: Filter out memories the user chose to keep local
+      if (Array.isArray(options.optedOutMemoryIds) && options.optedOutMemoryIds.length > 0) {
+        const optOutSet = new Set(options.optedOutMemoryIds);
+        currentItems = currentItems.map((item) => ({
+          ...item,
+          memories: item.memories.filter((m) => !optOutSet.has(m.id)),
+        }));
+      }
+
+      // 4. Memory vault gating: if vault is locked, remove vault memories
+      if (!options.includeVault) {
+        currentItems = currentItems.map((item) => ({
+          ...item,
+          memories: item.memories.filter((m) => m.privacyState !== "vault"),
+        }));
+      }
+    }
+
     const res = await fetch(`${getSyncHubUrl()}/api/sync/merge`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

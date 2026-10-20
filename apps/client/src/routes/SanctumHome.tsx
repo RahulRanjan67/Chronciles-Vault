@@ -511,6 +511,67 @@ const POPULAR_READING_SITES: readonly PopularSiteEntry[] = [
   },
 ];
 
+interface SponsoredPartner {
+  readonly id: string;
+  readonly name: string;
+  readonly tagline: string;
+  readonly category: string;
+  readonly badge: string;
+  readonly description: string;
+  readonly promoNote?: string;
+  readonly promoCode?: string;
+  readonly ctaLabel: string;
+  readonly ctaUrl: string;
+}
+
+const SPONSORED_PARTNERS: readonly SponsoredPartner[] = [
+  {
+    id: "bookwalker",
+    name: "BookWalker Global",
+    tagline: "Official Digital Light Novels & Manga Store",
+    category: "Official eBook Store",
+    badge: "Official Partner",
+    description: "Read official English digital editions of top light novels, isekai, and manga. Enjoy monthly coin-back events and exclusive digital bonuses.",
+    promoNote: "Save 20% on your first light novel or manga purchase",
+    promoCode: "GRIMOIRE20",
+    ctaLabel: "Browse BookWalker Store",
+    ctaUrl: "https://global.bookwalker.jp",
+  },
+  {
+    id: "sevenseas",
+    name: "Seven Seas Danmei & Novels",
+    tagline: "Official English Print & Digital Publisher",
+    category: "Publisher Spotlight",
+    badge: "Curated Showcase",
+    description: "Official publisher of hit Danmei titles (Grandmaster of Demonic Cultivation, TGCF) and fantasy epics with deluxe covers and internal art.",
+    promoNote: "Available in print worldwide and digital across major book vendors",
+    ctaLabel: "Explore Seven Seas Danmei",
+    ctaUrl: "https://sevenseasdanmei.com",
+  },
+  {
+    id: "graphicaudio",
+    name: "GraphicAudio",
+    tagline: "A Movie in Your Mind® — Full Cast Audio",
+    category: "Dramatized Audiobooks",
+    badge: "Audio Partner",
+    description: "Experience fantasy and progression audiobooks performed by a full cast of actors, immersive sound effects, and cinematic orchestral music.",
+    promoNote: "Listen to 60+ minute dramatized audio samples free",
+    promoCode: "AUDIO50",
+    ctaLabel: "Discover GraphicAudio",
+    ctaUrl: "https://www.graphicaudio.net",
+  },
+  {
+    id: "jnovelclub",
+    name: "J-Novel Club",
+    tagline: "Weekly Pre-Pub Light Novels & Manga",
+    category: "Digital Subscription",
+    badge: "Publisher Direct",
+    description: "Read new chapters of Ascendance of a Bookworm, Apothecary Diaries, and more weeks before publication directly from the official translation team.",
+    promoNote: "Monthly pre-pub subscription with DRM-free premium credits",
+    ctaLabel: "Read on J-Novel Club",
+    ctaUrl: "https://j-novel.club",
+  },
+];
 
 export interface SanctumHomeProps {
   onEnterRoom: (targetRoute?: string) => void;
@@ -529,6 +590,15 @@ export function SanctumHome({
   platformMode = (import.meta.env?.VITE_PLATFORM_MODE as "web" | "pc" | "mobile" | undefined) ?? "web",
 }: SanctumHomeProps) {
   const isWebFullHome = platformMode === "web";
+  // ─── Sponsored Partner Showcase State ──────────────────────────
+  const [activePartnerIndex, setActivePartnerIndex] = React.useState<number>(0);
+  React.useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActivePartnerIndex((prev) => (prev + 1) % SPONSORED_PARTNERS.length);
+    }, 8000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   // ─── Loading & Session Hydration State ─────────────────────────
   const [progress, setProgress] = React.useState<number>(8);
   const [isRoomReady, setIsRoomReady] = React.useState<boolean>(false);
@@ -999,17 +1069,16 @@ export function SanctumHome({
       window.localStorage.setItem("cv:auth_token", `token-${Date.now()}`);
       setCurrentUser(detectedUser);
 
-      // Import into repository
+      // Import into repository with exact ID, memory, and category alignment
       let worksCreated = 0;
       let memoriesCreated = 0;
       let relationsCreated = 0;
 
       if (Array.isArray(rawData.works)) {
-        const plannedIds = new Set<string>(rawData.works.map((w: any) => String(w.id)));
-        const res = stateMod.applyBackupImport(rawData, plannedIds);
-        worksCreated = res.worksCreated;
-        memoriesCreated = res.memoriesCreated;
-        relationsCreated = res.relationsCreated;
+        const importRes = stateMod.clientRepository.importData(rawData);
+        worksCreated = importRes.worksCount;
+        memoriesCreated = importRes.memoriesCount;
+        relationsCreated = Array.isArray(rawData.relations) ? rawData.relations.length : 0;
       }
 
       // Restore categories with normalized schema & workIds
@@ -1178,6 +1247,8 @@ export function SanctumHome({
         ? "rgba(244, 63, 94, 0.26)"
         : "rgba(99, 102, 241, 0.26)";
 
+  const currentPartner = (SPONSORED_PARTNERS[activePartnerIndex] ?? SPONSORED_PARTNERS[0])!;
+
   return (
     <div
       className={`relative min-h-screen bg-[var(--gm-bg)] text-[var(--gm-text)] bg-cover bg-center bg-fixed selection:bg-[var(--gm-accent-muted)] overflow-x-hidden ${
@@ -1197,12 +1268,12 @@ export function SanctumHome({
       />
 
       {/* ═══════════════════════════════════════════════════════════════════
-          ARCHITECTURAL TOP HEADER BAR (CLEAN & GAME SCREEN FOCUS)
+          ARCHITECTURAL TOP HEADER BAR (CLEAN & MOBILE-SAFE)
          ═══════════════════════════════════════════════════════════════════ */}
-      <header className="fixed top-0 inset-x-0 z-40 border-b-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)]/95 backdrop-blur-md">
+      <header className="fixed top-0 inset-x-0 z-40 border-b-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)]/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
         {/* Main Architectural Header Bar */}
-        <div className="px-4 sm:px-8 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        <div className="px-3 sm:px-8 h-14 flex items-center justify-between gap-2 sm:gap-4 overflow-hidden">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             <img
               src="/logo.png"
               onError={(e) => {
@@ -1212,18 +1283,14 @@ export function SanctumHome({
                 }
               }}
               alt="Grimoire"
-              className="h-9 w-9 rounded-full object-cover shadow-[2px_2px_0px_var(--gm-border-strong)] ring-1 ring-[var(--gm-border-strong)] shrink-0"
+              className="h-8 w-8 sm:h-9 sm:w-9 rounded-full object-cover shadow-[2px_2px_0px_var(--gm-border-strong)] ring-1 ring-[var(--gm-border-strong)] shrink-0"
             />
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-gm-sm uppercase tracking-wider text-[var(--gm-text)]">
-                  Grimoire
-                </span>
-              </div>
-            </div>
+            <span className="font-bold text-gm-sm uppercase tracking-wider text-[var(--gm-text)] shrink-0">
+              Grimoire
+            </span>
           </div>
 
-          {/* Center Inline 4-Theme Architectural Switcher */}
+          {/* Center Inline 4-Theme Architectural Switcher (hidden on small screens, visible on desktop) */}
           <div className="hidden xl:flex items-center border border-[var(--gm-border-strong)] bg-[var(--gm-surface)]">
             {[
               { id: "midnight-arcana", label: "Midnight", roomIdx: 0 },
@@ -1258,7 +1325,7 @@ export function SanctumHome({
             })}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {isWebFullHome && (
               <>
                 <a
@@ -1285,9 +1352,9 @@ export function SanctumHome({
                 <button
                   type="button"
                   onClick={onOpenFeaturesGuide}
-                  className="inline-flex flex-col items-center gap-1 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-3 py-2 text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
+                  className="hidden sm:inline-flex flex-col items-center gap-1 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 sm:px-3 py-1.5 sm:py-2 text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
                 >
-                  <Layers className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+                  <Layers className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[var(--gm-accent-strong)]" />
                   <span>Features</span>
                 </button>
               </>
@@ -1296,7 +1363,7 @@ export function SanctumHome({
               <button
                 type="button"
                 onClick={() => setShowSignInModal(true)}
-                className="hidden sm:inline-flex items-center gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-3 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
+                className="hidden sm:inline-flex items-center gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
                 title="Switch Profile"
               >
                 <UserCheck className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
@@ -1307,7 +1374,7 @@ export function SanctumHome({
                 <button
                   type="button"
                   onClick={() => setShowSignUpModal(true)}
-                  className="hidden sm:inline-flex items-center gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-3 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
+                  className="hidden sm:inline-flex items-center gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
                 >
                   <UserPlus className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
                   <span>Sign Up</span>
@@ -1315,7 +1382,7 @@ export function SanctumHome({
                 <button
                   type="button"
                   onClick={() => setShowSignInModal(true)}
-                  className="hidden sm:inline-flex items-center gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-3 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
+                  className="hidden sm:inline-flex items-center gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
                 >
                   <KeyRound className="h-3.5 w-3.5 text-amber-500" />
                   <span>Sign In</span>
@@ -1327,11 +1394,11 @@ export function SanctumHome({
               onClick={() => {
                 gcaFileInputRef.current?.click();
               }}
-              className="inline-flex items-center gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-3 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer"
+              className="inline-flex items-center gap-1 sm:gap-1.5 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2 sm:px-3 py-1.5 text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all cursor-pointer shrink-0"
               title="Import Grimoire Codex Archive (.gca)"
             >
               <Archive className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
-              <span>Import .gca</span>
+              <span><span className="hidden xs:inline">Import </span>.gca</span>
             </button>
             <button
               type="button"
@@ -1342,10 +1409,9 @@ export function SanctumHome({
                   handleEnterRoom();
                 }
               }}
-              className="inline-flex items-center gap-1.5 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] px-4 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-accent-fg)] shadow-[3px_3px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
+              className="inline-flex items-center gap-1 sm:gap-1.5 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] px-2.5 sm:px-4 py-1.5 text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--gm-accent-fg)] shadow-[2px_2px_0px_var(--gm-border-strong)] sm:shadow-[3px_3px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer shrink-0"
             >
-              <span>{currentUser ? "Enter My Room" : "Enter Room"}</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <span>{currentUser ? "Enter Room →" : "Sign In →"}</span>
             </button>
           </div>
         </div>
@@ -1526,126 +1592,127 @@ export function SanctumHome({
                 }deg)`,
               }}
             >
-              {/* Cockpit HUD Top Bar: User Name & Sync Status */}
+              {/* SPONSORED PARTNER SHOWCASE / MINIMAL AD SPACE */}
               <div className="flex items-center justify-between border-b-2 border-[var(--gm-border-strong)] pb-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 bg-emerald-500 rounded-full animate-pulse" />
-                  <span className="text-gm-xs font-mono font-bold uppercase tracking-wider text-[var(--gm-text)]">
-                    @{currentUser}
+                  <span className="border border-amber-500/60 bg-amber-500/15 px-2 py-0.5 text-[10px] font-mono font-bold text-amber-500 uppercase tracking-wider">
+                    Sponsored Partner
+                  </span>
+                  <span className="text-gm-xs font-mono font-bold text-[var(--gm-text)] truncate">
+                    {currentPartner.category}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="border border-emerald-500/50 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-mono font-bold text-emerald-400">
-                    Sync Link Active
-                  </span>
+                <div className="flex items-center gap-1.5">
+                  {SPONSORED_PARTNERS.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setActivePartnerIndex(idx)}
+                      className={`h-2 rounded-full transition-all cursor-pointer ${
+                        activePartnerIndex === idx
+                          ? "w-5 bg-[var(--gm-accent-strong)]"
+                          : "w-2 bg-[var(--gm-border-strong)] hover:bg-[var(--gm-text-muted)]"
+                      }`}
+                      aria-label={`Partner slide ${idx + 1}`}
+                    />
+                  ))}
                 </div>
               </div>
 
-              {/* Profile Details Grid: Real Reading Metrics (No User Ranks or Grades) */}
-              <div className="grid grid-cols-3 gap-2 mb-4 border border-[var(--gm-border)] bg-[var(--gm-surface)] p-3 shadow-[2px_2px_0px_var(--gm-border)]">
-                <div>
-                  <div className="text-[9px] font-mono font-bold uppercase text-[var(--gm-text-subtle)]">
-                    Collection
-                  </div>
-                  <div className="text-gm-xs font-mono font-bold text-[var(--gm-text)] mt-0.5 truncate">
-                    {roomStats.worksCount > 0 ? `${roomStats.worksCount} Works` : "Sanctum Ready"}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[9px] font-mono font-bold uppercase text-[var(--gm-text-subtle)]">
-                    Active Flow
-                  </div>
-                  <div className="text-gm-xs font-mono font-bold text-[var(--gm-accent-strong)] mt-0.5 truncate">
-                    {roomStats.activeCount > 0 ? `${roomStats.activeCount} In Progress` : "All Caught Up"}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[9px] font-mono font-bold uppercase text-[var(--gm-text-subtle)]">
-                    Memories
-                  </div>
-                  <div className="text-gm-xs font-mono font-bold text-amber-500 mt-0.5 truncate">
-                    {roomStats.memoriesCount > 0 ? `${roomStats.memoriesCount} Saved` : "Memory Vault"}
-                  </div>
-                </div>
-              </div>
-
-              {/* Status HUD: High Priority Works & Half-Watched Local Media */}
-              <div className="space-y-3 relative z-10">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[var(--gm-text-subtle)] border-b border-[var(--gm-border)] pb-1 flex items-center justify-between">
-                  <span>HIGH PRIORITY WORKS &amp; RESUME</span>
-                  <span className="text-emerald-500 font-mono text-[9px] font-bold">● READY TO READ</span>
-                </div>
-
-                {/* 1. High Priority Chapter Update */}
-                <div className="border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] p-3.5 shadow-[2px_2px_0px_var(--gm-border-strong)] flex items-start gap-3">
-                  <div className="p-2 border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] text-amber-500 shrink-0">
-                    <Zap className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 bg-amber-500/20 text-amber-500 border border-amber-500/40">
-                        {featuredWork ? "ACTIVE READING" : "CHAMBER STANDBY"}
+              {/* Partner Card Body */}
+              <div className="space-y-4">
+                <div className="border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] p-4 shadow-[2px_2px_0px_var(--gm-border-strong)]">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-[var(--gm-accent)]/15 text-[var(--gm-accent-strong)] border border-[var(--gm-accent)]/30">
+                        {currentPartner.badge}
                       </span>
-                      <span className="text-[10px] font-mono text-[var(--gm-text-muted)]">
-                        {featuredWork ? featuredWork.category : "Library Ready"}
-                      </span>
+                      <h3 className="font-extrabold text-gm-base text-[var(--gm-text)] mt-2">
+                        {currentPartner.name}
+                      </h3>
+                      <p className="text-[11px] font-mono font-semibold text-[var(--gm-accent-strong)] mt-0.5">
+                        {currentPartner.tagline}
+                      </p>
                     </div>
-                    <h4 className="font-extrabold text-gm-sm text-[var(--gm-text)] truncate mt-1">
-                      {featuredWork ? featuredWork.title : "Your Sanctum Awaits"}
-                    </h4>
-                    <p className="text-[11px] font-mono text-[var(--gm-text-muted)] mt-0.5">
-                      {featuredWork ? featuredWork.updateInfo : "Enter room to browse your library and add works"}
-                    </p>
                   </div>
-                </div>
 
-                {/* 2. Half-Watched Local Media Resume */}
-                <div className="border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] p-3.5 shadow-[2px_2px_0px_var(--gm-border-strong)] flex items-start gap-3">
-                  <div className="p-2 border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] text-cyan-500 shrink-0">
-                    <Film className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 bg-cyan-500/20 text-cyan-500 border border-cyan-500/40">
-                        {featuredMedia ? "LOCAL MEDIA" : "MEDIA STANDBY"}
-                      </span>
-                      <span className="text-[10px] font-mono text-[var(--gm-text-muted)]">
-                        {featuredMedia ? featuredMedia.subtitle : "Workstation Player"}
-                      </span>
-                    </div>
-                    <h4 className="font-extrabold text-gm-sm text-[var(--gm-text)] truncate mt-1">
-                      {featuredMedia ? featuredMedia.title : "Local Shelf Hub"}
-                    </h4>
-                    <div className="flex items-center justify-between text-[11px] font-mono text-[var(--gm-text-muted)] mt-1">
-                      <span>{featuredMedia ? featuredMedia.progressText : "Drop media files in Local Shelf to watch"}</span>
-                      {featuredMedia && <span className="text-[var(--gm-accent-strong)] font-bold">{featuredMedia.progressPercent}%</span>}
-                    </div>
-                    {featuredMedia && (
-                      <div className="w-full h-1.5 bg-[var(--gm-border)] mt-1.5 overflow-hidden">
-                        <div className="h-full bg-[var(--gm-accent-strong)]" style={{ width: `${featuredMedia.progressPercent}%` }} />
+                  <p className="text-gm-xs text-[var(--gm-text-muted)] leading-relaxed mt-2.5">
+                    {currentPartner.description}
+                  </p>
+
+                  {/* Promo Callout Box */}
+                  {currentPartner.promoNote && (
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border border-dashed border-amber-500/50 bg-amber-500/10 p-2.5">
+                      <div className="text-[11px] font-mono text-[var(--gm-text)]">
+                        <span className="font-bold text-amber-500">PROMO: </span>
+                        {currentPartner.promoNote}
                       </div>
-                    )}
+                      {currentPartner.promoCode && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void navigator.clipboard.writeText(currentPartner.promoCode!);
+                            toast({
+                              title: "Coupon code copied!",
+                              description: `Code "${currentPartner.promoCode}" copied to clipboard.`,
+                              variant: "success",
+                            });
+                          }}
+                          className="inline-flex items-center gap-1 border border-amber-500/60 bg-[var(--gm-surface)] px-2 py-0.5 text-[11px] font-mono font-bold text-amber-400 hover:bg-amber-500/20 cursor-pointer"
+                        >
+                          <Copy className="h-3 w-3" />
+                          <span>{currentPartner.promoCode}</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* CTA Action Row */}
+                  <div className="mt-3.5 pt-3 border-t border-[var(--gm-border)] flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-mono text-[var(--gm-text-subtle)]">
+                      Zero-tracking affiliate partner
+                    </span>
+                    <a
+                      href={currentPartner.ctaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] px-3 py-1.5 text-gm-xs font-mono font-bold text-[var(--gm-accent-fg)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:opacity-95 transition-opacity"
+                    >
+                      <span>{currentPartner.ctaLabel}</span>
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
                   </div>
                 </div>
 
-                {/* Cockpit Bottom Chamber Launcher Bar */}
-                <div className="pt-2 flex items-center justify-between border-t border-[var(--gm-border)]">
-                  <span className="text-[10px] font-mono text-[var(--gm-text-muted)]">
-                    Chamber: <strong className="text-[var(--gm-text)]">{activeRoom?.name ?? "Lobby"}</strong>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!currentUser) {
-                        setShowSignInModal(true);
-                      } else {
-                        handleEnterRoom();
+                {/* Minimalist Switcher Controls & Privacy Guarantee */}
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActivePartnerIndex(
+                          (prev) => (prev - 1 + SPONSORED_PARTNERS.length) % SPONSORED_PARTNERS.length,
+                        )
                       }
-                    }}
-                    className="inline-flex items-center gap-1.5 border-2 border-[var(--gm-border-strong)] bg-[var(--gm-accent)] px-3.5 py-1.5 text-[11px] font-mono font-bold uppercase text-[var(--gm-accent-fg)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:opacity-95 transition-opacity cursor-pointer"
-                  >
-                    <span>{currentUser ? "Launch Chamber →" : "Sign In to Enter →"}</span>
-                  </button>
+                      className="border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2.5 py-1 text-[10px] font-mono font-bold text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:border-[var(--gm-border-strong)] cursor-pointer"
+                      aria-label="Previous Partner"
+                    >
+                      ← Prev
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActivePartnerIndex((prev) => (prev + 1) % SPONSORED_PARTNERS.length)
+                      }
+                      className="border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2.5 py-1 text-[10px] font-mono font-bold text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:border-[var(--gm-border-strong)] cursor-pointer"
+                      aria-label="Next Partner"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                  <span className="text-[9px] font-mono text-[var(--gm-text-subtle)]">
+                    Non-invasive · Zero popups · Non-tracking
+                  </span>
                 </div>
               </div>
             </div>
@@ -1883,23 +1950,23 @@ export function SanctumHome({
               </div>
 
               {/* Clean Architectural Medium Filter Tabs (No hardcoded counts) */}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {[
                   { id: "all", label: "ALL PORTALS" },
                   { id: "manga", label: "MANGA & COMICS" },
-                  { id: "manhwa", label: "MANHWA & WEBTOONS" },
+                  { id: "manhwa", label: "MANHWA" },
                   { id: "novel", label: "WEB & LIGHT NOVELS" },
                   { id: "anime", label: "ANIME & DONGHUA" },
-                  { id: "drama", label: "ASIAN DRAMAS (KDRAMA/CDRAMA)" },
+                  { id: "drama", label: "ASIAN DRAMAS" },
                   { id: "movie", label: "MOVIES & SERIES" },
                 ].map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
                     onClick={() => setSiteCategory(tab.id as typeof siteCategory)}
-                    className={`px-3.5 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider border-2 transition-all cursor-pointer ${
+                    className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider border-2 transition-all cursor-pointer whitespace-nowrap ${
                       siteCategory === tab.id
-                        ? "border-[var(--gm-border-strong)] bg-[var(--gm-accent)] text-[var(--gm-accent-fg)] shadow-[3px_3px_0px_var(--gm-border-strong)]"
+                        ? "border-[var(--gm-border-strong)] bg-[var(--gm-accent)] text-[var(--gm-accent-fg)] shadow-[2px_2px_0px_var(--gm-border-strong)] sm:shadow-[3px_3px_0px_var(--gm-border-strong)]"
                         : "border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:border-[var(--gm-border-strong)]"
                     }`}
                   >

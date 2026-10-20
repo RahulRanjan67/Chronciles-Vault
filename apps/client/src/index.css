@@ -153,8 +153,120 @@
   }
 }
 
+/* 1. Single Page View: Corner curl turning from bottom-right corner to top-left */
+@keyframes gmPageTurnCornerForward {
+  0% {
+    transform: perspective(1600px) rotate3d(-0.4, 1, 0.25, 0deg) translate3d(0, 0, 0);
+    transform-origin: bottom right;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    opacity: 1;
+  }
+  30% {
+    transform: perspective(1600px) rotate3d(-0.5, 1, 0.3, -25deg) translate3d(-15px, -12px, 20px);
+    transform-origin: bottom right;
+    box-shadow: -15px -15px 30px rgba(0, 0, 0, 0.35);
+    opacity: 0.95;
+  }
+  100% {
+    transform: perspective(1600px) rotate3d(-0.55, 1, 0.35, -85deg) translate3d(-50px, -35px, 60px);
+    transform-origin: bottom right;
+    box-shadow: -35px -35px 50px rgba(0, 0, 0, 0.45);
+    opacity: 0;
+  }
+}
+
+@keyframes gmPageTurnCornerReverse {
+  0% {
+    transform: perspective(1600px) rotate3d(-0.55, 1, 0.35, -85deg) translate3d(-50px, -35px, 60px);
+    transform-origin: top left;
+    box-shadow: -35px -35px 50px rgba(0, 0, 0, 0.45);
+    opacity: 0;
+  }
+  70% {
+    transform: perspective(1600px) rotate3d(-0.45, 1, 0.25, -20deg) translate3d(-10px, -8px, 15px);
+    transform-origin: top left;
+    box-shadow: -15px -15px 30px rgba(0, 0, 0, 0.3);
+    opacity: 0.95;
+  }
+  100% {
+    transform: perspective(1600px) rotate3d(0, 0, 0, 0deg) translate3d(0, 0, 0);
+    transform-origin: top left;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    opacity: 1;
+  }
+}
+
+/* 2. Two-Page Layout: Flipping to backside of page motion across book spine */
+@keyframes gmPageFlipSpineForward {
+  0% {
+    transform: perspective(2000px) rotateY(0deg);
+    transform-origin: left center;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    opacity: 1;
+  }
+  45% {
+    transform: perspective(2000px) rotateY(-90deg);
+    transform-origin: left center;
+    box-shadow: -20px 0 35px rgba(0, 0, 0, 0.5);
+    opacity: 0.9;
+  }
+  100% {
+    transform: perspective(2000px) rotateY(-180deg);
+    transform-origin: left center;
+    box-shadow: -40px 0 50px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+  }
+}
+
+@keyframes gmPageFlipSpineReverse {
+  0% {
+    transform: perspective(2000px) rotateY(-180deg);
+    transform-origin: right center;
+    box-shadow: -40px 0 50px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+  }
+  55% {
+    transform: perspective(2000px) rotateY(-90deg);
+    transform-origin: right center;
+    box-shadow: 20px 0 35px rgba(0, 0, 0, 0.5);
+    opacity: 0.9;
+  }
+  100% {
+    transform: perspective(2000px) rotateY(0deg);
+    transform-origin: right center;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    opacity: 1;
+  }
+}
+
+.gm-corner-turn-forward {
+  animation: gmPageTurnCornerForward 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow, opacity;
+}
+
+.gm-corner-turn-reverse {
+  animation: gmPageTurnCornerReverse 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow, opacity;
+}
+
+.gm-spine-turn-forward {
+  animation: gmPageFlipSpineForward 0.48s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, box-shadow;
+}
+
+.gm-spine-turn-reverse {
+  animation: gmPageFlipSpineReverse 0.48s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, box-shadow;
+}
+
 .gm-page-turn-active {
-  animation: cvPageTurn 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: gmPageFlipSpineForward 0.44s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   transform-origin: left center;
   transform-style: preserve-3d;
   backface-visibility: hidden;
@@ -162,7 +274,7 @@
 }
 
 .gm-page-turn-reverse {
-  animation: cvPageTurnReverse 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: gmPageFlipSpineReverse 0.44s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   transform-origin: right center;
   transform-style: preserve-3d;
   backface-visibility: hidden;

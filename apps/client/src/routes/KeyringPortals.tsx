@@ -258,10 +258,59 @@ export function KeyringPortals() {
         </p>
       </div>
 
+      {/* ─── SPONSORED HORIZONTAL RECTANGLE AD BANNER (NON-INVASIVE / PRIVACY-FIRST) ─── */}
+      <aside
+        aria-label="Sponsored Portal Partner"
+        className="mb-6 rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-surface)]/80 hover:bg-[var(--gm-surface)] p-3 sm:p-4 shadow-xs transition-all relative overflow-hidden"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start sm:items-center gap-3 min-w-0">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-gm-md bg-[var(--gm-accent-muted)]/20 border border-[var(--gm-accent-muted)] flex items-center justify-center shrink-0">
+              <span className="font-serif font-black text-gm-base sm:text-gm-lg text-[var(--gm-accent-strong)]">
+                BW
+              </span>
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--gm-text-subtle)] bg-[var(--gm-bg-elevated)] px-1.5 py-0.5 rounded border border-[var(--gm-border)]">
+                  Sponsored Partner • Zero Tracking
+                </span>
+                <span className="text-gm-sm font-bold text-[var(--gm-text)] truncate">
+                  BookWalker Global Light Novel &amp; Manga Vault
+                </span>
+                <Badge variant="accent" size="sm" className="font-mono text-[10px]">
+                  50% Coin Rebate
+                </Badge>
+              </div>
+              <p className="text-gm-xs text-[var(--gm-text-muted)] mt-0.5 line-clamp-1">
+                Official eBook digital store for licensed Japanese light novels, manhwa, and simulpub manga releases.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+            <span className="hidden md:inline font-mono text-[11px] text-[var(--gm-text-subtle)]">
+              Code: <strong className="text-[var(--gm-accent-strong)]">GRIMOIRE50</strong>
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                window.open("https://global.bookwalker.jp", "_blank", "noopener,noreferrer");
+              }}
+              className="gap-1.5 text-gm-xs h-8 px-3"
+            >
+              <span>Visit Portal</span>
+              <ExternalLink className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      </aside>
+
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
-        <TabsList className="bg-[var(--gm-surface)] border border-[var(--gm-border)] h-auto min-h-11 px-3 py-1.5 gap-3 flex-wrap">
-          <TabsTrigger value="portals" className="gap-2 px-3 py-1.5">
-            <Globe className="h-4 w-4 shrink-0 text-[var(--gm-accent-strong)]" />
+        <TabsList className="bg-[var(--gm-surface)] border border-[var(--gm-border)] h-auto min-h-11 px-2.5 py-1.5 gap-2 sm:gap-3 flex-wrap max-w-full overflow-hidden">
+          <TabsTrigger value="portals" className="gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap shrink-0">
+            <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-[var(--gm-accent-strong)]" />
             <span>Frequent Portals</span>
             {frequentWebsites.length > 0 && (
               <Badge variant="accent" size="sm" className="ml-1 px-1.5 py-0 font-mono text-[10px] shrink-0">
@@ -269,12 +318,12 @@ export function KeyringPortals() {
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="credentials" className="gap-2 px-3 py-1.5">
-            <ShieldCheck className="h-4 w-4 shrink-0 text-[var(--gm-accent-strong)]" />
-            <span>Saved Credentials ({credentials.length})</span>
+          <TabsTrigger value="credentials" className="gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap shrink-0">
+            <ShieldCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-[var(--gm-accent-strong)]" />
+            <span>Credentials ({credentials.length})</span>
           </TabsTrigger>
-          <TabsTrigger value="search" className="gap-2 px-3 py-1.5">
-            <Search className="h-4 w-4 shrink-0 text-[var(--gm-accent-strong)]" />
+          <TabsTrigger value="search" className="gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap shrink-0">
+            <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-[var(--gm-accent-strong)]" />
             <span>Search Portals</span>
           </TabsTrigger>
         </TabsList>

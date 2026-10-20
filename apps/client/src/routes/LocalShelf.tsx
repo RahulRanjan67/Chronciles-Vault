@@ -208,7 +208,7 @@ export function LocalShelf({ onOpenFile }: LocalShelfProps) {
             </h1>
           </div>
           <p className="mt-1 text-gm-sm text-[var(--gm-text-muted)]">
-            Organize DRM-free EPUB, PDF, CBZ, and TXT files stored privately on this device.
+            Organize DRM-free EPUB, PDF, CBZ, TXT, Markdown (.md), and Word documents (.docx/.doc) stored privately on this device.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -216,7 +216,7 @@ export function LocalShelf({ onOpenFile }: LocalShelfProps) {
             ref={fileInput}
             className="sr-only"
             type="file"
-            accept=".epub,.pdf,.cbz,.txt,application/pdf,application/epub+zip,application/vnd.comicbook+zip,text/plain"
+            accept=".epub,.pdf,.cbz,.txt,.md,.markdown,.docx,.doc,application/pdf,application/epub+zip,application/vnd.comicbook+zip,text/plain,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
             multiple
             onChange={(event) => void handleImport(event)}
           />
@@ -246,7 +246,7 @@ export function LocalShelf({ onOpenFile }: LocalShelfProps) {
 
       <div className="mb-6 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] p-4 text-gm-sm text-[var(--gm-text-muted)]">
         Files are stored offline on this device and are never uploaded to any remote server.
-        EPUB, PDF, CBZ, and TXT documents open in an isolated reader; unlinked files remain on your holding shelf.
+        EPUB, PDF, CBZ, TXT, Markdown (.md), and Word (.docx/.doc) documents open in an isolated reader with single-page and two-page spread views.
       </div>
 
       {error && (
@@ -270,7 +270,7 @@ export function LocalShelf({ onOpenFile }: LocalShelfProps) {
           <div>
             <h2 className="text-gm-lg font-bold text-[var(--gm-text)]">Your local shelf is empty</h2>
             <p className="mt-1 max-w-md text-gm-sm text-[var(--gm-text-muted)]">
-              Import a DRM-free EPUB, PDF, CBZ, or TXT file from your device to begin reading.
+              Import a DRM-free EPUB, PDF, CBZ, TXT, Markdown (.md), or Word document (.docx/.doc) from your device to begin reading.
             </p>
           </div>
           <div className="flex items-center justify-center gap-3">

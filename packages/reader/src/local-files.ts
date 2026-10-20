@@ -1,4 +1,4 @@
-export type LocalFileFormat = "epub" | "pdf" | "cbz" | "txt";
+export type LocalFileFormat = "epub" | "pdf" | "cbz" | "txt" | "md" | "docx";
 
 export interface LocalFileMetadata {
   readonly id: string;
@@ -29,12 +29,16 @@ const FORMAT_MIME: Record<LocalFileFormat, string> = {
   pdf: "application/pdf",
   cbz: "application/vnd.comicbook+zip",
   txt: "text/plain",
+  md: "text/markdown",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 };
 
 function getFormat(fileName: string): LocalFileFormat {
   const extension = fileName.split(".").pop()?.toLowerCase();
   if (extension === "epub" || extension === "pdf" || extension === "cbz" || extension === "txt") return extension;
-  throw new Error("Choose an EPUB, PDF, CBZ, or TXT file.");
+  if (extension === "md" || extension === "markdown") return "md";
+  if (extension === "docx" || extension === "doc") return "docx";
+  throw new Error("Choose an EPUB, PDF, CBZ, TXT, MD, or Word document (.docx/.doc).");
 }
 
 function hasZipSignature(bytes: Uint8Array): boolean {
@@ -73,9 +77,16 @@ async function inspectFileSignature(file: File, format: LocalFileFormat): Promis
   if (format === "txt") {
     return FORMAT_MIME.txt;
   }
-  const bytes = new Uint8Array(await file.slice(0, 128).arrayBuffer());
+  if (format === "md") {
+    return FORMAT_MIME.md;
+  }
+  if (format === "docx") {
+    return FORMAT_MIME.docx;
+  }
+  const bytes = new Uint8Array(await file.slice(0, 1024).arrayBuffer());
   if (format === "pdf") {
-    if (new TextDecoder().decode(bytes.subarray(0, 5)) !== "%PDF-") {
+    const headerStr = new TextDecoder().decode(bytes);
+    if (!headerStr.includes("%PDF-")) {
       throw new Error("The selected file does not contain a valid PDF signature.");
     }
     return FORMAT_MIME.pdf;

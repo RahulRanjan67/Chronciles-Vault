@@ -67,6 +67,9 @@ const TrashBin = React.lazy(() =>
 const KeyringPortals = React.lazy(() =>
   import("./routes/KeyringPortals").then((module) => ({ default: module.KeyringPortals })),
 );
+const SyncConfig = React.lazy(() =>
+  import("./routes/SyncConfig").then((module) => ({ default: module.SyncConfig })),
+);
 
 export { CommandPalette };
 
@@ -88,6 +91,7 @@ export const APP_ROUTES: RouteDefinition[] = [
   { path: "/categories", name: "My Categories", tier: 2, component: Categories },
   { path: "/keyring", name: "Keyring & Portals", tier: 2, component: KeyringPortals },
   { path: "/portals", name: "Keyring & Portals", tier: 2, component: KeyringPortals },
+  { path: "/sync", name: "Sync Sanctum", tier: 2, component: SyncConfig },
   { path: "/discover", name: "Discover", tier: 2, component: Discover },
   { path: "/vault", name: "Private Vault", tier: 3, component: Vault },
   { path: "/archive", name: "Archive", tier: 3, component: Archive },

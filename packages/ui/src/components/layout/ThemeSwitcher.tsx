@@ -41,26 +41,13 @@ export function ThemeSwitcher({ className, compact = false }: ThemeSwitcherProps
           type="button"
           aria-label={`Switch Theme: currently ${theme.name}`}
           className={cn(
-            'inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_var(--gm-accent)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gm-border-focus)] cursor-pointer select-none',
+            'inline-flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] text-xs font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_var(--gm-accent)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gm-border-focus)] cursor-pointer select-none shrink-0',
             className,
           )}
         >
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-center">
             {getThemeIcon(themeId)}
-            {!compact && (
-              <span className="hidden sm:inline font-medium tracking-tight">
-                {theme.name}
-              </span>
-            )}
           </div>
-
-          <div
-            className="h-2.5 w-2.5 rounded-full border border-[var(--gm-border-strong)] shrink-0"
-            style={{ backgroundColor: theme.previewAccent }}
-            aria-hidden="true"
-          />
-
-          <ChevronDown className="h-2.5 w-2.5 text-[var(--gm-text-subtle)]" />
         </button>
       </DropdownMenuTrigger>
 

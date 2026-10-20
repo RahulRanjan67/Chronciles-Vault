@@ -54,6 +54,7 @@ export function Vault({ onNavigateWork }: VaultProps) {
   const [busy, setBusy] = React.useState(false);
   const [summaryCount, setSummaryCount] = React.useState<number | null>(null);
   const [workToHideId, setWorkToHideId] = React.useState<string>("");
+  const [vaultAccessMode, setVaultAccessMode] = React.useState<"unlock" | "setup">("unlock");
 
   const hiddenWorks = React.useMemo(
     () =>
@@ -62,6 +63,12 @@ export function Vault({ onNavigateWork }: VaultProps) {
       ),
     [libraryStore.items],
   );
+
+  React.useEffect(() => {
+    if (keyRecord || hiddenWorks.length > 0) {
+      setVaultAccessMode("unlock");
+    }
+  }, [keyRecord, hiddenWorks.length]);
 
   const publicWorks = React.useMemo(
     () =>
@@ -136,6 +143,28 @@ export function Vault({ onNavigateWork }: VaultProps) {
         setError("Please enter your passphrase.");
         return;
       }
+
+      if (vaultAccessMode === "setup") {
+        if (effectivePass !== confirmation) {
+          setError("Passphrase confirmation does not match.");
+          return;
+        }
+        if (effectivePass.length < 8) {
+          setError("Choose a passphrase with at least 8 characters.");
+          return;
+        }
+        const created = await createVaultKey(effectivePass);
+        await vaultRepository.saveKeyRecord(created.keyRecord);
+        useVaultStore.getState().activateMasterKey(created.masterKey, created.keyRecord);
+        setKeyRecord(created.keyRecord);
+        toast({
+          title: "Vault Configured & Unlocked",
+          description: "Master passphrase active on this device.",
+          variant: "success",
+        });
+        return;
+      }
+
       if (keyRecord) {
         const result = await unlock(effectivePass, keyRecord);
         if (!result.success) {
@@ -144,7 +173,7 @@ export function Vault({ onNavigateWork }: VaultProps) {
         }
         toast({
           title: "Vault unlocked",
-          description: `Hidden works (${hiddenWorks.length}) and private notes are now visible for this session.`,
+          description: "Sealed works and private notes are now unlocked for this session.",
           variant: "success",
         });
         return;
@@ -157,9 +186,10 @@ export function Vault({ onNavigateWork }: VaultProps) {
       const created = await createVaultKey(effectivePass);
       await vaultRepository.saveKeyRecord(created.keyRecord);
       useVaultStore.getState().activateMasterKey(created.masterKey, created.keyRecord);
+      setKeyRecord(created.keyRecord);
       toast({
-        title: "Vault created & unlocked",
-        description: `Revealed ${hiddenWorks.length} hidden works on this device.`,
+        title: "Vault Unlocked",
+        description: "Sealed works and private records are now accessible on this device.",
         variant: "success",
       });
     } catch (accessError: unknown) {
@@ -279,43 +309,68 @@ export function Vault({ onNavigateWork }: VaultProps) {
             </div>
             <div className="text-left">
               <h1 className="text-gm-xl font-extrabold text-[var(--gm-text)]">
-                {keyRecord
+                {keyRecord || hiddenWorks.length > 0
                   ? "Vault Is Locked"
-                  : hiddenWorks.length > 0
-                    ? "Unlock Imported Vault"
-                    : "Setup Private Vault"}
+                  : "Setup Private Vault"}
               </h1>
               <p className="mt-1 text-gm-xs leading-relaxed text-[var(--gm-text-muted)]">
-                {keyRecord
-                  ? `Enter your master passphrase to reveal ${hiddenWorks.length > 0 ? `${hiddenWorks.length} hidden works` : "your private sanctum"} and notes for this session.`
-                  : hiddenWorks.length > 0
-                    ? `Your imported archive contains ${hiddenWorks.length} vault-sealed works. Because Grimoire uses zero-knowledge encryption, your master key remains strictly local. Enter your master passphrase (sample packs use "GrimoireVault#2026") to unlock your sealed collection.`
-                    : "Create a master passphrase to isolate sensitive fiction titles, private notes, and credentials behind hardware-accelerated zero-knowledge encryption."}
+                {keyRecord || hiddenWorks.length > 0
+                  ? 'Enter your master passphrase to unlock sealed works, private notes, and protected credentials for this session (sample packs use "GrimoireVault#2026").'
+                  : "Create a master passphrase to isolate sensitive fiction titles, private notes, and credentials behind hardware-accelerated zero-knowledge encryption."}
               </p>
             </div>
           </div>
 
+          <div className="flex border-b border-[var(--gm-border-strong)] mb-6">
+            <button
+              type="button"
+              onClick={() => {
+                setVaultAccessMode("unlock");
+                setError("");
+              }}
+              className={`flex-1 py-2 text-gm-xs font-bold border-b-2 transition-all cursor-pointer ${
+                vaultAccessMode === "unlock"
+                  ? "border-[var(--gm-accent-strong)] text-[var(--gm-accent-strong)]"
+                  : "border-transparent text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
+              }`}
+            >
+              Unlock Vault
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setVaultAccessMode("setup");
+                setError("");
+              }}
+              className={`flex-1 py-2 text-gm-xs font-bold border-b-2 transition-all cursor-pointer ${
+                vaultAccessMode === "setup"
+                  ? "border-[var(--gm-accent-strong)] text-[var(--gm-accent-strong)]"
+                  : "border-transparent text-[var(--gm-text-muted)] hover:text-[var(--gm-text)]"
+              }`}
+            >
+              {keyRecord ? "Reset Master Passphrase" : "Create New Vault"}
+            </button>
+          </div>
+
           <form onSubmit={handleAccess} className="space-y-3">
             <label className="block text-left font-mono text-[11px] font-bold uppercase text-[var(--gm-text-subtle)]">
-              {keyRecord || hiddenWorks.length > 0 ? "Master Passphrase" : "Create Master Passphrase"}
+              {vaultAccessMode === "unlock" ? "Master Passphrase" : "New Master Passphrase"}
             </label>
             <Input
               type="password"
               placeholder={
-                keyRecord
-                  ? "Enter your master passphrase"
-                  : hiddenWorks.length > 0
-                    ? "Enter vault master passphrase (e.g. GrimoireVault#2026)"
-                    : "Enter a secure master passphrase"
+                vaultAccessMode === "unlock"
+                  ? "Enter vault master passphrase (e.g. GrimoireVault#2026)"
+                  : "Enter a secure master passphrase (min 8 chars)"
               }
               value={passphrase}
               onChange={(event) => setPassphrase(event.target.value)}
-              autoComplete={keyRecord || hiddenWorks.length > 0 ? "current-password" : "new-password"}
+              autoComplete={vaultAccessMode === "unlock" ? "current-password" : "new-password"}
             />
-            {!keyRecord && hiddenWorks.length === 0 && (
+            {vaultAccessMode === "setup" && (
               <Input
                 type="password"
-                placeholder="Confirm master passphrase"
+                placeholder="Confirm new master passphrase"
                 value={confirmation}
                 onChange={(event) => setConfirmation(event.target.value)}
                 autoComplete="new-password"
@@ -336,11 +391,11 @@ export function Vault({ onNavigateWork }: VaultProps) {
               <span>
                 {busy
                   ? "Unlocking…"
-                  : keyRecord
-                    ? "Unlock Vault"
-                    : hiddenWorks.length > 0
-                      ? `Unlock Sealed Vault (${hiddenWorks.length} Works)`
-                      : "Create & Unlock Vault"}
+                  : vaultAccessMode === "unlock"
+                    ? "Unlock Private Vault"
+                    : keyRecord
+                    ? "Reset & Update Passphrase"
+                    : "Create & Unlock Vault"}
               </span>
             </Button>
           </form>

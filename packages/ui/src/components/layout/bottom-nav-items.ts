@@ -30,26 +30,22 @@ export interface BottomNavItem {
 /** Tabs pinned to the visible bar: the five most frequently used destinations. */
 export const BOTTOM_NAV_ITEMS: BottomNavItem[] = [
   { id: 'library', label: 'Library', href: '/', icon: BookOpen },
+  { id: 'updates', label: 'Updates', href: '/updates', icon: Sparkles },
   { id: 'return', label: 'Return', href: '/return-desk', icon: RotateCcw },
-  { id: 'radar', label: 'Radar', href: '/radar', icon: Radar },
   { id: 'shelf', label: 'Shelf', href: '/shelf', icon: HardDrive },
   { id: 'memory', label: 'Memory', href: '/memory', icon: MessageSquare },
 ];
 
 /**
- * Every other section reachable from the desktop Sidebar (Updates, My
- * Categories, Lists, Archive, Discover, Settings, Help). On narrow screens
- * the Sidebar is hidden entirely, so without this list these routes were
- * only reachable by typing a URL directly. They open in a "More" bottom
- * sheet instead of crowding the five-tab bar.
+ * Every other section reachable from the desktop Sidebar.
+ * Opens in a "More" bottom sheet instead of crowding the five-tab bar.
  */
 export const MORE_NAV_ITEMS: BottomNavItem[] = [
-  { id: 'updates', label: 'Updates', href: '/updates', icon: Sparkles },
+  { id: 'radar', label: 'Radar', href: '/radar', icon: Radar },
   { id: 'categories', label: 'My Categories', href: '/categories', icon: Tag },
   { id: 'lists', label: 'Lists', href: '/lists', icon: ListFilter },
   { id: 'archive', label: 'Archive', href: '/archive', icon: Archive },
   { id: 'trash', label: 'Trash Bin', href: '/trash', icon: Trash2 },
-  { id: 'discover', label: 'Discover', href: '/discover', icon: Compass },
   { id: 'settings', label: 'Settings', href: '/settings', icon: Settings },
   { id: 'help', label: 'Help & Guide', href: '/help', icon: HelpCircle },
 ];

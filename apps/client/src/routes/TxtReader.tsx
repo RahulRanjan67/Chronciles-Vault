@@ -21,6 +21,7 @@ import {
   startReaderSession,
   updateReaderSession,
   endReaderSession,
+  SafeZipArchive,
 } from "@grimoire/reader";
 import type { LocalFileMetadata } from "@grimoire/reader";
 import {
@@ -43,13 +44,196 @@ type FontSize = "sm" | "base" | "lg" | "xl";
 type FontFamily = "serif" | "sans" | "mono";
 
 const CHARS_PER_PAGE: Record<FontSize, number> = {
-  sm: 1500,
-  base: 1100,
-  lg: 800,
-  xl: 550,
+  sm: 1600,
+  base: 1200,
+  lg: 850,
+  xl: 580,
 };
 
-function splitTextIntoPages(text: string, fontSize: FontSize): string[] {
+function parseDocxXmlToMarkdown(xmlStr: string): string {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlStr, "application/xml");
+    const paragraphs = Array.from(doc.getElementsByTagNameNS("*", "p"));
+    const outputLines: string[] = [];
+
+    for (const p of paragraphs) {
+      let headingPrefix = "";
+      const pStyle = p.getElementsByTagNameNS("*", "pStyle")[0];
+      const styleVal = pStyle?.getAttribute("w:val") || pStyle?.getAttribute("val") || "";
+      if (/heading\s*1/i.test(styleVal) || /title/i.test(styleVal)) {
+        headingPrefix = "# ";
+      } else if (/heading\s*2/i.test(styleVal) || /subtitle/i.test(styleVal)) {
+        headingPrefix = "## ";
+      } else if (/heading\s*3/i.test(styleVal)) {
+        headingPrefix = "### ";
+      }
+
+      const runs = Array.from(p.getElementsByTagNameNS("*", "r"));
+      let paraText = "";
+      for (const r of runs) {
+        const isBold = r.getElementsByTagNameNS("*", "b").length > 0;
+        const isItalic = r.getElementsByTagNameNS("*", "i").length > 0;
+        const textNodes = Array.from(r.getElementsByTagNameNS("*", "t"));
+        let runText = textNodes.map((t) => t.textContent || "").join("");
+        if (!runText) continue;
+        if (isBold && isItalic) runText = `***${runText.trim()}*** `;
+        else if (isBold) runText = `**${runText.trim()}** `;
+        else if (isItalic) runText = `*${runText.trim()}* `;
+        paraText += runText;
+      }
+
+      const trimmed = paraText.trim();
+      if (trimmed) {
+        outputLines.push(headingPrefix ? `${headingPrefix}${trimmed}` : trimmed);
+      }
+    }
+
+    return outputLines.join("\n\n");
+  } catch (err) {
+    console.error("Failed to parse docx XML:", err);
+    return "";
+  }
+}
+
+async function extractFallbackText(blob: Blob): Promise<string> {
+  try {
+    const buffer = await blob.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    let result = "";
+    let current = "";
+    for (let i = 0; i < bytes.length; i++) {
+      const b = bytes[i];
+      if (b !== undefined && ((b >= 32 && b <= 126) || b === 10 || b === 13)) {
+        current += String.fromCharCode(b);
+      } else {
+        if (current.trim().length >= 4) {
+          result += current.trim() + "\n\n";
+        }
+        current = "";
+      }
+    }
+    if (current.trim().length >= 4) {
+      result += current.trim();
+    }
+    return result || "This document is empty or could not be decoded.";
+  } catch {
+    return "This document is empty or could not be decoded.";
+  }
+}
+
+function renderInlineMarkdown(text: string): React.ReactNode {
+  const parts: React.ReactNode[] = [];
+  const regex = /(\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
+  let lastIdx = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIdx) {
+      parts.push(text.slice(lastIdx, match.index));
+    }
+    const token = match[0];
+    if (token.startsWith("***") && token.endsWith("***")) {
+      parts.push(<strong key={match.index}><em>{token.slice(3, -3)}</em></strong>);
+    } else if (token.startsWith("**") && token.endsWith("**")) {
+      parts.push(<strong key={match.index} className="font-bold">{token.slice(2, -2)}</strong>);
+    } else if (token.startsWith("*") && token.endsWith("*")) {
+      parts.push(<em key={match.index} className="italic">{token.slice(1, -1)}</em>);
+    } else if (token.startsWith("`") && token.endsWith("`")) {
+      parts.push(<code key={match.index} className="px-1 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[0.88em]">{token.slice(1, -1)}</code>);
+    }
+    lastIdx = regex.lastIndex;
+  }
+  if (lastIdx < text.length) {
+    parts.push(text.slice(lastIdx));
+  }
+  return parts.length > 0 ? parts : text;
+}
+
+function DocumentPageContent({ content }: { content: string }) {
+  const blocks = content.split(/\n\n+/);
+  return (
+    <>
+      {blocks.map((block, idx) => {
+        const trimmed = block.trim();
+        if (!trimmed) return null;
+
+        if (trimmed.startsWith("# ")) {
+          return (
+            <h1 key={idx} className="text-gm-xl font-bold font-serif mb-3 mt-1 pb-1 border-b border-current/20 leading-tight">
+              {renderInlineMarkdown(trimmed.slice(2))}
+            </h1>
+          );
+        }
+        if (trimmed.startsWith("## ")) {
+          return (
+            <h2 key={idx} className="text-gm-lg font-bold font-serif mb-2.5 mt-3 text-[var(--gm-accent-strong)] leading-snug">
+              {renderInlineMarkdown(trimmed.slice(3))}
+            </h2>
+          );
+        }
+        if (trimmed.startsWith("### ")) {
+          return (
+            <h3 key={idx} className="text-gm-base font-semibold font-serif mb-2 mt-2 leading-snug">
+              {renderInlineMarkdown(trimmed.slice(4))}
+            </h3>
+          );
+        }
+        if (trimmed.startsWith("> ")) {
+          return (
+            <blockquote key={idx} className="border-l-4 border-[var(--gm-accent-strong)] pl-3.5 py-1 italic opacity-90 my-2 text-justify">
+              {renderInlineMarkdown(trimmed.slice(2))}
+            </blockquote>
+          );
+        }
+        if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+          const items = trimmed.split("\n");
+          return (
+            <ul key={idx} className="space-y-1.5 my-2 pl-4 list-disc text-justify">
+              {items.map((it, itemIdx) => (
+                <li key={itemIdx}>{renderInlineMarkdown(it.replace(/^[-*]\s+/, ""))}</li>
+              ))}
+            </ul>
+          );
+        }
+        if (/^\d+\.\s+/.test(trimmed)) {
+          const items = trimmed.split("\n");
+          return (
+            <ol key={idx} className="space-y-1.5 my-2 pl-4 list-decimal text-justify">
+              {items.map((it, itemIdx) => (
+                <li key={itemIdx}>{renderInlineMarkdown(it.replace(/^\d+\.\s+/, ""))}</li>
+              ))}
+            </ol>
+          );
+        }
+        if (trimmed.startsWith("```")) {
+          const lines = trimmed.split("\n");
+          const lastLine = lines[lines.length - 1];
+          const code = lines.slice(1, lastLine && lastLine.startsWith("```") ? -1 : undefined).join("\n");
+          return (
+            <pre key={idx} className="p-3 bg-black/10 dark:bg-black/30 font-mono text-xs rounded my-2 overflow-x-auto whitespace-pre-wrap">
+              {code}
+            </pre>
+          );
+        }
+        if (trimmed === "---" || trimmed === "***" || trimmed === "___") {
+          return (
+            <div key={idx} className="text-center my-3 opacity-60 font-serif tracking-widest text-sm">
+              ❦ ✦ ❦
+            </div>
+          );
+        }
+        return (
+          <p key={idx} className="indent-6 text-justify leading-relaxed">
+            {renderInlineMarkdown(trimmed)}
+          </p>
+        );
+      })}
+    </>
+  );
+}
+
+function splitContentIntoPages(text: string, fontSize: FontSize): string[] {
   const normalized = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const paragraphs = normalized.split(/\n\s*\n/);
   const budget = CHARS_PER_PAGE[fontSize];
@@ -60,14 +244,22 @@ function splitTextIntoPages(text: string, fontSize: FontSize): string[] {
     const trimmed = para.trim();
     if (!trimmed) continue;
 
-    // If a single paragraph is longer than the budget, split it into chunks
+    // Major headings start a new page if page has content
+    const isMajorHeading = /^#{1,2}\s+/.test(trimmed);
+    if (isMajorHeading && currentPage.length > budget * 0.4) {
+      if (currentPage.trim()) {
+        pages.push(currentPage.trim());
+        currentPage = "";
+      }
+    }
+
+    // Split overly long paragraphs cleanly along sentence boundaries
     if (trimmed.length > budget) {
       if (currentPage.trim()) {
         pages.push(currentPage.trim());
         currentPage = "";
       }
-      // Split by sentence boundaries or word boundaries
-      const sentences = trimmed.split(/(?<=[.!?])\s+/);
+      const sentences = trimmed.match(/[^.!?]+[.!?]+(\s+|$)|[^.!?]+$/g) || [trimmed];
       let chunk = "";
       for (const sentence of sentences) {
         if ((chunk + " " + sentence).length > budget && chunk.trim()) {
@@ -138,7 +330,7 @@ export function TxtReader({ fileId, onBack }: TxtReaderProps) {
   // Compute pages dynamically from rawText and fontSize
   const pages = React.useMemo(() => {
     if (!rawText) return [];
-    return splitTextIntoPages(rawText, fontSize);
+    return splitContentIntoPages(rawText, fontSize);
   }, [rawText, fontSize]);
 
   const totalPages = Math.max(1, pages.length);
@@ -158,10 +350,27 @@ export function TxtReader({ fileId, onBack }: TxtReaderProps) {
       try {
         const stored = (await listLocalFiles()).find((item) => item.id === fileId);
         if (!stored) throw new Error("This file is no longer on your Local Shelf.");
-        if (stored.format !== "txt") throw new Error("This file is not a plain text document.");
+        if (stored.format !== "txt" && stored.format !== "md" && stored.format !== "docx") {
+          throw new Error("This file format is not supported by the document reader.");
+        }
 
         const blob = await getLocalFileBlob(stored.id);
-        const text = await blob.text();
+        let text = "";
+
+        if (stored.format === "docx") {
+          try {
+            const archive = await SafeZipArchive.open(blob);
+            const docXmlBytes = await archive.read("word/document.xml");
+            const xmlStr = new TextDecoder("utf-8").decode(docXmlBytes);
+            text = parseDocxXmlToMarkdown(xmlStr);
+          } catch (docxErr) {
+            console.warn("Falling back to text extraction for document:", docxErr);
+            text = await extractFallbackText(blob);
+          }
+        } else {
+          text = await blob.text();
+        }
+
         if (cancelled) return;
 
         setFile(stored);
@@ -180,7 +389,7 @@ export function TxtReader({ fileId, onBack }: TxtReaderProps) {
         setIsLoading(false);
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load TXT file.");
+          setError(err instanceof Error ? err.message : "Failed to load document.");
           setIsLoading(false);
         }
       }
@@ -442,7 +651,9 @@ export function TxtReader({ fileId, onBack }: TxtReaderProps) {
   const leftPageContent = pages[leftPageIndex] ?? "";
   const rightPageContent = rightPageIndex >= 0 && rightPageIndex < totalPages ? pages[rightPageIndex] ?? "" : "";
 
-  const animationClass = turnDirection === "reverse" ? "gm-page-turn-reverse" : "gm-page-turn-active";
+  const animationClass = spreadMode
+    ? (turnDirection === "reverse" ? "gm-spine-turn-reverse" : "gm-spine-turn-forward")
+    : (turnDirection === "reverse" ? "gm-corner-turn-reverse" : "gm-corner-turn-forward");
 
   return (
     <div className={`flex flex-col h-[calc(100vh-3.5rem)] min-h-[500px] w-full select-text ${theme === "dark" ? "bg-[#0c0c0e]" : "bg-[#ece5d4]"}`}>
@@ -635,11 +846,7 @@ export function TxtReader({ fileId, onBack }: TxtReaderProps) {
 
                 {/* Left Page Text Content */}
                 <div className={`my-auto flex-1 py-4 overflow-y-auto ${fontFamilies} ${fontSizes} space-y-4`}>
-                  {leftPageContent.split("\n\n").map((para, i) => (
-                    <p key={i} className="indent-6 text-justify">
-                      {para}
-                    </p>
-                  ))}
+                  <DocumentPageContent content={leftPageContent} />
                 </div>
 
                 {/* Left Page Footer */}
@@ -670,11 +877,7 @@ export function TxtReader({ fileId, onBack }: TxtReaderProps) {
                 {/* Right Page Text Content */}
                 <div className={`my-auto flex-1 py-4 overflow-y-auto ${fontFamilies} ${fontSizes} space-y-4`}>
                   {rightPageContent ? (
-                    rightPageContent.split("\n\n").map((para, i) => (
-                      <p key={i} className="indent-6 text-justify">
-                        {para}
-                      </p>
-                    ))
+                    <DocumentPageContent content={rightPageContent} />
                   ) : (
                     <div className="flex h-full flex-col items-center justify-center text-center text-gm-xs opacity-40 font-mono">
                       <BookOpen className="h-8 w-8 mb-2" />
@@ -708,11 +911,7 @@ export function TxtReader({ fileId, onBack }: TxtReaderProps) {
 
                 {/* Single Page Text Content */}
                 <div className={`my-auto flex-1 py-6 overflow-y-auto ${fontFamilies} ${fontSizes} max-w-2xl mx-auto w-full space-y-4`}>
-                  {pages[currentPageIndex]?.split("\n\n").map((para, i) => (
-                    <p key={i} className="indent-8 text-justify">
-                      {para}
-                    </p>
-                  ))}
+                  <DocumentPageContent content={pages[currentPageIndex] ?? ""} />
                 </div>
 
                 {/* Single Page Footer */}

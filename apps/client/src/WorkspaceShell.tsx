@@ -1,5 +1,5 @@
 import * as React from "react";
-import { DoorOpen, KeyRound, Layers, Lock, LogOut, RefreshCw, Unlock, X } from "lucide-react";
+import { KeyRound, Layers, Lock, LogOut, RefreshCw, Unlock, X } from "lucide-react";
 import { AppShell, toast, ThemeSwitcher } from "@grimoire/ui";
 import { matchRoute } from "./router";
 import { TermsAndConditions } from "./components/features/TermsAndConditions/TermsAndConditions";
@@ -170,27 +170,27 @@ export function WorkspaceShell({
           trash: totalTrashCount,
         }}
         headerSlot={
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <button
               type="button"
               onClick={() => onNavigate("/vault")}
-              className="inline-flex h-8 sm:h-9 items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer min-w-[34px] sm:min-w-[38px]"
+              className="inline-flex h-7 w-7 sm:h-8 sm:w-auto items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-0 sm:px-2.5 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer shrink-0"
               title="Open Private Vault to reveal or conceal Hidden Works"
             >
               {isVaultUnlocked ? (
-                <Unlock className="h-4 w-4 text-[var(--gm-warning)]" />
+                <Unlock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[var(--gm-warning)]" />
               ) : (
-                <Lock className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+                <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[var(--gm-accent-strong)]" />
               )}
             </button>
             <button
               type="button"
-              onClick={() => void handleCrossPlatformSync()}
-              className="inline-flex h-8 sm:h-9 items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
-              title="Sync Works, Progress & Memories across Web, PC App & Mobile App"
+              onClick={() => onNavigate("/sync")}
+              className="inline-flex h-7 w-7 sm:h-8 sm:w-auto items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-0 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer shrink-0"
+              title="Configure & Sync Works, Categories, and Memories across Web, PC & Mobile"
             >
               <RefreshCw
-                className={`h-4 w-4 text-[var(--gm-accent-strong)] ${
+                className={`h-3.5 w-3.5 sm:h-4 sm:w-4 text-[var(--gm-accent-strong)] ${
                   isSyncing ? "animate-spin" : ""
                 }`}
               />
@@ -198,39 +198,30 @@ export function WorkspaceShell({
             </button>
             <button
               type="button"
-              onClick={onOpenSanctumHome}
-              className="inline-flex h-8 sm:h-9 items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
-              title="Exit Room and return to Sanctum Title Screen"
+              onClick={() => setShowPortalsModal(true)}
+              className="inline-flex h-7 w-7 sm:h-8 sm:w-auto items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-0 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer shrink-0"
+              title="Reading Portals & Website Credential Manager"
             >
-              <DoorOpen className="h-4 w-4 text-[var(--gm-accent-strong)]" />
-              <span className="hidden sm:inline">Exit Room</span>
+              <KeyRound className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[var(--gm-accent-strong)]" />
+              <span className="hidden md:inline">Portals</span>
             </button>
             <button
               type="button"
               onClick={onOpenFeaturesGuide}
-              className="inline-flex h-8 sm:h-9 items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
+              className="inline-flex h-7 w-7 sm:h-8 sm:w-auto items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-0 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer shrink-0"
               title="Open Step-by-Step Feature Encyclopedia"
             >
-              <Layers className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+              <Layers className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[var(--gm-accent-strong)]" />
               <span className="hidden lg:inline">Guide</span>
             </button>
-            <button
-              type="button"
-              onClick={() => setShowPortalsModal(true)}
-              className="inline-flex h-8 sm:h-9 items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-text)] shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
-              title="Reading Portals & Website Credential Manager"
-            >
-              <KeyRound className="h-4 w-4 text-[var(--gm-accent-strong)]" />
-              <span className="hidden md:inline">Portals</span>
-            </button>
-            <ThemeSwitcher />
+            <ThemeSwitcher compact />
             <button
               type="button"
               onClick={handleLogOut}
-              className="inline-flex h-8 sm:h-9 items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-danger)] hover:bg-[var(--gm-danger)] hover:text-white shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer"
+              className="inline-flex h-7 w-7 sm:h-8 sm:w-auto items-center justify-center gap-1.5 rounded-gm-sm border border-[var(--gm-border-strong)] bg-[var(--gm-bg-elevated)] p-0 sm:px-3 text-xs sm:text-sm font-semibold text-[var(--gm-danger)] hover:bg-[var(--gm-danger)] hover:text-white shadow-[2px_2px_0px_var(--gm-border-strong)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all cursor-pointer shrink-0"
               title="Log Out and Seal Room Session"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden xl:inline">Log Out</span>
             </button>
           </div>
