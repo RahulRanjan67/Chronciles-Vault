@@ -17,15 +17,16 @@ Grimoire is architected as a Local-First, Zero-Knowledge application. Central se
 npx wrangler login
 ```
 
-### Step 2: Create Production D1 Database
+### Step 2: (Optional) Create Production D1 Database
+If you wish to enable edge E2EE multi-device sync and metadata caching:
 ```bash
 npx wrangler d1 create grimoire_d1_production
 ```
-*Note the returned `database_id` and ensure it matches `database_id` in `wrangler.toml`.*
+*Uncomment the `[[d1_databases]]` block in `wrangler.toml` and set `database_id` to the returned UUID.*
 
-### Step 3: Run Database Migrations
+### Step 3: (Optional) Run Database Migrations
 ```bash
-# Apply initial schema to production D1 database
+# Apply initial schema to production D1 database (if D1 is configured)
 npx wrangler d1 migrations apply grimoire_d1_production --remote
 ```
 

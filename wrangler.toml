@@ -3,16 +3,23 @@ main = "server/worker.ts"
 compatibility_date = "2024-04-05"
 compatibility_flags = ["nodejs_compat"]
 
-[site]
-bucket = "./apps/client/dist"
+[assets]
+directory = "./apps/client/dist"
+binding = "ASSETS"
 
-[[d1_databases]]
-binding = "DB"
-database_name = "grimoire_d1_production"
-database_id = "grimoire-d1-prod-001"
-migrations_dir = "./migrations"
+# Optional Cloudflare D1 Relational Binding
+# Grimoire operates 100% sovereignly in local-first mode (IndexedDB / OPFS).
+# To activate Cloudflare D1 cloud sync & edge metadata caching:
+# 1. Run: npx wrangler d1 create grimoire_d1_production
+# 2. Paste the actual UUID returned by Cloudflare below and uncomment this section:
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "grimoire_d1_production"
+# database_id = "PASTE_YOUR_CLOUDFLARE_D1_UUID_HERE"
+# migrations_dir = "./migrations"
 
 [vars]
 ENVIRONMENT = "production"
 API_VERSION = "v1"
 CORS_ALLOW_ORIGIN = "*"
+

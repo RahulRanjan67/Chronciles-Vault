@@ -8,7 +8,8 @@
  */
 
 export interface Env {
-  DB: D1Database;
+  DB?: D1Database;
+  ASSETS?: Fetcher;
   ENVIRONMENT?: string;
   CORS_ALLOW_ORIGIN?: string;
 }
@@ -43,6 +44,14 @@ export default {
 
       // 2. Auth: Register / Session
       if (url.pathname === "/api/auth/register" && request.method === "POST") {
+        if (!env.DB) {
+          return jsonResponse(
+            { error: "Cloudflare D1 database is not bound. Grimoire operates in sovereign local-first mode." },
+            corsHeaders,
+            503
+          );
+        }
+
         const body: any = await request.json();
         const { username, authTokenHash, publicKey } = body;
         if (!username || !authTokenHash) {
@@ -64,6 +73,14 @@ export default {
 
       // 3. E2EE Sync: Push Encrypted Blob
       if (url.pathname === "/api/sync/push" && request.method === "POST") {
+        if (!env.DB) {
+          return jsonResponse(
+            { error: "Cloudflare D1 database is not bound. Sync operates in sovereign local-first mode." },
+            corsHeaders,
+            503
+          );
+        }
+
         const body: any = await request.json();
         const { userId, deviceId, clientTimestamp, stateVector, encryptedPayload } = body;
 
@@ -86,6 +103,10 @@ export default {
 
       // 4. E2EE Sync: Pull Encrypted Blobs
       if (url.pathname === "/api/sync/pull" && request.method === "GET") {
+        if (!env.DB) {
+          return jsonResponse({ success: true, items: [] }, corsHeaders);
+        }
+
         const userId = url.searchParams.get("userId");
         const excludeDeviceId = url.searchParams.get("excludeDeviceId");
 
@@ -124,15 +145,17 @@ export default {
         const domain = parsed.hostname;
         const itemKey = parsed.pathname;
 
-        // Check D1 Cache first
-        const cached: any = await env.DB.prepare(
-          "SELECT metadata_json, expires_at FROM portal_metadata_cache WHERE domain = ? AND item_key = ?"
-        )
-          .bind(domain, itemKey)
-          .first();
+        // Check D1 Cache first if DB is configured
+        if (env.DB) {
+          const cached: any = await env.DB.prepare(
+            "SELECT metadata_json, expires_at FROM portal_metadata_cache WHERE domain = ? AND item_key = ?"
+          )
+            .bind(domain, itemKey)
+            .first();
 
-        if (cached && new Date(cached.expires_at) > new Date()) {
-          return jsonResponse(JSON.parse(cached.metadata_json), corsHeaders);
+          if (cached && new Date(cached.expires_at) > new Date()) {
+            return jsonResponse(JSON.parse(cached.metadata_json), corsHeaders);
+          }
         }
 
         // Fetch external HTML and parse title / description safely
@@ -160,12 +183,14 @@ export default {
         const now = new Date();
         const expires = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-        await env.DB.prepare(
-          `INSERT OR REPLACE INTO portal_metadata_cache (domain, item_key, title, metadata_json, cached_at, expires_at)
-           VALUES (?, ?, ?, ?, ?, ?)`
-        )
-          .bind(domain, itemKey, title, JSON.stringify(payload), now.toISOString(), expires)
-          .run();
+        if (env.DB) {
+          await env.DB.prepare(
+            `INSERT OR REPLACE INTO portal_metadata_cache (domain, item_key, title, metadata_json, cached_at, expires_at)
+             VALUES (?, ?, ?, ?, ?, ?)`
+          )
+            .bind(domain, itemKey, title, JSON.stringify(payload), now.toISOString(), expires)
+            .run();
+        }
 
         return jsonResponse(payload, corsHeaders);
       }
@@ -175,8 +200,12 @@ export default {
         return jsonResponse({ error: "API route not found" }, corsHeaders, 404);
       }
 
-      // Pass-through to static files handled by Cloudflare Pages/Workers Sites
-      return new Response("Grimoire Static Web", { status: 200 });
+      // Static assets pass-through for client SPA
+      if (env.ASSETS) {
+        return await env.ASSETS.fetch(request);
+      }
+
+      return new Response("Grimoire Sovereign Sanctum is Live", { status: 200 });
     } catch (err: any) {
       return jsonResponse({ error: err.message || "Internal server error" }, corsHeaders, 500);
     }
