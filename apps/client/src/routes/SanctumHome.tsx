@@ -600,8 +600,8 @@ export function SanctumHome({
   }, []);
 
   // ─── Loading & Session Hydration State ─────────────────────────
-  const [progress, setProgress] = React.useState<number>(8);
-  const [isRoomReady, setIsRoomReady] = React.useState<boolean>(false);
+  const [progress, setProgress] = React.useState<number>(100);
+  const [isRoomReady, setIsRoomReady] = React.useState<boolean>(true);
   const [isExitingToRoom, setIsExitingToRoom] = React.useState<boolean>(false);
   const [roomStats, setRoomStats] = React.useState<{
     worksCount: number;

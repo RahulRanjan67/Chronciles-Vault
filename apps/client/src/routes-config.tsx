@@ -92,7 +92,7 @@ export const APP_ROUTES: RouteDefinition[] = [
   { path: "/keyring", name: "Keyring & Portals", tier: 2, component: KeyringPortals },
   { path: "/portals", name: "Keyring & Portals", tier: 2, component: KeyringPortals },
   { path: "/sync", name: "Sync Sanctum", tier: 2, component: SyncConfig },
-  { path: "/discover", name: "Discover", tier: 2, component: Discover },
+  { path: "/discover", name: "Curated Lists", tier: 2, component: Lists },
   { path: "/vault", name: "Private Vault", tier: 3, component: Vault },
   { path: "/archive", name: "Archive", tier: 3, component: Archive },
   { path: "/trash", name: "Trash Bin", tier: 3, component: TrashBin },

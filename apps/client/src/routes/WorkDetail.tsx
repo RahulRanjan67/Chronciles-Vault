@@ -28,11 +28,19 @@ import {
   Headphones,
   SkipBack,
   SkipForward,
+  Tag,
+  ListFilter,
 } from "lucide-react";
 import {
   Badge,
   Button,
   Cover,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   Input,
   MemoryCard,
   PageContainer,
@@ -55,7 +63,9 @@ import {
 } from "@grimoire/ui";
 import {
   clientRepository,
+  useCategoriesStore,
   useLibraryStore,
+  useListsStore,
   useWorkDetailStore,
 } from "@grimoire/state";
 import {
@@ -133,6 +143,18 @@ export function WorkDetail({
   } = useWorkDetailStore();
   const updateWorkInLibrary = useLibraryStore((state) => state.updateWork);
   const updateRelationshipInLibrary = useLibraryStore((state) => state.updateRelationship);
+
+  const { categories, toggleWorkInCategory } = useCategoriesStore();
+  const { myLists, addWorkToList, removeWorkFromList } = useListsStore();
+  const [listsModalOpen, setListsModalOpen] = React.useState(false);
+
+  const assignedCategories = React.useMemo(() => {
+    return categories.filter((c) => c.workIds.includes(workId));
+  }, [categories, workId]);
+
+  const assignedLists = React.useMemo(() => {
+    return myLists.filter((l) => l.items.some((i) => i.workId === workId));
+  }, [myLists, workId]);
 
   const [activeTab, setActiveTab] = React.useState("overview");
   const [checkingPathId, setCheckingPathId] = React.useState<string | null>(null);
@@ -846,6 +868,38 @@ export function WorkDetail({
                   </span>
                 ))}
               </div>
+
+              {/* Assigned Categories & Lists Badges */}
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-mono text-[var(--gm-text-subtle)] mr-1">In:</span>
+                {assignedCategories.map((c) => (
+                  <span
+                    key={c.id}
+                    className="inline-flex items-center gap-1 rounded-gm-full px-2.5 py-0.5 text-[10px] font-semibold border border-[var(--gm-accent-muted)] bg-[var(--gm-accent)]/10 text-[var(--gm-accent-strong)]"
+                  >
+                    <Tag className="h-2.5 w-2.5" />
+                    <span>{c.name}</span>
+                  </span>
+                ))}
+                {assignedLists.map((l) => (
+                  <span
+                    key={l.id}
+                    className="inline-flex items-center gap-1 rounded-gm-full px-2.5 py-0.5 text-[10px] font-semibold border border-[var(--gm-border)] bg-[var(--gm-surface)] text-[var(--gm-text)]"
+                  >
+                    <BookOpen className="h-2.5 w-2.5 text-[var(--gm-text-muted)]" />
+                    <span>{l.title}</span>
+                  </span>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setListsModalOpen(true)}
+                  className="inline-flex items-center gap-1 rounded-gm-full px-2 py-0.5 text-[10px] font-medium border border-dashed border-[var(--gm-border-strong)] text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:border-[var(--gm-accent)] transition-colors cursor-pointer"
+                  title="Assign this work to multiple categories or lists"
+                >
+                  <Plus className="h-2.5 w-2.5" />
+                  <span>Assign Categories &amp; Lists</span>
+                </button>
+              </div>
             </div>
 
             {/* Progress & Status Controls */}
@@ -931,6 +985,16 @@ export function WorkDetail({
                 </Button>
 
                 <div className="flex items-center gap-2 ml-auto">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => setListsModalOpen(true)}
+                    title="Assign to custom categories and personal lists"
+                  >
+                    <Tag className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
+                    <span>Categories &amp; Lists</span>
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -2306,6 +2370,141 @@ export function WorkDetail({
           </div>
         </div>
       )}
+
+      {/* Multi-Category & Multi-List Assignment Dialog */}
+      <Dialog open={listsModalOpen} onOpenChange={setListsModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Tag className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+              <span>Assign &quot;{work.title}&quot;</span>
+            </DialogTitle>
+            <DialogDescription>
+              Assign this work to multiple custom categories and personal reading lists. Changes save instantly.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5 py-2 max-h-[60vh] overflow-y-auto pr-1">
+            {/* Custom Categories Section */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-gm-xs font-bold uppercase tracking-wider text-[var(--gm-text-muted)]">
+                  Custom Categories ({assignedCategories.length}/{categories.length})
+                </span>
+              </div>
+              {categories.length > 0 ? (
+                <div className="space-y-1.5">
+                  {categories.map((cat) => {
+                    const isAssigned = cat.workIds.includes(workId);
+                    return (
+                      <div
+                        key={cat.id}
+                        onClick={() => toggleWorkInCategory(cat.id, workId)}
+                        className={`flex items-center justify-between p-2.5 rounded-cv border transition-all cursor-pointer ${
+                          isAssigned
+                            ? "border-[var(--gm-accent)] bg-[var(--gm-surface)]"
+                            : "border-[var(--gm-border)] hover:bg-[var(--gm-surface)]/60"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="h-2.5 w-2.5 rounded-full bg-[var(--gm-accent-strong)] shrink-0" />
+                          <div className="min-w-0">
+                            <p className="font-semibold text-gm-xs text-[var(--gm-text)] truncate">
+                              {cat.name}
+                            </p>
+                            {cat.description && (
+                              <p className="text-[10px] text-[var(--gm-text-muted)] truncate">
+                                {cat.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div
+                          className={`h-5 w-5 rounded flex items-center justify-center border transition-colors ${
+                            isAssigned
+                              ? "bg-[var(--gm-accent)] border-[var(--gm-accent)] text-white"
+                              : "border-[var(--gm-border)]"
+                          }`}
+                        >
+                          {isAssigned && <Check className="h-3.5 w-3.5" />}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-gm-xs text-[var(--gm-text-muted)] italic">
+                  No categories created yet. Create some in My Categories!
+                </p>
+              )}
+            </div>
+
+            {/* Personal Lists Section */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-gm-xs font-bold uppercase tracking-wider text-[var(--gm-text-muted)]">
+                  Personal Lists ({assignedLists.length}/{myLists.length})
+                </span>
+              </div>
+              {myLists.length > 0 ? (
+                <div className="space-y-1.5">
+                  {myLists.map((list) => {
+                    const isAssigned = list.items.some((i) => i.workId === workId);
+                    return (
+                      <div
+                        key={list.id}
+                        onClick={() => {
+                          if (isAssigned) {
+                            removeWorkFromList(list.id, workId);
+                          } else {
+                            addWorkToList(list.id, workId);
+                          }
+                        }}
+                        className={`flex items-center justify-between p-2.5 rounded-cv border transition-all cursor-pointer ${
+                          isAssigned
+                            ? "border-[var(--gm-accent)] bg-[var(--gm-surface)]"
+                            : "border-[var(--gm-border)] hover:bg-[var(--gm-surface)]/60"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <BookOpen className="h-3.5 w-3.5 text-[var(--gm-text-muted)] shrink-0" />
+                          <div className="min-w-0">
+                            <p className="font-semibold text-gm-xs text-[var(--gm-text)] truncate">
+                              {list.title}
+                            </p>
+                            <p className="text-[10px] text-[var(--gm-text-muted)]">
+                              {list.items.length} works
+                            </p>
+                          </div>
+                        </div>
+
+                        <div
+                          className={`h-5 w-5 rounded flex items-center justify-center border transition-colors ${
+                            isAssigned
+                              ? "bg-[var(--gm-accent)] border-[var(--gm-accent)] text-white"
+                              : "border-[var(--gm-border)]"
+                          }`}
+                        >
+                          {isAssigned && <Check className="h-3.5 w-3.5" />}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-gm-xs text-[var(--gm-text-muted)] italic">
+                  No personal lists created yet. Create one in Lists!
+                </p>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button onClick={() => setListsModalOpen(false)}>Done</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }

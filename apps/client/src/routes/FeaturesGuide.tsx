@@ -1,4 +1,6 @@
 import * as React from "react";
+import { toast } from "@grimoire/ui";
+import { ImageZoomLightbox } from "../components/common/ImageZoomLightbox";
 import {
   ArrowLeft,
   BookOpen,
@@ -33,6 +35,10 @@ import {
   Sparkles,
   X,
   Zap,
+  ZoomIn,
+  ZoomOut,
+  Camera,
+  Upload,
 } from "lucide-react";
 
 export interface FeatureStepItem {
@@ -1227,7 +1233,7 @@ export function FeaturesGuide({ onNavigate, onEnterRoomAndNavigate }: FeaturesGu
     "faq-supported-formats": true,
   });
 
-  const [customScreenshots] = React.useState<Record<string, string>>(() => {
+  const [customScreenshots, setCustomScreenshots] = React.useState<Record<string, string>>(() => {
     if (typeof window === "undefined") return {};
     try {
       const raw = window.localStorage.getItem("cv:feature_screenshots:v1");
@@ -1236,6 +1242,50 @@ export function FeaturesGuide({ onNavigate, onEnterRoomAndNavigate }: FeaturesGu
       return {};
     }
   });
+
+  const [lightboxImage, setLightboxImage] = React.useState<{
+    src: string;
+    title: string;
+    caption?: string;
+    routePath?: string;
+  } | null>(null);
+
+  const [activeUploadFeatureId, setActiveUploadFeatureId] = React.useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeUploadFeatureId) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      if (result) {
+        setCustomScreenshots((prev) => {
+          const next = { ...prev, [activeUploadFeatureId]: result };
+          try {
+            window.localStorage.setItem("cv:feature_screenshots:v1", JSON.stringify(next));
+          } catch (err) {
+            console.warn("Could not save to localStorage", err);
+          }
+          return next;
+        });
+        toast({
+          title: "Screenshot attached",
+          description: `Visual reference saved for ${activeUploadFeatureId}`,
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+    setActiveUploadFeatureId(null);
+  };
+
+  const triggerUpload = (featureId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveUploadFeatureId(featureId);
+    fileInputRef.current?.click();
+  };
 
   const filteredFeatures = React.useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -1546,13 +1596,62 @@ export function FeaturesGuide({ onNavigate, onEnterRoomAndNavigate }: FeaturesGu
                         {/* Right 5 Columns: Architectural Feature Blueprint Frame */}
                         <div className="lg:col-span-5 space-y-2.5">
                           {attachedScreenshot ? (
-                            <div className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] overflow-hidden shadow-2xs">
-                              <div className="relative group aspect-[16/10] bg-black/50 flex items-center justify-center overflow-hidden">
+                            <div className="rounded-cv border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] overflow-hidden shadow-2xs space-y-2">
+                              <div
+                                onClick={() =>
+                                  setLightboxImage({
+                                    src: attachedScreenshot,
+                                    title: feature.title,
+                                    caption: feature.screenshotCaption,
+                                    routePath: feature.routePath,
+                                  })
+                                }
+                                className="relative group aspect-[16/10] bg-black/60 flex items-center justify-center overflow-hidden cursor-zoom-in"
+                                title="Click to pop out and zoom screenshot"
+                              >
                                 <img
                                   src={attachedScreenshot}
                                   alt={feature.title}
-                                  className="w-full h-full object-contain"
+                                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                                 />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-cv bg-black/80 text-white text-xs font-semibold backdrop-blur-xs shadow-lg">
+                                    <ZoomIn className="h-3.5 w-3.5" /> Click to Zoom &amp; Pan
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="p-3 pt-0 flex items-center justify-between gap-2 border-t border-[var(--gm-border)]/40 mt-1">
+                                <span className="text-[11px] font-mono text-[var(--gm-text-muted)] line-clamp-1">
+                                  {feature.screenshotCaption}
+                                </span>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => triggerUpload(feature.id, e)}
+                                    className="inline-flex items-center gap-1 rounded-cv border border-[var(--gm-border)] bg-[var(--gm-surface)] px-2 py-1 text-[11px] font-medium text-[var(--gm-text-muted)] hover:text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] transition-colors cursor-pointer"
+                                    title="Replace with new screenshot"
+                                  >
+                                    <Camera className="h-3 w-3" />
+                                    <span>Replace</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setLightboxImage({
+                                        src: attachedScreenshot,
+                                        title: feature.title,
+                                        caption: feature.screenshotCaption,
+                                        routePath: feature.routePath,
+                                      })
+                                    }
+                                    className="inline-flex items-center gap-1 rounded-cv bg-[var(--gm-accent)]/10 border border-[var(--gm-accent)]/40 px-2.5 py-1 text-[11px] font-semibold text-[var(--gm-accent-strong)] hover:bg-[var(--gm-accent)] hover:text-white transition-colors cursor-pointer"
+                                    title="Open zoomable lightbox"
+                                  >
+                                    <Maximize2 className="h-3 w-3" />
+                                    <span>Zoom</span>
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           ) : (
@@ -1598,13 +1697,24 @@ export function FeaturesGuide({ onNavigate, onEnterRoomAndNavigate }: FeaturesGu
                                 {feature.screenshotCaption}
                               </p>
 
-                              <button
-                                type="button"
-                                onClick={() => triggerJump(feature.routePath)}
-                                className="w-full inline-flex items-center justify-center gap-2 rounded-cv border border-[var(--gm-accent)] bg-[var(--gm-accent)]/10 px-3 py-2 text-gm-xs font-sans font-bold text-[var(--gm-accent-strong)] hover:bg-[var(--gm-accent)] hover:text-[var(--gm-accent-fg)] transition-all cursor-pointer shadow-2xs"
-                              >
-                                <span>Launch Feature in App ({feature.routePath}) →</span>
-                              </button>
+                              <div className="grid grid-cols-2 gap-2 pt-1 font-sans">
+                                <button
+                                  type="button"
+                                  onClick={(e) => triggerUpload(feature.id, e)}
+                                  className="inline-flex items-center justify-center gap-1.5 rounded-cv border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-2.5 py-1.5 text-gm-xs font-semibold text-[var(--gm-text)] hover:bg-[var(--gm-surface-hover)] transition-all cursor-pointer"
+                                  title="Upload screenshot from disk"
+                                >
+                                  <Upload className="h-3.5 w-3.5 text-[var(--gm-accent-strong)]" />
+                                  <span>Attach Visual</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => triggerJump(feature.routePath)}
+                                  className="inline-flex items-center justify-center gap-1.5 rounded-cv border border-[var(--gm-accent)] bg-[var(--gm-accent)]/15 px-2.5 py-1.5 text-gm-xs font-bold text-[var(--gm-accent-strong)] hover:bg-[var(--gm-accent)] hover:text-[var(--gm-accent-fg)] transition-all cursor-pointer shadow-2xs"
+                                >
+                                  <span>Launch ({feature.routePath}) →</span>
+                                </button>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -1681,6 +1791,28 @@ export function FeaturesGuide({ onNavigate, onEnterRoomAndNavigate }: FeaturesGu
           </div>
         )}
       </div>
+
+      {/* Hidden File Input for Attaching Screenshots */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileUpload}
+        className="hidden"
+        aria-hidden="true"
+      />
+
+      {/* Interactive Lightbox Pop-Out Modal with Zoom & Pan */}
+      {lightboxImage && (
+        <ImageZoomLightbox
+          src={lightboxImage.src}
+          title={lightboxImage.title}
+          caption={lightboxImage.caption}
+          routePath={lightboxImage.routePath}
+          onClose={() => setLightboxImage(null)}
+          onNavigate={(p) => triggerJump(p)}
+        />
+      )}
     </div>
   );
 }

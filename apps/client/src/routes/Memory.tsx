@@ -1,5 +1,5 @@
 import * as React from "react";
-import { MessageSquare, Plus, Trash2 } from "lucide-react";
+import { MessageSquare, Plus, Trash2, ZoomIn } from "lucide-react";
 import {
   MemoryType,
   PrivacyState,
@@ -21,6 +21,7 @@ import {
   toast,
 } from "@grimoire/ui";
 import { toUIMemoryType } from "../utils/display-adapters";
+import { ImageZoomLightbox } from "../components/common/ImageZoomLightbox";
 
 export interface MemoryProps {
   onNavigateWork?: (workId: string) => void;
@@ -59,6 +60,11 @@ export function Memory({ onNavigateWork }: MemoryProps) {
   const [imagePreviews, setImagePreviews] = React.useState<
     Record<string, { readonly thumbnail: string }>
   >({});
+  const [lightboxImage, setLightboxImage] = React.useState<{
+    src: string;
+    title: string;
+    caption?: string;
+  } | null>(null);
   const galleryRef = React.useRef<HTMLDivElement>(null);
   const loadedImagesRef = React.useRef(new Set<string>());
   const objectUrlsRef = React.useRef<string[]>([]);
@@ -511,7 +517,15 @@ export function Memory({ onNavigateWork }: MemoryProps) {
                 return (
                   <div
                     key={asset.id}
-                    className="relative max-h-64 overflow-hidden rounded-gm-lg border border-[var(--gm-border)]"
+                    onClick={() =>
+                      setLightboxImage({
+                        src: preview.thumbnail,
+                        title: memory.title ?? `Screenshot: ${workTitle ?? "Memory"}`,
+                        caption: memory.body || undefined,
+                      })
+                    }
+                    className="relative group max-h-64 overflow-hidden rounded-gm-lg border border-[var(--gm-border)] cursor-zoom-in"
+                    title="Click to zoom screenshot"
                   >
                     <img
                       src={preview.thumbnail}
@@ -524,8 +538,13 @@ export function Memory({ onNavigateWork }: MemoryProps) {
                       alt={memory.title ?? `Saved image for ${workTitle ?? "memory"}`}
                       loading="lazy"
                       decoding="async"
-                      className="relative max-h-64 w-full object-contain"
+                      className="relative max-h-64 w-full object-contain group-hover:scale-105 transition-transform duration-200"
                     />
+                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-cv bg-black/75 text-white text-xs font-semibold backdrop-blur-xs">
+                        <ZoomIn className="h-3.5 w-3.5" /> Click to Zoom
+                      </span>
+                    </div>
                   </div>
                 );
               })}
@@ -562,6 +581,17 @@ export function Memory({ onNavigateWork }: MemoryProps) {
             />
           )}
         </div>
+      )}
+
+      {/* Lightbox Pop-Out Modal with Zoom & Pan */}
+      {lightboxImage && (
+        <ImageZoomLightbox
+          src={lightboxImage.src}
+          title={lightboxImage.title}
+          caption={lightboxImage.caption}
+          onClose={() => setLightboxImage(null)}
+          onNavigate={onNavigateWork}
+        />
       )}
     </PageContainer>
   );

@@ -63,6 +63,7 @@ export function Lists({ onNavigateWork }: ListsProps) {
     createList,
     deleteList,
     removeWorkFromList,
+    addWorkToList,
     moveListItem,
     communityLists,
     communitySearchQuery,
@@ -80,6 +81,8 @@ export function Lists({ onNavigateWork }: ListsProps) {
 
   const [activeTab, setActiveTab] = React.useState<"my-lists" | "explore">("explore");
   const [editListOpen, setEditListOpen] = React.useState(false);
+  const [assignWorksModalOpen, setAssignWorksModalOpen] = React.useState(false);
+  const [assignSearch, setAssignSearch] = React.useState("");
   const [noteEntryId, setNoteEntryId] = React.useState<string | null>(null);
   const [createListModalOpen, setCreateListModalOpen] = React.useState(false);
   const [selectedCommunityList, setSelectedCommunityList] = React.useState<CommunityList | null>(
@@ -495,6 +498,9 @@ export function Lists({ onNavigateWork }: ListsProps) {
                       )}
                     </div>
                     <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setAssignWorksModalOpen(true)} className="gap-1.5">
+                        <Plus className="h-3.5 w-3.5" /> Assign Works
+                      </Button>
                       <Button variant="outline" size="sm" onClick={() => setEditListOpen(true)} className="gap-1.5">
                         <Pencil className="h-3.5 w-3.5" /> Edit list
                       </Button>
@@ -602,8 +608,8 @@ export function Lists({ onNavigateWork }: ListsProps) {
                   ) : (
                     <EmptyState
                       variant="library"
-                      actionLabel="Explore Lists"
-                      onAction={() => setActiveTab("explore")}
+                      actionLabel="Assign Works Now"
+                      onAction={() => setAssignWorksModalOpen(true)}
                     />
                   )}
 
@@ -774,6 +780,90 @@ export function Lists({ onNavigateWork }: ListsProps) {
               <Button type="submit">Create List</Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Works Modal for Personal List */}
+      <Dialog open={assignWorksModalOpen} onOpenChange={setAssignWorksModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Assign Works to &quot;{activePersonalList?.title}&quot;</DialogTitle>
+            <DialogDescription>
+              Select works from your library to include in this list. A work can exist on multiple lists simultaneously.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="relative my-2">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--gm-text-subtle)]" />
+            <Input
+              value={assignSearch}
+              onChange={(e) => setAssignSearch(e.target.value)}
+              placeholder="Filter works to assign…"
+              className="pl-9 text-gm-xs bg-[var(--gm-surface)]"
+            />
+          </div>
+
+          <div className="max-h-80 overflow-y-auto space-y-1.5 py-1 pr-1">
+            {libraryItems
+              .filter(({ work }) =>
+                !assignSearch.trim() ||
+                work.title.toLowerCase().includes(assignSearch.toLowerCase()) ||
+                work.genres.some((g) => g.toLowerCase().includes(assignSearch.toLowerCase()))
+              )
+              .map(({ work }) => {
+                if (!activePersonalList) return null;
+                const isAssigned = activePersonalList.items.some((i) => i.workId === work.id);
+
+                return (
+                  <div
+                    key={work.id}
+                    onClick={() => {
+                      if (isAssigned) {
+                        removeWorkFromList(activePersonalList.id, work.id);
+                      } else {
+                        addWorkToList(activePersonalList.id, work.id);
+                      }
+                    }}
+                    className={`flex items-center justify-between p-2.5 rounded-cv border transition-all cursor-pointer ${
+                      isAssigned
+                        ? "border-[var(--gm-accent)] bg-[var(--gm-surface)]"
+                        : "border-[var(--gm-border)] hover:bg-[var(--gm-surface)]/60"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Cover
+                        title={work.title}
+                        src={work.coverRef ?? null}
+                        size="sm"
+                        className="h-10 w-8 shrink-0 object-cover rounded-xs"
+                      />
+                      <div className="min-w-0">
+                        <p className="font-semibold text-gm-xs text-[var(--gm-text)] truncate">
+                          {work.title}
+                        </p>
+                        <p className="text-[10px] text-[var(--gm-text-muted)]">
+                          {work.contentType} · {work.genres.slice(0, 2).join(", ")}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`h-5 w-5 rounded flex items-center justify-center border transition-colors ${
+                        isAssigned
+                          ? "bg-[var(--gm-accent)] border-[var(--gm-accent)] text-white"
+                          : "border-[var(--gm-border)]"
+                      }`}
+                    >
+                      {isAssigned && <Check className="h-3.5 w-3.5" />}
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button onClick={() => setAssignWorksModalOpen(false)}>Done</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </PageContainer>

@@ -46,7 +46,6 @@ export const SECONDARY_NAV_ITEMS: NavItem[] = [
   { id: 'keyring', label: 'Keyring & Portals', href: '/keyring', icon: KeyRound },
   { id: 'archive', label: 'Archive', href: '/archive', icon: Archive },
   { id: 'trash', label: 'Trash Bin', href: '/trash', icon: Trash2 },
-  { id: 'discover', label: 'Discover', href: '/discover', icon: Compass },
 ];
 
 export const TERTIARY_NAV_ITEMS: NavItem[] = [

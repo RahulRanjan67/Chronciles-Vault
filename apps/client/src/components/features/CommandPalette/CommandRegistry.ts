@@ -54,7 +54,7 @@ export const COMMAND_REGISTRY: CommandItem[] = [
   { id: "nav-return", title: "Go to Up Next", category: "Navigation", icon: RotateCcw, keywords: ["up next", "return", "home", "continue", "desk", "queue"], action: goTo("/up-next") },
   { id: "nav-library", title: "Go to Library", category: "Navigation", icon: BookOpen, keywords: ["library", "books", "manga", "novels", "shelf"], action: goTo("/") },
   { id: "nav-keyring", title: "Go to Keyring & Portals", category: "Navigation", icon: KeyRound, keywords: ["keyring", "passwords", "websites", "portals", "credentials", "logins"], action: goTo("/keyring") },
-  { id: "nav-discover", title: "Go to Discover", category: "Navigation", icon: Compass, keywords: ["discover", "find", "search", "providers"], action: goTo("/discover") },
+  { id: "nav-lists", title: "Go to Curated & Personal Lists", category: "Navigation", icon: LayoutGrid, keywords: ["lists", "shelves", "curated", "collections", "discover"], action: goTo("/lists") },
   { id: "nav-radar", title: "Go to Radar", category: "Navigation", icon: Radar, keywords: ["radar", "tracking", "detection", "releases"], action: goTo("/radar") },
   { id: "nav-updates", title: "Go to Updates Feed", category: "Navigation", icon: Sparkles, keywords: ["updates", "new", "chapters", "feed"], action: goTo("/updates") },
   { id: "nav-memory", title: "Go to Memory", category: "Navigation", icon: MessageSquare, keywords: ["memory", "notes", "quotes", "thoughts"], action: goTo("/memory") },
