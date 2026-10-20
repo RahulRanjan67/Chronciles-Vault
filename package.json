@@ -2,7 +2,8 @@
   "name": "grimoire",
   "version": "0.1.0",
   "private": true,
-  "description": "Grimoire — Your personal fiction sanctum",
+  "homepage": "https://grimoire-2c5.pages.dev",
+  "description": "Grimoire — Sovereign Local-First Personal Fiction Sanctum for Web Novels, Manga, Light Novels & Lore Archives",
   "engines": {
     "node": "20.x",
     "pnpm": ">=9.0.0"

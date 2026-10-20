@@ -13,6 +13,12 @@
 [![Architecture: Local--First](https://img.shields.io/badge/Architecture-Local--First-success)](#system-architecture)
 [![Security: Zero--Knowledge](https://img.shields.io/badge/Security-Zero--Knowledge%20Vault-purple)](#security--cryptography-model)
 
+<br/>
+
+[![Live Sanctum Web App](https://img.shields.io/badge/🚀%20Live%20Sanctum-grimoire--2c5.pages.dev-6366f1?style=for-the-badge&logo=cloudflare&logoColor=white)](https://grimoire-2c5.pages.dev)
+
+**🌐 Live Web Application:** [https://grimoire-2c5.pages.dev](https://grimoire-2c5.pages.dev)
+
 </div>
 
 ---
