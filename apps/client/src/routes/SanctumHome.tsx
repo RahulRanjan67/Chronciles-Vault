@@ -524,31 +524,31 @@ interface SponsoredPartner {
   readonly promoCode?: string;
   readonly ctaLabel: string;
   readonly ctaUrl: string;
+  readonly isAadsBanner?: boolean;
 }
 
 const SPONSORED_PARTNERS: readonly SponsoredPartner[] = [
   {
-    id: "bookwalker",
-    name: "BookWalker Global",
-    tagline: "Official Digital Light Novels & Manga Store",
-    category: "Official eBook Store",
-    badge: "Official Partner",
-    description: "Read official English digital editions of top light novels, isekai, and manga. Enjoy monthly coin-back events and exclusive digital bonuses.",
-    promoNote: "Save 20% on your first light novel or manga purchase",
-    promoCode: "GRIMOIRE20",
-    ctaLabel: "Browse BookWalker Store",
-    ctaUrl: "https://global.bookwalker.jp",
+    id: "aads-main",
+    name: "A-ADS Live Sponsor Network",
+    tagline: "Privacy-First Decentralized Web Advertising",
+    category: "Verified Sponsor",
+    badge: "Ad Unit #2459291",
+    description: "Support Grimoire's free sovereign reading platform. Verified advertiser promotions rendered in a contained, sandbox-locked frame.",
+    ctaLabel: "Sponsor Platform",
+    ctaUrl: "https://a-ads.com?partner=2459291",
+    isAadsBanner: true,
   },
   {
-    id: "sevenseas",
-    name: "Seven Seas Danmei & Novels",
-    tagline: "Official English Print & Digital Publisher",
-    category: "Publisher Spotlight",
-    badge: "Curated Showcase",
-    description: "Official publisher of hit Danmei titles (Grandmaster of Demonic Cultivation, TGCF) and fantasy epics with deluxe covers and internal art.",
-    promoNote: "Available in print worldwide and digital across major book vendors",
-    ctaLabel: "Explore Seven Seas Danmei",
-    ctaUrl: "https://sevenseasdanmei.com",
+    id: "aads-spotlight",
+    name: "Featured Sponsor Unit",
+    tagline: "High-Visibility Community Spotlight",
+    category: "Dedicated Space",
+    badge: "Contained Slot",
+    description: "Real-time adaptive banner ads displaying curated community offerings with guaranteed zero popups and zero auto-redirects.",
+    ctaLabel: "Advertise Here",
+    ctaUrl: "https://a-ads.com/ad_units/2459291",
+    isAadsBanner: true,
   },
   {
     id: "graphicaudio",
@@ -561,17 +561,7 @@ const SPONSORED_PARTNERS: readonly SponsoredPartner[] = [
     promoCode: "AUDIO50",
     ctaLabel: "Discover GraphicAudio",
     ctaUrl: "https://www.graphicaudio.net",
-  },
-  {
-    id: "jnovelclub",
-    name: "J-Novel Club",
-    tagline: "Weekly Pre-Pub Light Novels & Manga",
-    category: "Digital Subscription",
-    badge: "Publisher Direct",
-    description: "Read new chapters of Ascendance of a Bookworm, Apothecary Diaries, and more weeks before publication directly from the official translation team.",
-    promoNote: "Monthly pre-pub subscription with DRM-free premium credits",
-    ctaLabel: "Read on J-Novel Club",
-    ctaUrl: "https://j-novel.club",
+    isAadsBanner: true,
   },
 ];
 
@@ -1752,6 +1742,35 @@ export function SanctumHome({
                     </div>
                   )}
 
+                  {/* Live A-ADS Dedicated Banner Frame inside Rotating Card */}
+                  <div className="mt-3 overflow-hidden border border-[var(--gm-border-strong)] bg-[var(--gm-bg)]/80 p-2 shadow-inner">
+                    <div className="flex items-center justify-between pb-1 mb-1.5 border-b border-[var(--gm-border)]/50 text-[9px] font-mono">
+                      <span className="font-bold text-[var(--gm-text-muted)] uppercase">
+                        Active Sponsor Unit #2459291
+                      </span>
+                      <span className="text-emerald-500 font-semibold">
+                        Sandboxed · Zero Popups
+                      </span>
+                    </div>
+                    <div style={{ width: "100%", margin: "auto", position: "relative" }}>
+                      <iframe
+                        data-aa="2459291"
+                        src="https://acceptable.a-ads.com/2459291/?size=Adaptive"
+                        title="A-ADS Banner Unit"
+                        style={{
+                          border: 0,
+                          padding: 0,
+                          width: "100%",
+                          minHeight: "90px",
+                          overflow: "hidden",
+                          display: "block",
+                          margin: "auto",
+                        }}
+                        sandbox="allow-scripts allow-same-origin allow-popups"
+                      />
+                    </div>
+                  </div>
+
                   {/* CTA Action Row */}
                   <div className="mt-3.5 pt-3 border-t border-[var(--gm-border)] flex items-center justify-between gap-2">
                     <span className="text-[10px] font-mono text-[var(--gm-text-subtle)]">
@@ -2004,6 +2023,39 @@ export function SanctumHome({
             className="relative z-10 py-20 px-4 sm:px-8 border-t-2 border-[var(--gm-border-strong)] bg-[var(--gm-bg)]/90"
           >
             <div className="max-w-7xl mx-auto space-y-8">
+              {/* DEDICATED AD SPACE: ABOVE GLOBAL PORTAL DIRECTORY */}
+              <div className="border-2 border-[var(--gm-border-strong)] bg-[var(--gm-surface)] p-3.5 shadow-[4px_4px_0px_var(--gm-border-strong)]">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-[var(--gm-border-strong)]/40 text-[10px] font-mono">
+                  <div className="flex items-center gap-2">
+                    <span className="border border-emerald-500/60 bg-emerald-500/15 px-2 py-0.5 font-bold text-emerald-500 uppercase tracking-wider">
+                      Dedicated Sponsor Space
+                    </span>
+                    <span className="text-[var(--gm-text-muted)] font-semibold hidden sm:inline">
+                      Grimoire Portal Partner
+                    </span>
+                  </div>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-[9px]">
+                    Sandboxed &bull; Zero Popups &bull; Contained Frame
+                  </span>
+                </div>
+                <div className="w-full flex items-center justify-center overflow-hidden bg-[var(--gm-bg)]/40 p-1">
+                  <iframe
+                    data-aa="2459291"
+                    src="https://acceptable.a-ads.com/2459291/?size=Adaptive"
+                    title="Grimoire Portal Directory Sponsor"
+                    style={{
+                      border: 0,
+                      padding: 0,
+                      width: "100%",
+                      minHeight: "90px",
+                      overflow: "hidden",
+                      display: "block",
+                      margin: "auto",
+                    }}
+                    sandbox="allow-scripts allow-same-origin allow-popups"
+                  />
+                </div>
+              </div>
               <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b-2 border-[var(--gm-border-strong)] pb-6">
                 <div className="max-w-3xl space-y-2">
                   <div className="inline-flex items-center gap-2 border border-[var(--gm-border-strong)] bg-[var(--gm-surface)] px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-widest text-[var(--gm-accent-strong)]">
