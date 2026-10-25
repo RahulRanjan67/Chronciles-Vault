@@ -392,18 +392,185 @@ export type RecommendationCategory =
   | "same_creator"
   | "genre_affinity"
   | "planned_gem"
-  | "reread_highlight";
+  | "reread_highlight"
+  | "catalog_discovery";
 
 export interface LocalRecommendation {
   id: string;
-  workId: WorkId;
+  workId?: WorkId;
   title: string;
   contentType: string;
   coverUrl: string | null;
   category: RecommendationCategory;
   reasonLabel: string;
   score: number;
+  provider?: "gutenberg" | "comick" | "internetarchive" | "goodreads" | "mangadex";
+  providerLabel?: string;
+  externalUrl?: string;
+  accessPathUrl?: string;
+  accessPathLabel?: string;
+  genres?: string[];
 }
+
+export interface CatalogRecommendationSeed {
+  seedId: string;
+  title: string;
+  contentType: string;
+  coverUrl: string | null;
+  genres: string[];
+  provider: "gutenberg" | "comick" | "internetarchive" | "goodreads";
+  providerLabel: string;
+  externalUrl: string;
+  accessPathUrl: string;
+  accessPathLabel: string;
+}
+
+export const CURATED_CATALOG_SEEDS: readonly CatalogRecommendationSeed[] = [
+  {
+    seedId: "cat-gutenberg-frankenstein",
+    title: "Frankenstein; or, The Modern Prometheus",
+    contentType: "Western Novel",
+    coverUrl: "https://www.gutenberg.org/cache/epub/84/pg84.cover.medium.jpg",
+    genres: ["Science Fiction", "Gothic", "Horror", "Classic"],
+    provider: "gutenberg",
+    providerLabel: "Project Gutenberg",
+    externalUrl: "https://www.gutenberg.org/ebooks/84",
+    accessPathUrl: "https://www.gutenberg.org/ebooks/84.epub3.images",
+    accessPathLabel: "Download EPUB (Gutenberg)",
+  },
+  {
+    seedId: "cat-gutenberg-dracula",
+    title: "Dracula",
+    contentType: "Western Novel",
+    coverUrl: "https://www.gutenberg.org/cache/epub/345/pg345.cover.medium.jpg",
+    genres: ["Gothic", "Horror", "Supernatural", "Classic"],
+    provider: "gutenberg",
+    providerLabel: "Project Gutenberg",
+    externalUrl: "https://www.gutenberg.org/ebooks/345",
+    accessPathUrl: "https://www.gutenberg.org/ebooks/345.epub3.images",
+    accessPathLabel: "Download EPUB (Gutenberg)",
+  },
+  {
+    seedId: "cat-gutenberg-timemachine",
+    title: "The Time Machine",
+    contentType: "Western Novel",
+    coverUrl: "https://www.gutenberg.org/cache/epub/35/pg35.cover.medium.jpg",
+    genres: ["Science Fiction", "Time Travel", "Adventure", "Classic"],
+    provider: "gutenberg",
+    providerLabel: "Project Gutenberg",
+    externalUrl: "https://www.gutenberg.org/ebooks/35",
+    accessPathUrl: "https://www.gutenberg.org/ebooks/35.epub3.images",
+    accessPathLabel: "Download EPUB (Gutenberg)",
+  },
+  {
+    seedId: "cat-gutenberg-montecristo",
+    title: "The Count of Monte Cristo",
+    contentType: "Western Novel",
+    coverUrl: "https://www.gutenberg.org/cache/epub/1184/pg1184.cover.medium.jpg",
+    genres: ["Adventure", "Revenge", "Historical Fiction", "Drama"],
+    provider: "gutenberg",
+    providerLabel: "Project Gutenberg",
+    externalUrl: "https://www.gutenberg.org/ebooks/1184",
+    accessPathUrl: "https://www.gutenberg.org/ebooks/1184.epub3.images",
+    accessPathLabel: "Download EPUB (Gutenberg)",
+  },
+  {
+    seedId: "cat-gutenberg-sherlock",
+    title: "The Adventures of Sherlock Holmes",
+    contentType: "Western Novel",
+    coverUrl: "https://www.gutenberg.org/cache/epub/1661/pg1661.cover.medium.jpg",
+    genres: ["Mystery", "Detective", "Crime", "Classic"],
+    provider: "gutenberg",
+    providerLabel: "Project Gutenberg",
+    externalUrl: "https://www.gutenberg.org/ebooks/1661",
+    accessPathUrl: "https://www.gutenberg.org/ebooks/1661.epub3.images",
+    accessPathLabel: "Download EPUB (Gutenberg)",
+  },
+  {
+    seedId: "cat-comick-sololeveling",
+    title: "Solo Leveling",
+    contentType: "Manhwa",
+    coverUrl: "https://meo.comick.pictures/5z6lM.jpg",
+    genres: ["Action", "Fantasy", "Manhwa", "Supernatural", "System"],
+    provider: "comick",
+    providerLabel: "Comick.io",
+    externalUrl: "https://comick.io/comic/00-solo-leveling",
+    accessPathUrl: "https://comick.io/comic/00-solo-leveling",
+    accessPathLabel: "Read Manhwa on Comick.io",
+  },
+  {
+    seedId: "cat-comick-orv",
+    title: "Omniscient Reader's Viewpoint",
+    contentType: "Manhwa",
+    coverUrl: "https://meo.comick.pictures/aO1b8.jpg",
+    genres: ["Action", "Apocalyptic", "Fantasy", "Manhwa", "Psychological"],
+    provider: "comick",
+    providerLabel: "Comick.io",
+    externalUrl: "https://comick.io/comic/00-omniscient-reader-s-viewpoint",
+    accessPathUrl: "https://comick.io/comic/00-omniscient-reader-s-viewpoint",
+    accessPathLabel: "Read Manhwa on Comick.io",
+  },
+  {
+    seedId: "cat-comick-blossomingblade",
+    title: "Return of the Blossoming Blade",
+    contentType: "Manhwa",
+    coverUrl: "https://meo.comick.pictures/yR15q.jpg",
+    genres: ["Martial Arts", "Xianxia", "Wuxia", "Action", "Manhwa"],
+    provider: "comick",
+    providerLabel: "Comick.io",
+    externalUrl: "https://comick.io/comic/return-of-the-mount-hua-sect",
+    accessPathUrl: "https://comick.io/comic/return-of-the-mount-hua-sect",
+    accessPathLabel: "Read on Comick.io",
+  },
+  {
+    seedId: "cat-archive-neuromancer",
+    title: "Neuromancer",
+    contentType: "Western Novel",
+    coverUrl: "https://archive.org/services/img/neuromancer00gibs_0",
+    genres: ["Cyberpunk", "Science Fiction", "Dystopia", "AI"],
+    provider: "internetarchive",
+    providerLabel: "Internet Archive",
+    externalUrl: "https://archive.org/details/neuromancer00gibs_0",
+    accessPathUrl: "https://archive.org/details/neuromancer00gibs_0",
+    accessPathLabel: "Read on Internet Archive Texts",
+  },
+  {
+    seedId: "cat-archive-dune",
+    title: "Dune",
+    contentType: "Western Novel",
+    coverUrl: "https://archive.org/services/img/dune00herb",
+    genres: ["Science Fiction", "Space Opera", "Political", "Classic"],
+    provider: "internetarchive",
+    providerLabel: "Internet Archive",
+    externalUrl: "https://archive.org/details/dune00herb",
+    accessPathUrl: "https://archive.org/details/dune00herb",
+    accessPathLabel: "Borrow & Read on Internet Archive",
+  },
+  {
+    seedId: "cat-goodreads-wayofkings",
+    title: "The Way of Kings",
+    contentType: "Western Novel",
+    coverUrl: "https://covers.openlibrary.org/b/id/7222246-L.jpg",
+    genres: ["High Fantasy", "Epic Fantasy", "Progression Fantasy", "Action"],
+    provider: "goodreads",
+    providerLabel: "Goodreads Top Rated",
+    externalUrl: "https://www.goodreads.com/book/show/7235533-the-way-of-kings",
+    accessPathUrl: "https://www.goodreads.com/book/show/7235533-the-way-of-kings",
+    accessPathLabel: "Goodreads Ratings & Edition Guide",
+  },
+  {
+    seedId: "cat-goodreads-projecthailmary",
+    title: "Project Hail Mary",
+    contentType: "Western Novel",
+    coverUrl: "https://covers.openlibrary.org/b/id/10522967-L.jpg",
+    genres: ["Science Fiction", "Space", "Hard Sci-Fi", "Adventure"],
+    provider: "goodreads",
+    providerLabel: "Goodreads Top Rated",
+    externalUrl: "https://www.goodreads.com/book/show/54493401-project-hail-mary",
+    accessPathUrl: "https://www.goodreads.com/book/show/54493401-project-hail-mary",
+    accessPathLabel: "Goodreads Ratings & Reviews",
+  },
+];
 
 export function generateLocalRecommendations(
   items: readonly HydratedWorkItem[],
@@ -545,7 +712,51 @@ export function generateLocalRecommendations(
     }
   }
 
-  return recommendations.sort((a, b) => b.score - a.score).slice(0, 8);
+  // 5. Curated Catalog Discoveries (Gutenberg, Comick, Internet Archive, Goodreads)
+  const existingNormalizedTitles = new Set(
+    activeItems.map((i) => i.work.title.toLowerCase().trim()),
+  );
+
+  for (const seed of CURATED_CATALOG_SEEDS) {
+    if (dismissedIds.has(seed.seedId)) continue;
+    if (existingNormalizedTitles.has(seed.title.toLowerCase().trim())) continue;
+
+    let matchScore = 0;
+    const matchedGenres: string[] = [];
+    for (const g of seed.genres) {
+      const weight = genreWeights.get(g) ?? 0;
+      if (weight > 0) {
+        matchScore += weight * 6;
+        matchedGenres.push(g);
+      }
+    }
+
+    const baseScore = 65;
+    const finalScore = baseScore + matchScore;
+
+    const reason =
+      matchedGenres.length > 0
+        ? `${seed.providerLabel} · Matches affinity for ${matchedGenres.slice(0, 2).join(" & ")}`
+        : `${seed.providerLabel} · Curated catalog work with direct reading access path`;
+
+    recommendations.push({
+      id: seed.seedId,
+      title: seed.title,
+      contentType: seed.contentType,
+      coverUrl: seed.coverUrl,
+      category: "catalog_discovery",
+      reasonLabel: reason,
+      score: finalScore,
+      provider: seed.provider,
+      providerLabel: seed.providerLabel,
+      externalUrl: seed.externalUrl,
+      accessPathUrl: seed.accessPathUrl,
+      accessPathLabel: seed.accessPathLabel,
+      genres: seed.genres,
+    });
+  }
+
+  return recommendations.sort((a, b) => b.score - a.score).slice(0, 10);
 }
 
 const DISMISSED_RECS_KEY = "cv_dismissed_recommendations_v1";

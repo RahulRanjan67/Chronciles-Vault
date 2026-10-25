@@ -35,6 +35,7 @@ import {
   Bell,
   AlertCircle,
   Timer,
+  Sparkles,
 } from "lucide-react";
 import {
   Badge,
@@ -96,7 +97,7 @@ import { WorkFandomLinksPanel } from "../components/features/WorkDetail/WorkFand
 import { WorkFanCreationsPanel } from "../components/features/WorkDetail/WorkFanCreationsPanel";
 import { ResumeReadingModal } from "../components/features/Reader";
 import { openLocalDiskPath } from "../utils/local-media";
-import { autoFetchCoverForWork } from "../utils/official-cover-service";
+import { autoFetchCoverForWork, scanDirectoryAccessPathsForTitle, type DiscoveredAccessPathCandidate } from "../utils/official-cover-service";
 
 export interface WorkDetailProps {
   workId?: string;
@@ -448,6 +449,98 @@ export function WorkDetail({
   const [fetchingCover, setFetchingCover] = React.useState(false);
   const [showUrlInput, setShowUrlInput] = React.useState(false);
   const [customCoverUrl, setCustomCoverUrl] = React.useState("");
+  const [isScanningSources, setIsScanningSources] = React.useState(false);
+  const [recommendedPaths, setRecommendedPaths] = React.useState<DiscoveredAccessPathCandidate[]>([]);
+  const [hasScannedSources, setHasScannedSources] = React.useState(false);
+
+  const handleScanSources = async () => {
+    setIsScanningSources(true);
+    setHasScannedSources(true);
+    try {
+      const found = await scanDirectoryAccessPathsForTitle(work.title);
+      const existingUrls = new Set(
+        accessPaths.map((p) => {
+          if ("url" in p && typeof (p as any).url === "string") return (p as any).url;
+          if ("filePath" in p && typeof (p as any).filePath === "string") return (p as any).filePath;
+          return "";
+        }).filter(Boolean),
+      );
+      const filtered = found.filter((p) => !existingUrls.has(p.url));
+      setRecommendedPaths(filtered);
+      if (filtered.length > 0) {
+        toast({
+          title: "Directory Scan Complete",
+          description: "Discovered " + filtered.length + " recommended access path(s) for \"" + work.title + "\".",
+          variant: "success",
+        });
+      } else {
+        toast({
+          title: "Scan Completed",
+          description: "All detected sources are already linked to this work.",
+          variant: "default",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Scan Failed",
+        description: err instanceof Error ? err.message : "Failed to scan directories.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsScanningSources(false);
+    }
+  };
+
+  const handleAttachRecommendedPath = (recPath: DiscoveredAccessPathCandidate) => {
+    addAccessPath({
+      kind: "web" as Parameters<typeof addAccessPath>[0]["kind"],
+      provider: recPath.provider || null,
+      label: recPath.label,
+      url: recPath.url,
+      capabilities: [AccessCapability.Read, AccessCapability.Updates],
+      health: "healthy" as Parameters<typeof addAccessPath>[0]["health"],
+      healthState: "healthy" as Parameters<typeof addAccessPath>[0]["healthState"],
+      lastCheckedAt: new Date().toISOString(),
+      lastOpenedAt: null,
+      isPreferred: accessPaths.length === 0,
+      provenance: { source: "directory_scan_" + recPath.providerKey },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    } as Parameters<typeof addAccessPath>[0]);
+
+    setRecommendedPaths((prev) => prev.filter((p) => p.id !== recPath.id));
+    toast({
+      title: "Reading Source Attached",
+      description: "Linked " + recPath.label + " to this work.",
+      variant: "success",
+    });
+  };
+
+  const handleAttachAllRecommended = () => {
+    for (const recPath of recommendedPaths) {
+      addAccessPath({
+        kind: "web" as Parameters<typeof addAccessPath>[0]["kind"],
+        provider: recPath.provider || null,
+        label: recPath.label,
+        url: recPath.url,
+        capabilities: [AccessCapability.Read, AccessCapability.Updates],
+        health: "healthy" as Parameters<typeof addAccessPath>[0]["health"],
+        healthState: "healthy" as Parameters<typeof addAccessPath>[0]["healthState"],
+        lastCheckedAt: new Date().toISOString(),
+        lastOpenedAt: null,
+        isPreferred: false,
+        provenance: { source: "directory_scan_" + recPath.providerKey },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      } as Parameters<typeof addAccessPath>[0]);
+    }
+    toast({
+      title: "All Sources Attached",
+      description: "Attached " + recommendedPaths.length + " access paths to \"" + work.title + "\".",
+      variant: "success",
+    });
+    setRecommendedPaths([]);
+  };
   const coverFileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   // Memory image upload state
@@ -1834,7 +1927,17 @@ export function WorkDetail({
             <p className="text-gm-xs text-[var(--gm-text-muted)]">
               URLs, local ebook files, and local video references linked to this work.
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isScanningSources}
+                onClick={handleScanSources}
+                className="gap-1.5 border-[var(--gm-accent-muted)] text-[var(--gm-accent-strong)] hover:bg-[var(--gm-accent)]/10"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>{isScanningSources ? "Scanning Directories…" : "Scan Directory Sources"}</span>
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -1861,6 +1964,92 @@ export function WorkDetail({
               </Button>
             </div>
           </div>
+
+          {/* Discovered Recommended Access Paths Panel */}
+          {recommendedPaths.length > 0 && (
+            <div className="mb-5 rounded-gm-xl border border-[var(--gm-accent-muted)] bg-[var(--gm-bg-elevated)] p-4 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <div>
+                  <h4 className="text-gm-sm font-bold text-[var(--gm-text)] flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-[var(--gm-accent-strong)]" />
+                    <span>Discovered Directory Reading Sources ({recommendedPaths.length})</span>
+                  </h4>
+                  <p className="text-[11px] text-[var(--gm-text-muted)]">
+                    Matching editions found across Project Gutenberg, Internet Archive, Comick, MangaDex & Goodreads.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleAttachAllRecommended}
+                    className="gap-1.5 text-gm-xs font-semibold"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>Attach All ({recommendedPaths.length})</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setRecommendedPaths([])}
+                    className="text-gm-xs text-[var(--gm-text-subtle)]"
+                  >
+                    Dismiss
+                  </Button>
+                </div>
+              </div>
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                {recommendedPaths.map((rec) => (
+                  <div
+                    key={rec.id}
+                    className="flex flex-col justify-between rounded-gm-lg border border-[var(--gm-border)] bg-[var(--gm-surface)] p-3 hover:border-[var(--gm-border-strong)] transition-all"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="font-mono text-[10px] uppercase font-bold text-[var(--gm-accent-strong)] bg-[var(--gm-accent-muted)]/40 px-1.5 py-0.5 rounded">
+                          {rec.provider}
+                        </span>
+                        {rec.format && (
+                          <span className="font-mono text-[9px] px-1 py-0.2 rounded bg-[var(--gm-bg-elevated)] text-[var(--gm-text-subtle)] border border-[var(--gm-border)]">
+                            {rec.format}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-gm-xs font-semibold text-[var(--gm-text)] line-clamp-1">
+                        {rec.label}
+                      </p>
+                      {rec.description && (
+                        <p className="text-[11px] text-[var(--gm-text-muted)] line-clamp-1 mt-0.5">
+                          {rec.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="mt-2.5 pt-2 border-t border-[var(--gm-border)]/50 flex items-center justify-between gap-2">
+                      <a
+                        href={rec.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[11px] text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)] hover:underline truncate flex items-center gap-1 max-w-[170px]"
+                        title={rec.url}
+                      >
+                        <ExternalLink className="h-3 w-3 shrink-0" />
+                        <span className="truncate">Preview Link</span>
+                      </a>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleAttachRecommendedPath(rec)}
+                        className="h-6 px-2 text-[11px] gap-1 shrink-0"
+                      >
+                        <Plus className="h-3 w-3" />
+                        <span>Attach to Work</span>
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Link Local Video Reference form */}
           {showLinkVideo && (

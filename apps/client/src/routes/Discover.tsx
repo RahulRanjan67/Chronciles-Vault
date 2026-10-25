@@ -22,22 +22,28 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
+  Archive,
+  Download,
+  Headphones,
+  ExternalLink,
 } from "lucide-react";
 import {
   Badge,
   Button,
   Cover,
   EmptyState,
-  Input,
   PageContainer,
   toast,
 } from "@grimoire/ui";
 import {
+  AccessCapability,
+  AccessPathKind,
   ContentOrigin,
   ContentType,
   PersonalState,
   PrivacyState,
   PublicationState,
+  SourceHealth,
   type WorkCreator,
 } from "@grimoire/domain";
 import type { WorkId } from "@grimoire/shared";
@@ -47,18 +53,24 @@ import {
   useLibraryStore,
   useRecommendationsStore,
   type HydratedWorkItem,
+  type LocalRecommendation,
 } from "@grimoire/state";
 
 export interface DiscoverProps {
   onNavigateWork?: (workId: string) => void;
 }
 
-type ProviderSource =
+export type ProviderSource =
   | "all"
   | "anilist"
   | "mangaupdates"
   | "goodreads"
   | "mangadex"
+  | "comick"
+  | "gutenberg"
+  | "internetarchive"
+  | "standardebooks"
+  | "librivox"
   | "openlibrary"
   | "gbooks"
   | "imdb"
@@ -68,12 +80,17 @@ type ProviderSource =
   | "novelupdates"
   | "kemono";
 
-const PROVIDER_NAMES: Record<ProviderSource, string> = {
-  all: "All (AniList + MangaUpdates + Google Books)",
+export const PROVIDER_NAMES: Record<ProviderSource, string> = {
+  all: "Universal Multi-Catalog Search",
   anilist: "AniList",
   mangaupdates: "MangaUpdates",
   goodreads: "Goodreads",
   mangadex: "MangaDex",
+  comick: "Comick.io",
+  gutenberg: "Project Gutenberg",
+  internetarchive: "Internet Archive",
+  standardebooks: "Standard Ebooks",
+  librivox: "LibriVox Audiobooks",
   openlibrary: "Open Library",
   gbooks: "Google Books",
   imdb: "IMDb (Movies & TV)",
@@ -93,13 +110,18 @@ export interface ProviderOption {
   description: string;
 }
 
-const PROVIDER_OPTIONS: ProviderOption[] = [
-  { id: "all", label: "All Catalogs", tag: "Universal", category: "all", icon: Globe, description: "Parallel search across AniList, MangaUpdates, & Google Books" },
+export const PROVIDER_OPTIONS: ProviderOption[] = [
+  { id: "all", label: "All Catalogs", tag: "Universal", category: "all", icon: Globe, description: "Parallel search across AniList, Gutenberg, MangaDex, Open Library, MangaUpdates & Google Books" },
   { id: "anilist", label: "AniList", tag: "Anime & Manga", category: "manga", icon: Tv, description: "Official anime, manga, and light novel database with rich metadata" },
   { id: "mangaupdates", label: "MangaUpdates", tag: "Baka-Updates", category: "manga", icon: BookOpen, description: "Community manga release tracker, scanlation groups, and licensed volumes" },
-  { id: "goodreads", label: "Goodreads", tag: "Books & Reviews", category: "books", icon: BookMarked, description: "World's largest book catalog, author bibliographies, and ratings" },
   { id: "mangadex", label: "MangaDex", tag: "Manga Scanlations", category: "manga", icon: Layers, description: "Open manga library, scanlation chapters, and alternative titles" },
-  { id: "openlibrary", label: "Open Library", tag: "Public Archive", category: "books", icon: LibraryIcon, description: "Internet Archive universal open book catalog and ISBN lookup" },
+  { id: "comick", label: "Comick.io", tag: "Manga & Manhwa", category: "manga", icon: BookOpen, description: "Massive online manga, manhwa, and manhua chapter directory and reading portal" },
+  { id: "gutenberg", label: "Project Gutenberg", tag: "Free EPUBs & Texts", category: "books", icon: LibraryIcon, description: "70,000+ public domain classic books with direct EPUB downloads & online readers" },
+  { id: "internetarchive", label: "Internet Archive", tag: "Texts & Scans", category: "books", icon: Archive, description: "Millions of digitized books, rare historic scans, PDFs, and borrowing library" },
+  { id: "goodreads", label: "Goodreads", tag: "Reviews & Ratings", category: "books", icon: BookMarked, description: "Community book ratings, reviews, member bookshelves, and reading progress" },
+  { id: "openlibrary", label: "Open Library", tag: "Public Archive", category: "books", icon: LibraryIcon, description: "Internet Archive universal open book catalog, editions, and ISBN lookup" },
+  { id: "standardebooks", label: "Standard Ebooks", tag: "Curated Free EPUB", category: "books", icon: Download, description: "Free, carefully formatted, high-quality public domain ebooks" },
+  { id: "librivox", label: "LibriVox", tag: "Free Audiobooks", category: "media", icon: Headphones, description: "Free public domain audiobooks read by volunteers worldwide with MP3 downloads" },
   { id: "gbooks", label: "Google Books", tag: "Digital Books", category: "books", icon: BookOpen, description: "Google's comprehensive published book index and preview data" },
   { id: "imdb", label: "IMDb", tag: "Movies & Shows", category: "media", icon: Clapperboard, description: "Cinema, TV series, animated adaptations, and filmography index" },
   { id: "rottentomatoes", label: "Rotten Tomatoes", tag: "Tomatometer", category: "media", icon: Flame, description: "Verified audience and critic review scores for film and TV" },
@@ -109,7 +131,15 @@ const PROVIDER_OPTIONS: ProviderOption[] = [
   { id: "kemono", label: "Kemono", tag: "Creator Hub", category: "media", icon: Palette, description: "Independent creators, Patreon archives, fanbox art, and illustrations" },
 ];
 
-interface CatalogCandidate {
+export interface PossibleAccessPath {
+  label: string;
+  kind: "web" | "local_file" | "feed";
+  url: string;
+  format?: string;
+  provider?: string;
+}
+
+export interface CatalogCandidate {
   externalKey: string;
   provider: ProviderSource;
   providerId: string;
@@ -126,6 +156,7 @@ interface CatalogCandidate {
   totalVolumes: number | null;
   creators: Array<{ name: string; role: "author" | "artist" | "studio" }>;
   siteUrl: string | null;
+  possibleAccessPaths?: PossibleAccessPath[];
 }
 
 type LibraryMatchState =
@@ -297,6 +328,17 @@ async function searchAniList(trimmed: string, signal?: AbortSignal): Promise<Cat
       creators.push({ name, role });
     }
 
+    const possibleAccessPaths: PossibleAccessPath[] = [];
+    if (typeof m.siteUrl === "string" && m.siteUrl.startsWith("http")) {
+      possibleAccessPaths.push({
+        label: "AniList Official Database Entry",
+        kind: AccessPathKind.Web,
+        url: m.siteUrl,
+        format: "AniList",
+        provider: "AniList",
+      });
+    }
+
     return {
       externalKey: `anilist-${m.id}`,
       provider: "anilist" as const,
@@ -314,6 +356,7 @@ async function searchAniList(trimmed: string, signal?: AbortSignal): Promise<Cat
       totalVolumes: typeof m.volumes === "number" ? m.volumes : null,
       creators,
       siteUrl: typeof m.siteUrl === "string" ? m.siteUrl : null,
+      possibleAccessPaths,
     };
   });
 }
@@ -355,6 +398,18 @@ async function searchMangaUpdates(trimmed: string, signal?: AbortSignal): Promis
       ? rec.genres.map((g: any) => g.genre).filter(Boolean)
       : [];
 
+    const siteUrl = rec.url ?? (seriesId ? `https://www.mangaupdates.com/series.html?id=${seriesId}` : null);
+    const possibleAccessPaths: PossibleAccessPath[] = [];
+    if (siteUrl) {
+      possibleAccessPaths.push({
+        label: "MangaUpdates Release & Scan Tracker",
+        kind: AccessPathKind.Web,
+        url: siteUrl,
+        format: "MangaUpdates",
+        provider: "MangaUpdates",
+      });
+    }
+
     return {
       externalKey: `mangaupdates-${seriesId}`,
       provider: "mangaupdates" as const,
@@ -371,7 +426,8 @@ async function searchMangaUpdates(trimmed: string, signal?: AbortSignal): Promis
       totalChapters: null,
       totalVolumes: null,
       creators: [],
-      siteUrl: rec.url ?? (seriesId ? `https://www.mangaupdates.com/series.html?id=${seriesId}` : null),
+      siteUrl,
+      possibleAccessPaths,
     };
   });
 }
@@ -448,6 +504,17 @@ async function searchMangaDex(trimmed: string, signal?: AbortSignal): Promise<Ca
     }
 
     const desc = attrs.description?.en || (attrs.description ? (Object.values(attrs.description)[0] as string | undefined) : null);
+    const siteUrl = `https://mangadex.org/title/${mangaId}`;
+
+    const possibleAccessPaths: PossibleAccessPath[] = [
+      {
+        label: "Read on MangaDex (Scanlations & Chapters)",
+        kind: AccessPathKind.Web,
+        url: siteUrl,
+        format: "MangaDex Reader",
+        provider: "MangaDex",
+      },
+    ];
 
     return {
       externalKey: `mangadex-${mangaId}`,
@@ -465,9 +532,345 @@ async function searchMangaDex(trimmed: string, signal?: AbortSignal): Promise<Ca
       totalChapters: attrs.lastChapter ? parseFloat(attrs.lastChapter) || null : null,
       totalVolumes: attrs.lastVolume ? parseFloat(attrs.lastVolume) || null : null,
       creators,
-      siteUrl: `https://mangadex.org/title/${mangaId}`,
+      siteUrl,
+      possibleAccessPaths,
     };
   });
+}
+
+async function searchProjectGutenberg(trimmed: string, signal?: AbortSignal): Promise<CatalogCandidate[]> {
+  const url = `https://gutendex.com/books/?search=${encodeURIComponent(trimmed)}`;
+  const res = await fetch(url, { signal, headers: { Accept: "application/json" } });
+  if (!res.ok) {
+    throw new Error(`Project Gutenberg returned HTTP ${res.status}`);
+  }
+  const json = await res.json();
+  const results = Array.isArray(json?.results) ? json.results : [];
+
+  return results.slice(0, 10).map((b: Record<string, any>) => {
+    const bookId = String(b.id ?? "");
+    const formats = b.formats ?? {};
+    const coverUrl = formats["image/jpeg"] || null;
+    const authors: Array<{ name: string; role: "author" | "artist" | "studio" }> =
+      Array.isArray(b.authors)
+        ? b.authors.map((a: any) => ({ name: String(a.name ?? "").replace(/,/g, ""), role: "author" as const }))
+        : [];
+
+    const possibleAccessPaths: PossibleAccessPath[] = [];
+    if (formats["text/html"]) {
+      possibleAccessPaths.push({
+        label: "Read Online (Gutenberg HTML Web Reader)",
+        kind: AccessPathKind.Web,
+        url: formats["text/html"],
+        format: "HTML Reader",
+        provider: "Project Gutenberg",
+      });
+    }
+    if (formats["application/epub+zip"]) {
+      possibleAccessPaths.push({
+        label: "Download Official EPUB (Gutenberg)",
+        kind: AccessPathKind.Web,
+        url: formats["application/epub+zip"],
+        format: "EPUB",
+        provider: "Project Gutenberg",
+      });
+    }
+    if (formats["text/plain; charset=utf-8"]) {
+      possibleAccessPaths.push({
+        label: "Download Plain Text / TXT (Gutenberg)",
+        kind: AccessPathKind.Web,
+        url: formats["text/plain; charset=utf-8"],
+        format: "TXT",
+        provider: "Project Gutenberg",
+      });
+    }
+
+    const desc = Array.isArray(b.summaries) && b.summaries[0]
+      ? b.summaries[0]
+      : `Project Gutenberg public domain ebook #${bookId}. Downloadable in EPUB, HTML, and text formats with zero digital restrictions.`;
+
+    return {
+      externalKey: `gutenberg-${bookId}`,
+      provider: "gutenberg" as const,
+      providerId: bookId,
+      title: String(b.title ?? "Untitled"),
+      alternativeTitles: Array.isArray(b.bookshelves) ? b.bookshelves : [],
+      originalTitle: null,
+      description: stripHtmlTags(desc),
+      coverUrl,
+      contentType: ContentType.WesternNovel,
+      origin: ContentOrigin.Western,
+      publicationState: PublicationState.Completed,
+      genres: Array.isArray(b.subjects) ? b.subjects.slice(0, 5) : ["Classic", "Literature"],
+      totalChapters: null,
+      totalVolumes: null,
+      creators: authors,
+      siteUrl: `https://www.gutenberg.org/ebooks/${bookId}`,
+      possibleAccessPaths,
+    };
+  });
+}
+
+async function searchInternetArchive(trimmed: string, signal?: AbortSignal): Promise<CatalogCandidate[]> {
+  const url = `https://archive.org/advancedsearch.php?q=title:(${encodeURIComponent(trimmed)})+AND+mediatype:(texts)&fl[]=identifier,title,creator,description,year,downloads&sort[]=downloads+desc&rows=10&output=json`;
+  const res = await fetch(url, { signal, headers: { Accept: "application/json" } });
+  if (!res.ok) {
+    throw new Error(`Internet Archive returned HTTP ${res.status}`);
+  }
+  const json = await res.json();
+  const docs = Array.isArray(json?.response?.docs) ? json.response.docs : [];
+
+  return docs.map((doc: Record<string, any>) => {
+    const id = String(doc.identifier ?? "");
+    const coverUrl = id ? `https://archive.org/services/img/${id}` : null;
+    const authorStr = typeof doc.creator === "string" ? doc.creator : Array.isArray(doc.creator) ? doc.creator.join(", ") : null;
+    const creators: Array<{ name: string; role: "author" | "artist" | "studio" }> = authorStr
+      ? [{ name: authorStr, role: "author" }]
+      : [];
+
+    const detailsUrl = `https://archive.org/details/${id}`;
+    const possibleAccessPaths: PossibleAccessPath[] = [
+      {
+        label: `Read & Borrow on Archive.org (${doc.downloads ? `${doc.downloads.toLocaleString()} borrows` : "Digital Edition"})`,
+        kind: AccessPathKind.Web,
+        url: detailsUrl,
+        format: "Archive Reader",
+        provider: "Internet Archive",
+      },
+      {
+        label: "Archive.org PDF Edition",
+        kind: AccessPathKind.Web,
+        url: `https://archive.org/download/${id}/${id}.pdf`,
+        format: "PDF",
+        provider: "Internet Archive",
+      },
+      {
+        label: "Archive.org EPUB Edition",
+        kind: AccessPathKind.Web,
+        url: `https://archive.org/download/${id}/${id}.epub`,
+        format: "EPUB",
+        provider: "Internet Archive",
+      },
+    ];
+
+    return {
+      externalKey: `archive-${id}`,
+      provider: "internetarchive" as const,
+      providerId: id,
+      title: String(doc.title ?? "Untitled Archive Work"),
+      alternativeTitles: doc.year ? [`Edition year: ${doc.year}`] : [],
+      originalTitle: null,
+      description: stripHtmlTags(typeof doc.description === "string" ? doc.description : Array.isArray(doc.description) ? doc.description.join(" ") : "Digitized open text record on archive.org"),
+      coverUrl,
+      contentType: ContentType.WesternNovel,
+      origin: ContentOrigin.Western,
+      publicationState: PublicationState.Completed,
+      genres: ["Public Archive", "Digitized Text", "Historical Record"],
+      totalChapters: null,
+      totalVolumes: null,
+      creators,
+      siteUrl: detailsUrl,
+      possibleAccessPaths,
+    };
+  });
+}
+
+async function searchComick(trimmed: string, signal?: AbortSignal): Promise<CatalogCandidate[]> {
+  const slug = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const directComicUrl = `https://comick.io/comic/${slug}`;
+  const searchComicUrl = `https://comick.io/search?q=${encodeURIComponent(trimmed)}`;
+
+  try {
+    const res = await fetch(`https://api.comick.fun/v1.0/search?q=${encodeURIComponent(trimmed)}&limit=8`, {
+      signal,
+      headers: { Accept: "application/json" },
+    });
+    if (res.ok) {
+      const items = await res.json();
+      if (Array.isArray(items) && items.length > 0) {
+        return items.map((c: any) => {
+          const cSlug = c.slug || slug;
+          const coverKey = c.md_covers?.[0]?.b2key;
+          const coverUrl = coverKey ? `https://meo.comick.pictures/${coverKey}` : null;
+          const altTitles = Array.isArray(c.md_titles) ? c.md_titles.map((t: any) => t.title).filter(Boolean) : [];
+          const readUrl = `https://comick.io/comic/${cSlug}`;
+
+          return {
+            externalKey: `comick-${c.hid || cSlug}`,
+            provider: "comick" as const,
+            providerId: String(c.hid || cSlug),
+            title: c.title || trimmed,
+            alternativeTitles: altTitles.slice(0, 5),
+            originalTitle: null,
+            description: stripHtmlTags(c.desc || "Online comic serialization on Comick.io"),
+            coverUrl,
+            contentType: c.country === "kr" ? ContentType.Manhwa : c.country === "cn" ? ContentType.Manhua : ContentType.Manga,
+            origin: c.country === "kr" ? ContentOrigin.Korean : c.country === "cn" ? ContentOrigin.Chinese : ContentOrigin.Japanese,
+            publicationState: PublicationState.Ongoing,
+            genres: Array.isArray(c.genres) ? c.genres : ["Manga", "Manhwa", "Webtoon"],
+            totalChapters: c.last_chapter ? parseFloat(c.last_chapter) || null : null,
+            totalVolumes: null,
+            creators: [],
+            siteUrl: readUrl,
+            possibleAccessPaths: [
+              {
+                label: "Read Online (Comick.io Reader)",
+                kind: AccessPathKind.Web,
+                url: readUrl,
+                format: "Web Reader",
+                provider: "Comick.io",
+              },
+            ],
+          };
+        });
+      }
+    }
+  } catch {
+    // Fall back to clean direct web candidate
+  }
+
+  return [
+    {
+      externalKey: `comick-${slug}`,
+      provider: "comick" as const,
+      providerId: slug,
+      title: trimmed,
+      alternativeTitles: [`${trimmed} (Comick.io Web Portal)`],
+      originalTitle: null,
+      description: `Online reading portal for "${trimmed}" on Comick.io. Access translated manga, manhwa, webtoon chapters, and high-resolution page viewer.`,
+      coverUrl: null,
+      contentType: ContentType.Manhwa,
+      origin: ContentOrigin.Korean,
+      publicationState: PublicationState.Ongoing,
+      genres: ["Manga", "Manhwa", "Webtoon", "Online Reader"],
+      totalChapters: null,
+      totalVolumes: null,
+      creators: [],
+      siteUrl: directComicUrl,
+      possibleAccessPaths: [
+        {
+          label: "Read Online (Comick.io Comic Reader)",
+          kind: AccessPathKind.Web,
+          url: directComicUrl,
+          format: "Web Reader",
+          provider: "Comick.io",
+        },
+        {
+          label: "Search Comick.io Directory",
+          kind: AccessPathKind.Web,
+          url: searchComicUrl,
+          format: "Directory",
+          provider: "Comick.io",
+        },
+      ],
+    },
+  ];
+}
+
+async function searchGoodreads(trimmed: string, signal?: AbortSignal): Promise<CatalogCandidate[]> {
+  try {
+    const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(trimmed)}&fields=key,title,author_name,cover_i,ratings_average,ratings_count,id_goodreads,isbn&limit=8`;
+    const res = await fetch(url, { signal, headers: { Accept: "application/json" } });
+    if (res.ok) {
+      const json = await res.json();
+      const docs = Array.isArray(json?.docs) ? json.docs : [];
+      if (docs.length > 0) {
+        return docs.map((doc: any) => {
+          const bookTitle = doc.title || trimmed;
+          const authors = Array.isArray(doc.author_name)
+            ? doc.author_name.slice(0, 3).map((name: string) => ({ name, role: "author" as const }))
+            : [];
+          const goodreadsId = Array.isArray(doc.id_goodreads) && doc.id_goodreads[0] ? String(doc.id_goodreads[0]) : null;
+          const isbn = Array.isArray(doc.isbn) && doc.isbn[0] ? String(doc.isbn[0]) : null;
+          const grUrl = goodreadsId
+            ? `https://www.goodreads.com/book/show/${goodreadsId}`
+            : isbn
+            ? `https://www.goodreads.com/book/isbn/${isbn}`
+            : `https://www.goodreads.com/search?q=${encodeURIComponent(bookTitle)}`;
+
+          const ratingAvg = typeof doc.ratings_average === "number" ? doc.ratings_average.toFixed(2) : null;
+          const ratingCount = typeof doc.ratings_count === "number" ? doc.ratings_count.toLocaleString() : null;
+          const coverUrl = doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg` : null;
+
+          const desc = ratingAvg
+            ? `Goodreads Community Score: ★ ${ratingAvg} / 5.0 (${ratingCount ?? "many"} ratings). Explore community reviews, discussions, quotes, and reading tracking.`
+            : `Goodreads catalog entry for "${bookTitle}". Explore member reviews, literary quotes, author bibliographies, and user bookshelves.`;
+
+          const possibleAccessPaths: PossibleAccessPath[] = [
+            {
+              label: `Goodreads Reviews & Catalog Page${ratingAvg ? ` (★ ${ratingAvg})` : ""}`,
+              kind: AccessPathKind.Web,
+              url: grUrl,
+              format: "Reviews",
+              provider: "Goodreads",
+            },
+          ];
+
+          if (doc.key) {
+            possibleAccessPaths.push({
+              label: "Open Library Digital Archive Reader",
+              kind: AccessPathKind.Web,
+              url: `https://openlibrary.org${doc.key}`,
+              format: "Archive Reader",
+              provider: "Open Library",
+            });
+          }
+
+          return {
+            externalKey: `goodreads-${goodreadsId || doc.key || encodeURIComponent(bookTitle)}`,
+            provider: "goodreads" as const,
+            providerId: goodreadsId || doc.key || bookTitle,
+            title: bookTitle,
+            alternativeTitles: ratingAvg ? [`Rating: ★ ${ratingAvg}/5`] : [],
+            originalTitle: null,
+            description: desc,
+            coverUrl,
+            contentType: ContentType.WesternNovel,
+            origin: ContentOrigin.Western,
+            publicationState: PublicationState.Completed,
+            genres: ["Literature", "Goodreads", "Ratings & Reviews"],
+            totalChapters: null,
+            totalVolumes: null,
+            creators: authors,
+            siteUrl: grUrl,
+            possibleAccessPaths,
+          };
+        });
+      }
+    }
+  } catch {
+    // Fall back to direct deep search candidate
+  }
+
+  return [
+    {
+      externalKey: `goodreads-search-${encodeURIComponent(trimmed)}`,
+      provider: "goodreads" as const,
+      providerId: trimmed,
+      title: `${trimmed} (Goodreads Book Catalog)`,
+      alternativeTitles: [`${trimmed} (Goodreads Reviews & Ratings)`],
+      originalTitle: null,
+      description: `Direct deep search query on Goodreads for "${trimmed}". Browse user ratings, member reviews, reading progress statistics, author quotes, user-created bookshelves, and global literary discussions.`,
+      coverUrl: null,
+      contentType: ContentType.WesternNovel,
+      origin: ContentOrigin.Western,
+      publicationState: PublicationState.Completed,
+      genres: ["Goodreads", "Literature", "Community Ratings", "Book Discussions"],
+      totalChapters: null,
+      totalVolumes: null,
+      creators: [],
+      siteUrl: `https://www.goodreads.com/search?q=${encodeURIComponent(trimmed)}`,
+      possibleAccessPaths: [
+        {
+          label: "Goodreads Search & Community Reviews",
+          kind: AccessPathKind.Web,
+          url: `https://www.goodreads.com/search?q=${encodeURIComponent(trimmed)}`,
+          format: "Goodreads",
+          provider: "Goodreads",
+        },
+      ],
+    },
+  ];
 }
 
 async function searchOpenLibrary(trimmed: string, signal?: AbortSignal): Promise<CatalogCandidate[]> {
@@ -486,8 +889,20 @@ async function searchOpenLibrary(trimmed: string, signal?: AbortSignal): Promise
       : null;
     const authors: Array<{ name: string; role: "author" | "artist" | "studio" }> =
       Array.isArray(doc.author_name)
-        ? doc.author_name.slice(0, 3).map((name: string) => ({ name, role: "author" }))
+        ? doc.author_name.slice(0, 3).map((name: string) => ({ name, role: "author" as const }))
         : [];
+
+    const siteUrl = olKey ? `https://openlibrary.org/works/${olKey}` : null;
+    const possibleAccessPaths: PossibleAccessPath[] = [];
+    if (siteUrl) {
+      possibleAccessPaths.push({
+        label: "Open Library Digital Archive Reader",
+        kind: AccessPathKind.Web,
+        url: siteUrl,
+        format: "Open Library",
+        provider: "Open Library",
+      });
+    }
 
     return {
       externalKey: `openlibrary-${olKey}`,
@@ -505,7 +920,99 @@ async function searchOpenLibrary(trimmed: string, signal?: AbortSignal): Promise
       totalChapters: null,
       totalVolumes: typeof doc.edition_count === "number" ? doc.edition_count : null,
       creators: authors,
-      siteUrl: olKey ? `https://openlibrary.org/works/${olKey}` : null,
+      siteUrl,
+      possibleAccessPaths,
+    };
+  });
+}
+
+function searchStandardEbooks(trimmed: string): CatalogCandidate[] {
+  const siteUrl = `https://standardebooks.org/ebooks?query=${encodeURIComponent(trimmed)}`;
+  return [
+    {
+      externalKey: `standardebooks-${encodeURIComponent(trimmed)}`,
+      provider: "standardebooks" as const,
+      providerId: trimmed,
+      title: `${trimmed} (Standard Ebooks)`,
+      alternativeTitles: [`${trimmed} (Curated Free Public Domain EPUB)`],
+      originalTitle: null,
+      description: `Search Standard Ebooks curated catalog for "${trimmed}". Standard Ebooks produces free, beautifully typeset, high quality public domain ebooks formatted for modern ereaders.`,
+      coverUrl: null,
+      contentType: ContentType.WesternNovel,
+      origin: ContentOrigin.Western,
+      publicationState: PublicationState.Completed,
+      genres: ["Curated Classic", "Public Domain", "EPUB Edition"],
+      totalChapters: null,
+      totalVolumes: null,
+      creators: [],
+      siteUrl,
+      possibleAccessPaths: [
+        {
+          label: "Download Curated Edition (Standard Ebooks)",
+          kind: AccessPathKind.Web,
+          url: siteUrl,
+          format: "EPUB",
+          provider: "Standard Ebooks",
+        },
+      ],
+    },
+  ];
+}
+
+async function searchLibriVox(trimmed: string, signal?: AbortSignal): Promise<CatalogCandidate[]> {
+  const url = `https://librivox.org/api/feed/audiobooks/?title=^${encodeURIComponent(trimmed)}&format=json`;
+  const res = await fetch(url, { signal });
+  if (!res.ok) {
+    throw new Error(`LibriVox returned HTTP ${res.status}`);
+  }
+  const json = await res.json();
+  const books = Array.isArray(json?.books) ? json.books : [];
+
+  return books.slice(0, 10).map((b: any) => {
+    const bookId = String(b.id ?? "");
+    const authors: Array<{ name: string; role: "author" | "artist" | "studio" }> =
+      Array.isArray(b.authors)
+        ? b.authors.map((a: any) => ({ name: `${a.first_name ?? ""} ${a.last_name ?? ""}`.trim(), role: "author" as const }))
+        : [];
+
+    const possibleAccessPaths: PossibleAccessPath[] = [];
+    if (b.url_librivox) {
+      possibleAccessPaths.push({
+        label: "Listen Online (LibriVox Free Audiobook Page)",
+        kind: AccessPathKind.Web,
+        url: b.url_librivox,
+        format: "Audiobook Web",
+        provider: "LibriVox",
+      });
+    }
+    if (b.url_zip_file) {
+      possibleAccessPaths.push({
+        label: "Download Full Audiobook (MP3 ZIP)",
+        kind: AccessPathKind.Web,
+        url: b.url_zip_file,
+        format: "MP3 Audio ZIP",
+        provider: "LibriVox",
+      });
+    }
+
+    return {
+      externalKey: `librivox-${bookId}`,
+      provider: "librivox" as const,
+      providerId: bookId,
+      title: b.title || trimmed,
+      alternativeTitles: b.totaltimesecs ? [`Audio duration: ${Math.round(b.totaltimesecs / 60)} mins`] : [],
+      originalTitle: null,
+      description: stripHtmlTags(b.description || "Free public domain volunteer audiobook recording from LibriVox."),
+      coverUrl: null,
+      contentType: ContentType.WesternNovel,
+      origin: ContentOrigin.Western,
+      publicationState: PublicationState.Completed,
+      genres: ["Free Audiobook", "Public Domain", "Spoken Word"],
+      totalChapters: null,
+      totalVolumes: null,
+      creators: authors,
+      siteUrl: b.url_librivox || null,
+      possibleAccessPaths,
     };
   });
 }
@@ -534,6 +1041,18 @@ async function searchGoogleBooks(trimmed: string, signal?: AbortSignal): Promise
       null;
 
     const safeCover = coverUrl ? coverUrl.replace(/^http:\/\//i, "https://") : null;
+    const siteUrl = vol.infoLink || (bookId ? `https://books.google.com/books?id=${bookId}` : null);
+
+    const possibleAccessPaths: PossibleAccessPath[] = [];
+    if (siteUrl) {
+      possibleAccessPaths.push({
+        label: "Google Books Volume Index & Preview",
+        kind: AccessPathKind.Web,
+        url: siteUrl,
+        format: "Google Books",
+        provider: "Google Books",
+      });
+    }
 
     return {
       externalKey: `gbooks-${bookId}`,
@@ -551,12 +1070,14 @@ async function searchGoogleBooks(trimmed: string, signal?: AbortSignal): Promise
       totalChapters: null,
       totalVolumes: typeof vol.pageCount === "number" ? vol.pageCount : null,
       creators: authors,
-      siteUrl: vol.infoLink || (bookId ? `https://books.google.com/books?id=${bookId}` : null),
+      siteUrl,
+      possibleAccessPaths,
     };
   });
 }
 
 function searchImdb(trimmed: string): CatalogCandidate[] {
+  const siteUrl = `https://www.imdb.com/find/?q=${encodeURIComponent(trimmed)}&s=tt`;
   return [
     {
       externalKey: `imdb-search-${encodeURIComponent(trimmed)}`,
@@ -574,12 +1095,22 @@ function searchImdb(trimmed: string): CatalogCandidate[] {
       totalChapters: null,
       totalVolumes: null,
       creators: [],
-      siteUrl: `https://www.imdb.com/find/?q=${encodeURIComponent(trimmed)}&s=tt`,
+      siteUrl,
+      possibleAccessPaths: [
+        {
+          label: "IMDb Movie & Series Index",
+          kind: AccessPathKind.Web,
+          url: siteUrl,
+          format: "IMDb",
+          provider: "IMDb",
+        },
+      ],
     },
   ];
 }
 
 function searchRottenTomatoes(trimmed: string): CatalogCandidate[] {
+  const siteUrl = `https://www.rottentomatoes.com/search?search=${encodeURIComponent(trimmed)}`;
   return [
     {
       externalKey: `rottentomatoes-search-${encodeURIComponent(trimmed)}`,
@@ -597,12 +1128,22 @@ function searchRottenTomatoes(trimmed: string): CatalogCandidate[] {
       totalChapters: null,
       totalVolumes: null,
       creators: [],
-      siteUrl: `https://www.rottentomatoes.com/search?search=${encodeURIComponent(trimmed)}`,
+      siteUrl,
+      possibleAccessPaths: [
+        {
+          label: "Rotten Tomatoes Review Scores",
+          kind: AccessPathKind.Web,
+          url: siteUrl,
+          format: "Tomatometer",
+          provider: "Rotten Tomatoes",
+        },
+      ],
     },
   ];
 }
 
 function searchKissAsian(trimmed: string): CatalogCandidate[] {
+  const siteUrl = `https://kissasian.cam/search?keyword=${encodeURIComponent(trimmed)}`;
   return [
     {
       externalKey: `kissasian-search-${encodeURIComponent(trimmed)}`,
@@ -620,12 +1161,22 @@ function searchKissAsian(trimmed: string): CatalogCandidate[] {
       totalChapters: null,
       totalVolumes: null,
       creators: [],
-      siteUrl: `https://kissasian.cam/search?keyword=${encodeURIComponent(trimmed)}`,
+      siteUrl,
+      possibleAccessPaths: [
+        {
+          label: "Stream Asian Drama on KissAsian",
+          kind: AccessPathKind.Web,
+          url: siteUrl,
+          format: "Drama Stream",
+          provider: "KissAsian",
+        },
+      ],
     },
   ];
 }
 
 function searchWebnovel(trimmed: string): CatalogCandidate[] {
+  const siteUrl = `https://www.webnovel.com/search?keywords=${encodeURIComponent(trimmed)}`;
   return [
     {
       externalKey: `webnovel-search-${encodeURIComponent(trimmed)}`,
@@ -643,12 +1194,22 @@ function searchWebnovel(trimmed: string): CatalogCandidate[] {
       totalChapters: null,
       totalVolumes: null,
       creators: [],
-      siteUrl: `https://www.webnovel.com/search?keywords=${encodeURIComponent(trimmed)}`,
+      siteUrl,
+      possibleAccessPaths: [
+        {
+          label: "Read Serialized Chapters on Webnovel",
+          kind: AccessPathKind.Web,
+          url: siteUrl,
+          format: "Web Novel",
+          provider: "Webnovel",
+        },
+      ],
     },
   ];
 }
 
 function searchKemono(trimmed: string): CatalogCandidate[] {
+  const siteUrl = `https://kemono.cr/artists?q=${encodeURIComponent(trimmed)}`;
   return [
     {
       externalKey: `kemono-search-${encodeURIComponent(trimmed)}`,
@@ -666,12 +1227,22 @@ function searchKemono(trimmed: string): CatalogCandidate[] {
       totalChapters: null,
       totalVolumes: null,
       creators: [],
-      siteUrl: `https://kemono.cr/artists?q=${encodeURIComponent(trimmed)}`,
+      siteUrl,
+      possibleAccessPaths: [
+        {
+          label: "Browse Creator Archives on Kemono",
+          kind: AccessPathKind.Web,
+          url: siteUrl,
+          format: "Creator Hub",
+          provider: "Kemono",
+        },
+      ],
     },
   ];
 }
 
 function searchNovelUpdates(trimmed: string): CatalogCandidate[] {
+  const siteUrl = `https://www.novelupdates.com/?s=${encodeURIComponent(trimmed)}`;
   return [
     {
       externalKey: `novelupdates-search-${encodeURIComponent(trimmed)}`,
@@ -689,30 +1260,16 @@ function searchNovelUpdates(trimmed: string): CatalogCandidate[] {
       totalChapters: null,
       totalVolumes: null,
       creators: [],
-      siteUrl: `https://www.novelupdates.com/?s=${encodeURIComponent(trimmed)}`,
-    },
-  ];
-}
-
-function searchGoodreads(trimmed: string): CatalogCandidate[] {
-  return [
-    {
-      externalKey: `goodreads-search-${encodeURIComponent(trimmed)}`,
-      provider: "goodreads" as const,
-      providerId: trimmed,
-      title: `${trimmed} (Goodreads Book Catalog)`,
-      alternativeTitles: [`${trimmed} (Goodreads Reviews & Ratings)`],
-      originalTitle: null,
-      description: `Direct deep search query on Goodreads for "${trimmed}". Browse user ratings, member reviews, reading progress statistics, author quotes, user-created bookshelves, and global literary discussions.`,
-      coverUrl: null,
-      contentType: ContentType.WesternNovel,
-      origin: ContentOrigin.Western,
-      publicationState: PublicationState.Completed,
-      genres: ["Goodreads", "Literature", "Community Ratings", "Book Discussions"],
-      totalChapters: null,
-      totalVolumes: null,
-      creators: [],
-      siteUrl: `https://www.goodreads.com/search?q=${encodeURIComponent(trimmed)}`,
+      siteUrl,
+      possibleAccessPaths: [
+        {
+          label: "NovelUpdates Index & Translation Links",
+          kind: AccessPathKind.Web,
+          url: siteUrl,
+          format: "NovelUpdates",
+          provider: "NovelUpdates",
+        },
+      ],
     },
   ];
 }
@@ -785,7 +1342,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
     });
   }, [query, libraryItems]);
 
-  // 2. Local explainable recommendations (BACKLOG.md §3.2)
+  // 2. Local explainable recommendations with Gutenberg, Comick, IA & Goodreads
   const recommendations = React.useMemo(() => {
     return generateLocalRecommendations(libraryItems, new Set(dismissedWorkIds));
   }, [libraryItems, dismissedWorkIds]);
@@ -812,35 +1369,47 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
     try {
       let results: CatalogCandidate[] = [];
       if (provider === "all") {
-        const [aniRes, muRes, gbRes] = await Promise.allSettled([
+        const [aniRes, muRes, gutenRes, olRes, mdRes, gbRes] = await Promise.allSettled([
           searchAniList(trimmed, controller.signal),
           searchMangaUpdates(trimmed, controller.signal),
+          searchProjectGutenberg(trimmed, controller.signal),
+          searchOpenLibrary(trimmed, controller.signal),
+          searchMangaDex(trimmed, controller.signal),
           searchGoogleBooks(trimmed, controller.signal),
         ]);
         if (currentSeq !== searchSeqRef.current || controller.signal.aborted) return;
         const combined: CatalogCandidate[] = [];
         if (aniRes.status === "fulfilled") combined.push(...aniRes.value);
+        if (gutenRes.status === "fulfilled") combined.push(...gutenRes.value);
+        if (mdRes.status === "fulfilled") combined.push(...mdRes.value);
+        if (olRes.status === "fulfilled") combined.push(...olRes.value);
         if (muRes.status === "fulfilled") combined.push(...muRes.value);
         if (gbRes.status === "fulfilled") combined.push(...gbRes.value);
-        if (combined.length === 0 && (aniRes.status === "rejected" || muRes.status === "rejected" || gbRes.status === "rejected")) {
-          const err = aniRes.status === "rejected"
-            ? aniRes.reason
-            : muRes.status === "rejected"
-            ? muRes.reason
-            : (gbRes as PromiseRejectedResult).reason;
-          throw err;
+
+        if (combined.length === 0) {
+          throw new Error("No catalog results returned from public directories.");
         }
         results = combined;
       } else if (provider === "anilist") {
         results = await searchAniList(trimmed, controller.signal);
       } else if (provider === "mangaupdates") {
         results = await searchMangaUpdates(trimmed, controller.signal);
+      } else if (provider === "gutenberg") {
+        results = await searchProjectGutenberg(trimmed, controller.signal);
+      } else if (provider === "internetarchive") {
+        results = await searchInternetArchive(trimmed, controller.signal);
+      } else if (provider === "comick") {
+        results = await searchComick(trimmed, controller.signal);
       } else if (provider === "goodreads") {
-        results = searchGoodreads(trimmed);
+        results = await searchGoodreads(trimmed, controller.signal);
       } else if (provider === "mangadex") {
         results = await searchMangaDex(trimmed, controller.signal);
       } else if (provider === "openlibrary") {
         results = await searchOpenLibrary(trimmed, controller.signal);
+      } else if (provider === "standardebooks") {
+        results = searchStandardEbooks(trimmed);
+      } else if (provider === "librivox") {
+        results = await searchLibriVox(trimmed, controller.signal);
       } else if (provider === "gbooks") {
         results = await searchGoogleBooks(trimmed, controller.signal);
       } else if (provider === "imdb") {
@@ -872,6 +1441,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
   };
 
   const handleAddCandidateToLibrary = (candidate: CatalogCandidate) => {
+    const primaryPath = candidate.possibleAccessPaths?.[0];
     const created = clientRepository.createWork(
       {
         title: candidate.title,
@@ -898,14 +1468,40 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
       },
       PersonalState.Planned,
       undefined,
-      candidate.siteUrl
+      primaryPath
+        ? {
+            provider: primaryPath.provider ?? (PROVIDER_NAMES[candidate.provider] || candidate.provider),
+            url: primaryPath.url,
+            label: primaryPath.label,
+          }
+        : candidate.siteUrl
         ? {
             provider: PROVIDER_NAMES[candidate.provider] ?? candidate.provider,
             url: candidate.siteUrl,
-            label: `${PROVIDER_NAMES[candidate.provider] ?? candidate.provider} Catalog Page`,
+            label: `${PROVIDER_NAMES[candidate.provider] ?? candidate.provider} Entry`,
           }
         : undefined,
     );
+
+    // Auto-attach any additional possible access paths
+    const remainingPaths = (candidate.possibleAccessPaths ?? []).slice(1);
+    for (const p of remainingPaths) {
+      clientRepository.addAccessPath(created.work.id, {
+        kind: AccessPathKind.Web,
+        provider: p.provider ?? candidate.provider,
+        label: p.label,
+        url: p.url,
+        capabilities: [AccessCapability.Read, AccessCapability.Updates],
+        health: SourceHealth.Healthy,
+        healthState: SourceHealth.Healthy,
+        lastCheckedAt: new Date().toISOString(),
+        lastOpenedAt: null,
+        isPreferred: false,
+        provenance: { source: `discover_${candidate.provider}` },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    }
 
     if (candidate.creators.length > 0) {
       const workCreators: WorkCreator[] = candidate.creators.map((c, idx) => ({
@@ -921,9 +1517,50 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
     }
 
     syncLibrary();
+    const count = candidate.possibleAccessPaths?.length ?? (candidate.siteUrl ? 1 : 0);
     toast({
       title: "Added to Library",
-      description: `"${candidate.title}" was saved to your Library with official metadata.`,
+      description: `"${candidate.title}" was saved with ${count} access path${count === 1 ? "" : "s"} attached.`,
+      variant: "success",
+    });
+  };
+
+  const handleAddCatalogRecommendation = (rec: LocalRecommendation) => {
+    const created = clientRepository.createWork(
+      {
+        title: rec.title,
+        alternativeTitles: [],
+        aliases: [],
+        originalTitle: null,
+        description: rec.reasonLabel,
+        contentType: (rec.contentType as ContentType) || ContentType.WesternNovel,
+        origin: ContentOrigin.Western,
+        publicationState: PublicationState.Completed,
+        privacyState: PrivacyState.Public,
+        coverRef: rec.coverUrl,
+        genres: rec.genres ?? ["Discovery"],
+        tags: [rec.provider ?? "catalog"],
+        totalChapters: null,
+        totalVolumes: null,
+        externalIds: rec.externalUrl
+          ? [{ provider: rec.provider ?? "catalog", externalId: rec.id, url: rec.externalUrl }]
+          : [],
+      },
+      PersonalState.Planned,
+      undefined,
+      rec.accessPathUrl
+        ? {
+            provider: rec.providerLabel ?? "Reading Source",
+            url: rec.accessPathUrl,
+            label: rec.accessPathLabel ?? "Read Online",
+          }
+        : undefined,
+    );
+
+    syncLibrary();
+    toast({
+      title: "Added Recommendation to Library",
+      description: `"${rec.title}" is now on your Plan to Read shelf with reading access path attached.`,
       variant: "success",
     });
   };
@@ -940,7 +1577,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
             </h1>
           </div>
           <p className="mt-1 text-gm-sm text-[var(--gm-text-muted)]">
-            Search your library first, query official metadata catalogs (AniList, MangaUpdates, MangaDex, Open Library, NovelUpdates), or explore local explainable recommendations.
+            Explore Project Gutenberg, Internet Archive, Comick, Goodreads, MangaDex, AniList, and local explainable recommendations with auto-configured reading access paths.
           </p>
         </div>
       </div>
@@ -959,7 +1596,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search any title, author, or keyword (e.g. Omniscient Reader, Solo Leveling, Dune)..."
+            placeholder="Search any book, manga, author, or keyword (e.g. Frankenstein, Solo Leveling, Dune, Dracula)..."
             className="w-full bg-transparent py-3 sm:py-3.5 px-2 text-gm-sm sm:text-gm-base text-[var(--gm-text)] placeholder:text-[var(--gm-text-subtle)] focus:outline-none"
           />
           {query.trim().length > 0 && (
@@ -995,9 +1632,9 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
             {(
               [
                 { id: "all", label: "All Catalogs", count: PROVIDER_OPTIONS.length },
-                { id: "manga", label: "Manga & Anime", count: 3 },
-                { id: "books", label: "Books & Novels", count: 5 },
-                { id: "media", label: "Drama & Media", count: 4 },
+                { id: "manga", label: "Manga & Anime", count: 4 },
+                { id: "books", label: "Books & Novels", count: 8 },
+                { id: "media", label: "Drama & Audio", count: 5 },
               ] as const
             ).map((cat) => {
               const isActive = selectedCategory === cat.id;
@@ -1191,20 +1828,22 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
             <div className="grid gap-4 md:grid-cols-2">
               {catalogResults.map((cand) => {
                 const matchState = classifyAgainstLibrary(cand, libraryItems);
+                const hasPaths = cand.possibleAccessPaths && cand.possibleAccessPaths.length > 0;
+
                 return (
                   <div
                     key={cand.externalKey}
-                    className="flex gap-4 rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 shadow-xs"
+                    className="flex flex-col justify-between rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 shadow-xs"
                   >
-                    <div className="w-20 shrink-0">
-                      <Cover
-                        src={cand.coverUrl ?? undefined}
-                        title={cand.title}
-                        size="md"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0 flex flex-col justify-between">
-                      <div>
+                    <div className="flex gap-4">
+                      <div className="w-20 shrink-0">
+                        <Cover
+                          src={cand.coverUrl ?? undefined}
+                          title={cand.title}
+                          size="md"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5 mb-1">
                           <span className="rounded-gm-sm bg-[var(--gm-accent)]/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[var(--gm-accent-strong)] border border-[var(--gm-accent)]/20">
                             {PROVIDER_NAMES[cand.provider] ?? cand.provider}
@@ -1243,8 +1882,40 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
                           </p>
                         )}
                       </div>
+                    </div>
 
-                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                    {/* Discovered Reading & Access Paths preview */}
+                    {hasPaths && (
+                      <div className="mt-3 pt-2.5 border-t border-[var(--gm-border)]/60">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--gm-text-subtle)] mb-1.5 flex items-center gap-1">
+                          <Download className="h-3 w-3 text-[var(--gm-accent-strong)]" />
+                          <span>Discovered Access Paths ({cand.possibleAccessPaths!.length}):</span>
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {cand.possibleAccessPaths!.map((p, idx) => (
+                            <a
+                              key={idx}
+                              href={p.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-[var(--gm-surface)] hover:bg-[var(--gm-surface-hover)] border border-[var(--gm-border)] text-[var(--gm-text)] hover:text-[var(--gm-accent-strong)] transition-colors"
+                              title={p.url}
+                            >
+                              <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                              <span className="truncate max-w-[200px]">{p.label}</span>
+                              {p.format && (
+                                <span className="font-mono text-[9px] px-1 py-0.1 rounded bg-[var(--gm-bg-elevated)] text-[var(--gm-text-muted)] border border-[var(--gm-border)]">
+                                  {p.format}
+                                </span>
+                              )}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="mt-3 pt-2 border-t border-[var(--gm-border)]/40 flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         {matchState.kind === "already_in_library" ? (
                           <Button
                             variant="outline"
@@ -1287,18 +1958,19 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
                             <span>Add to Library</span>
                           </Button>
                         )}
-                        {cand.siteUrl && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="gap-1 text-gm-xs text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)]"
-                            onClick={() => window.open(cand.siteUrl!, "_blank")}
-                          >
-                            <Globe className="h-3.5 w-3.5" />
-                            <span>{cand.provider === "novelupdates" ? "Search Web" : "Open Link"}</span>
-                          </Button>
-                        )}
                       </div>
+
+                      {cand.siteUrl && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-1 text-gm-xs text-[var(--gm-text-subtle)] hover:text-[var(--gm-text)]"
+                          onClick={() => window.open(cand.siteUrl!, "_blank")}
+                        >
+                          <Globe className="h-3.5 w-3.5" />
+                          <span>Catalog Site</span>
+                        </Button>
+                      )}
                     </div>
                   </div>
                 );
@@ -1317,7 +1989,7 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
               <span>Local Explainable Recommendations</span>
             </h2>
             <p className="text-gm-xs text-[var(--gm-text-muted)]">
-              Computed 100% locally from your adaptation graph, favorite creators, and top genres — with an explicit reason for every suggestion.
+              Computed 100% locally from your reading affinities, favorite creators, and curated catalog discoveries from Project Gutenberg, Comick, Internet Archive & Goodreads.
             </p>
           </div>
           {dismissedWorkIds.length > 0 && (
@@ -1344,54 +2016,82 @@ export function Discover({ onNavigateWork }: DiscoverProps) {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {recommendations.map((rec) => (
-              <div
-                key={rec.id}
-                className="flex flex-col justify-between rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 shadow-xs hover:border-[var(--gm-border-strong)] transition-colors"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="w-14 shrink-0">
-                      <Cover
-                        src={rec.coverUrl ?? undefined}
-                        title={rec.title}
-                        size="sm"
-                      />
+            {recommendations.map((rec) => {
+              const isCatalogDiscovery = rec.category === "catalog_discovery";
+
+              return (
+                <div
+                  key={rec.id}
+                  className="flex flex-col justify-between rounded-gm-xl border border-[var(--gm-border)] bg-[var(--gm-bg-elevated)] p-4 shadow-xs hover:border-[var(--gm-border-strong)] transition-colors"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className="w-14 shrink-0">
+                        <Cover
+                          src={rec.coverUrl ?? undefined}
+                          title={rec.title}
+                          size="sm"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => dismissRecommendation(rec.workId ? (rec.workId as WorkId) : rec.id)}
+                        title="Dismiss this recommendation"
+                        className="rounded-gm-sm p-1 text-[var(--gm-text-subtle)] hover:bg-[var(--gm-surface)] hover:text-[var(--gm-text)] cursor-pointer"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => dismissRecommendation(rec.workId as WorkId)}
-                      title="Dismiss this recommendation"
-                      className="rounded-gm-sm p-1 text-[var(--gm-text-subtle)] hover:bg-[var(--gm-surface)] hover:text-[var(--gm-text)] cursor-pointer"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
+
+                    <div className="flex items-center gap-1.5 mb-1">
+                      {isCatalogDiscovery ? (
+                        <Badge variant="accent" className="text-[9px] px-1.5 py-0 font-mono">
+                          {rec.providerLabel ?? "Catalog"}
+                        </Badge>
+                      ) : (
+                        <Badge variant="muted" className="text-[9px] px-1.5 py-0 font-mono">
+                          Library
+                        </Badge>
+                      )}
+                    </div>
+
+                    <h3 className="text-gm-sm font-bold text-[var(--gm-text)] line-clamp-1">
+                      {rec.title}
+                    </h3>
+                    <p className="mt-1.5 rounded-cv bg-[var(--gm-surface)] px-2.5 py-1.5 text-[11px] leading-snug text-[var(--gm-accent-strong)] border border-[var(--gm-border)]">
+                      {rec.reasonLabel}
+                    </p>
                   </div>
 
-                  <h3 className="text-gm-sm font-bold text-[var(--gm-text)] line-clamp-1">
-                    {rec.title}
-                  </h3>
-                  <p className="mt-1.5 rounded-cv bg-[var(--gm-surface)] px-2.5 py-1.5 text-[11px] leading-snug text-[var(--gm-accent-strong)] border border-[var(--gm-border)]">
-                    {rec.reasonLabel}
-                  </p>
+                  <div className="mt-4 pt-3 border-t border-[var(--gm-border)] flex items-center justify-between">
+                    <span className="font-mono text-[10px] uppercase text-[var(--gm-text-subtle)]">
+                      {rec.contentType}
+                    </span>
+                    {isCatalogDiscovery ? (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handleAddCatalogRecommendation(rec)}
+                        className="h-7 px-2 text-gm-xs gap-1"
+                      >
+                        <Plus className="h-3 w-3" />
+                        <span>Add to Shelf</span>
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => rec.workId && onNavigateWork?.(rec.workId)}
+                        className="h-7 px-2 text-gm-xs gap-1 text-[var(--gm-text)]"
+                      >
+                        <BookOpen className="h-3 w-3" />
+                        <span>View Work</span>
+                      </Button>
+                    )}
+                  </div>
                 </div>
-
-                <div className="mt-4 pt-3 border-t border-[var(--gm-border)] flex items-center justify-between">
-                  <span className="font-mono text-[10px] uppercase text-[var(--gm-text-subtle)]">
-                    {rec.contentType}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onNavigateWork?.(rec.workId)}
-                    className="h-7 px-2 text-gm-xs gap-1 text-[var(--gm-text)]"
-                  >
-                    <BookOpen className="h-3 w-3" />
-                    <span>View Work</span>
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

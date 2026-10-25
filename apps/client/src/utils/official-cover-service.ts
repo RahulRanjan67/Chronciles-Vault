@@ -20,7 +20,21 @@ export function cleanTitleForCoverSearch(rawTitle: string): string {
 }
 
 /**
- * Query multi-catalog services (AniList, Open Library, MangaUpdates) for an official cover.
+ * Discovered access path item for connecting external catalogs.
+ */
+export interface DiscoveredAccessPathCandidate {
+  id: string;
+  provider: string;
+  providerKey: "gutenberg" | "internetarchive" | "comick" | "openlibrary" | "goodreads" | "mangadex";
+  label: string;
+  url: string;
+  kind: "web";
+  format?: string;
+  description?: string;
+}
+
+/**
+ * Query multi-catalog services (AniList, Open Library, Gutenberg, Internet Archive, Comick, MangaUpdates) for an official cover.
  */
 export async function fetchOfficialCoverForTitle(title: string): Promise<string | null> {
   const clean = cleanTitleForCoverSearch(title);
@@ -71,7 +85,59 @@ export async function fetchOfficialCoverForTitle(title: string): Promise<string 
     // Continue to next strategy on network failure
   }
 
-  // 3. Tertiary Strategy: MangaUpdates (Asian Web Novels, Manhua, Indie Scanlations)
+  // 3. Project Gutenberg / Gutendex (Public domain classics & historical literature)
+  try {
+    const gRes = await fetch(
+      `https://gutendex.com/books/?search=${encodeURIComponent(clean)}`,
+      { headers: { Accept: "application/json" } }
+    );
+    if (gRes.ok) {
+      const gData = await gRes.json();
+      const firstBook = gData?.results?.[0];
+      const cover = firstBook?.formats?.["image/jpeg"];
+      if (cover && typeof cover === "string" && cover.startsWith("http")) {
+        return cover;
+      }
+    }
+  } catch {
+    // Continue
+  }
+
+  // 4. Internet Archive (Texts, historic editions, rare scans)
+  try {
+    const iaRes = await fetch(
+      `https://archive.org/advancedsearch.php?q=title:(${encodeURIComponent(clean)})+AND+mediatype:(texts)&fl[]=identifier&rows=1&output=json`,
+      { headers: { Accept: "application/json" } }
+    );
+    if (iaRes.ok) {
+      const iaData = await iaRes.json();
+      const id = iaData?.response?.docs?.[0]?.identifier;
+      if (id) {
+        return `https://archive.org/services/img/${id}`;
+      }
+    }
+  } catch {
+    // Continue
+  }
+
+  // 5. Comick API (Manga, Manhwa, Manhua)
+  try {
+    const cRes = await fetch(
+      `https://api.comick.fun/v1.0/search?q=${encodeURIComponent(clean)}&limit=1`,
+      { headers: { Accept: "application/json" } }
+    );
+    if (cRes.ok) {
+      const cData = await cRes.json();
+      const b2key = cData?.[0]?.md_covers?.[0]?.b2key;
+      if (b2key) {
+        return `https://meo.comick.pictures/${b2key}`;
+      }
+    }
+  } catch {
+    // Continue
+  }
+
+  // 6. Tertiary Strategy: MangaUpdates (Asian Web Novels, Manhua, Indie Scanlations)
   try {
     const muRes = await fetch("https://api.mangaupdates.com/v1/series/search", {
       method: "POST",
@@ -90,6 +156,184 @@ export async function fetchOfficialCoverForTitle(title: string): Promise<string 
   }
 
   return null;
+}
+
+/**
+ * Scan online open directories (Gutenberg, Internet Archive, Comick, Open Library/Goodreads, MangaDex)
+ * to locate recommended reading access paths for a work.
+ */
+export async function scanDirectoryAccessPathsForTitle(
+  rawTitle: string,
+): Promise<DiscoveredAccessPathCandidate[]> {
+  const clean = cleanTitleForCoverSearch(rawTitle);
+  if (!clean) return [];
+
+  const candidates: DiscoveredAccessPathCandidate[] = [];
+
+  const [gutenbergRes, iaRes, olRes, mdRes] = await Promise.allSettled([
+    // 1. Project Gutenberg / Gutendex
+    (async () => {
+      const res = await fetch(`https://gutendex.com/books/?search=${encodeURIComponent(clean)}`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      const results: DiscoveredAccessPathCandidate[] = [];
+      const first = data?.results?.[0];
+      if (first) {
+        const titleMatch = first.title ?? clean;
+        if (first.formats?.["application/epub+zip"]) {
+          results.push({
+            id: `gutenberg-epub-${first.id}`,
+            provider: "Project Gutenberg",
+            providerKey: "gutenberg",
+            label: "Download EPUB (Project Gutenberg)",
+            url: first.formats["application/epub+zip"],
+            kind: "web",
+            format: "EPUB",
+            description: `Public domain edition: "${titleMatch}"`,
+          });
+        }
+        if (first.formats?.["text/html"]) {
+          results.push({
+            id: `gutenberg-html-${first.id}`,
+            provider: "Project Gutenberg",
+            providerKey: "gutenberg",
+            label: "Read Online (Gutenberg Web Reader)",
+            url: first.formats["text/html"],
+            kind: "web",
+            format: "HTML Reader",
+            description: `Official web browser reader: "${titleMatch}"`,
+          });
+        }
+      }
+      return results;
+    })(),
+
+    // 2. Internet Archive
+    (async () => {
+      const url = `https://archive.org/advancedsearch.php?q=title:(${encodeURIComponent(clean)})+AND+mediatype:(texts)&fl[]=identifier,title,creator,downloads&sort[]=downloads+desc&rows=2&output=json`;
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      const data = await res.json();
+      const docs = data?.response?.docs ?? [];
+      const results: DiscoveredAccessPathCandidate[] = [];
+      for (const doc of docs) {
+        if (!doc.identifier) continue;
+        results.push({
+          id: `ia-details-${doc.identifier}`,
+          provider: "Internet Archive",
+          providerKey: "internetarchive",
+          label: `Read & Borrow on Archive.org (${doc.downloads ? `${doc.downloads.toLocaleString()} borrows` : "Digital Edition"})`,
+          url: `https://archive.org/details/${doc.identifier}`,
+          kind: "web",
+          format: "Digital Archive",
+          description: doc.title || "Full digitized book archive",
+        });
+        results.push({
+          id: `ia-pdf-${doc.identifier}`,
+          provider: "Internet Archive",
+          providerKey: "internetarchive",
+          label: "Archive.org PDF Edition",
+          url: `https://archive.org/download/${doc.identifier}/${doc.identifier}.pdf`,
+          kind: "web",
+          format: "PDF",
+          description: "Direct PDF download from archive.org",
+        });
+        break; // take best match
+      }
+      return results;
+    })(),
+
+    // 3. Open Library & Goodreads Bridge
+    (async () => {
+      const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(clean)}&fields=key,title,author_name,id_goodreads,isbn&limit=1`;
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      const data = await res.json();
+      const doc = data?.docs?.[0];
+      const results: DiscoveredAccessPathCandidate[] = [];
+      if (doc) {
+        if (Array.isArray(doc.id_goodreads) && doc.id_goodreads[0]) {
+          results.push({
+            id: `goodreads-${doc.id_goodreads[0]}`,
+            provider: "Goodreads",
+            providerKey: "goodreads",
+            label: "Goodreads Reviews & Catalog Page",
+            url: `https://www.goodreads.com/book/show/${doc.id_goodreads[0]}`,
+            kind: "web",
+            format: "Goodreads",
+            description: "Community ratings, user reviews, and edition index",
+          });
+        } else {
+          results.push({
+            id: `goodreads-search-${clean}`,
+            provider: "Goodreads",
+            providerKey: "goodreads",
+            label: "Goodreads Reviews & Community Search",
+            url: `https://www.goodreads.com/search?q=${encodeURIComponent(clean)}`,
+            kind: "web",
+            format: "Goodreads",
+            description: "Search community bookshelves, ratings, and reviews",
+          });
+        }
+        if (doc.key) {
+          results.push({
+            id: `ol-${doc.key}`,
+            provider: "Open Library",
+            providerKey: "openlibrary",
+            label: "Open Library Digital Archive",
+            url: `https://openlibrary.org${doc.key}`,
+            kind: "web",
+            format: "Open Library",
+            description: "Internet Archive universal open book catalog",
+          });
+        }
+      }
+      return results;
+    })(),
+
+    // 4. MangaDex API
+    (async () => {
+      const url = `https://api.mangadex.org/manga?title=${encodeURIComponent(clean)}&limit=1`;
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      const data = await res.json();
+      const manga = data?.data?.[0];
+      const results: DiscoveredAccessPathCandidate[] = [];
+      if (manga?.id) {
+        results.push({
+          id: `mangadex-${manga.id}`,
+          provider: "MangaDex",
+          providerKey: "mangadex",
+          label: "Read on MangaDex (Scanlations)",
+          url: `https://mangadex.org/title/${manga.id}`,
+          kind: "web",
+          format: "Manga Reader",
+          description: "Open community scanlation chapters",
+        });
+      }
+      return results;
+    })(),
+  ]);
+
+  if (gutenbergRes.status === "fulfilled") candidates.push(...gutenbergRes.value);
+  if (iaRes.status === "fulfilled") candidates.push(...iaRes.value);
+  if (olRes.status === "fulfilled") candidates.push(...olRes.value);
+  if (mdRes.status === "fulfilled") candidates.push(...mdRes.value);
+
+  // 5. Comick.io direct gateway path
+  const slug = clean.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  candidates.push({
+    id: `comick-${slug}`,
+    provider: "Comick.io",
+    providerKey: "comick",
+    label: "Read on Comick.io (Manga/Manhwa)",
+    url: `https://comick.io/comic/${slug}`,
+    kind: "web",
+    format: "Web Reader",
+    description: "Online manga, manhwa, and manhua chapter reader",
+  });
+
+  return candidates;
 }
 
 export interface FetchCoverOptions {
